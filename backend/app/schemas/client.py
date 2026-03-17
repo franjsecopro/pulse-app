@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 from app.schemas.contract import ContractResponse
+from app.schemas.payment_identifier import PayerResponse
 
 
 class ClientCreateRequest(BaseModel):
@@ -35,6 +36,7 @@ class ClientResponse(BaseModel):
     updated_at: datetime
     deleted_at: Optional[datetime]
     contracts: list[ContractResponse] = []
+    payers: list[PayerResponse] = []
 
     model_config = {"from_attributes": True}
 
@@ -48,5 +50,6 @@ class ClientListResponse(BaseModel):
     is_active: bool
     created_at: datetime
     contracts: list[ContractResponse] = []
+    payers: list[PayerResponse] = []
 
     model_config = {"from_attributes": True}

@@ -37,3 +37,6 @@ class Client(Base):
     payments: Mapped[list["Payment"]] = relationship(
         "Payment", back_populates="client", lazy="select"
     )
+    payers: Mapped[list["PaymentIdentifier"]] = relationship(
+        "PaymentIdentifier", back_populates="client", lazy="select"
+    )
