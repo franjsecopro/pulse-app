@@ -66,12 +66,13 @@ class PaymentRepository:
         await self._db.commit()
 
     async def get_monthly_totals(self, user_id: int, year: int, month: int) -> dict[int, float]:
-        """Returns a mapping of client_id -> total paid for the given month."""
+        """Returns a mapping of client_id -> total confirmed paid for the given month."""
         result = await self._db.execute(
             select(Payment.client_id, func.sum(Payment.amount))
             .where(
                 Payment.user_id == user_id,
                 Payment.client_id.is_not(None),
+                Payment.status == "confirmed",
                 func.strftime("%m", Payment.payment_date) == f"{month:02d}",
                 func.strftime("%Y", Payment.payment_date) == str(year),
             )

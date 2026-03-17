@@ -81,7 +81,20 @@ async function request<T>(
   const data = await response.json()
 
   if (!response.ok) {
-    throw new ApiError(response.status, data.detail ?? 'Request failed')
+    let errorMessage = 'Request failed'
+
+    if (data?.detail) {
+      // Handle validation errors (array of error objects) or string errors
+      if (Array.isArray(data.detail)) {
+        errorMessage = data.detail
+          .map((err: any) => err.msg || String(err))
+          .join(', ')
+      } else {
+        errorMessage = String(data.detail)
+      }
+    }
+
+    throw new ApiError(response.status, errorMessage)
   }
 
   return data as T

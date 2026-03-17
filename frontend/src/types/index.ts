@@ -9,6 +9,14 @@ export interface TokenResponse {
   token_type: string
 }
 
+export interface PaymentIdentifier {
+  id: number
+  client_id: number
+  name: string
+  info: string | null
+  created_at: string
+}
+
 export interface Contract {
   id: number
   client_id: number
@@ -33,6 +41,7 @@ export interface Client {
   updated_at?: string
   deleted_at?: string | null
   contracts: Contract[]
+  payers: PaymentIdentifier[]
 }
 
 export interface ClassSession {
