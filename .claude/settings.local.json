@@ -8,7 +8,9 @@
       "Bash(./venv/Scripts/python -c \"import main; print\\(''Main OK''\\)\")",
       "Read(//c/Users/luthe/.claude/projects/C--Users-luthe-Desktop-DEV-pulse-app/**)",
       "Read(//c/Users/luthe/.claude/projects/C--Users-luthe-Desktop-DEV-pulse-app/memory/**)",
-      "Bash(find /c/Users/luthe/Desktop/DEV/pulse-app/.claude/worktrees/elegant-hypatia/backend -name alembic.ini -o -path */alembic/versions/* -type f)"
+      "Bash(find /c/Users/luthe/Desktop/DEV/pulse-app/.claude/worktrees/elegant-hypatia/backend -name alembic.ini -o -path */alembic/versions/* -type f)",
+      "Bash(./venv/Scripts/python ../generate_test_pdf.py)",
+      "Bash(./venv/Scripts/python -c \":*)"
     ]
   }
 }

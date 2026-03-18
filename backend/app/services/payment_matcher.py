@@ -41,7 +41,6 @@ def match_transaction(concept: str, clients: list[Client]) -> MatchResult:
             id_lower = identifier.lower()
 
             if id_lower == concept_lower:
-                # Perfect exact match
                 return MatchResult(
                     client_id=client.id,
                     client_name=client.name,
@@ -50,7 +49,6 @@ def match_transaction(concept: str, clients: list[Client]) -> MatchResult:
                 )
 
             if id_lower in concept_lower:
-                # Identifier found inside the concept
                 confidence = len(id_lower) / max(len(concept_lower), 1)
                 result = MatchResult(
                     client_id=client.id,
@@ -62,7 +60,6 @@ def match_transaction(concept: str, clients: list[Client]) -> MatchResult:
                     best = result
 
             elif concept_lower in id_lower:
-                # Concept is contained in the identifier (less reliable)
                 confidence = len(concept_lower) / max(len(id_lower), 1) * 0.7
                 result = MatchResult(
                     client_id=client.id,
@@ -72,6 +69,24 @@ def match_transaction(concept: str, clients: list[Client]) -> MatchResult:
                 )
                 if best is None or result.confidence > best.confidence:
                     best = result
+
+            else:
+                # Word-based match: handles different word order (e.g. bank puts surname first)
+                # Strips common bank prefixes like "VIR", "VIRT", "PAGO", "REC"
+                BANK_PREFIXES = {"vir", "virt", "pago", "rec", "transferencia", "bizum"}
+                concept_words = {w for w in concept_lower.split() if w not in BANK_PREFIXES}
+                id_words = set(id_lower.split())
+                common = concept_words & id_words
+                if id_words and len(common) / len(id_words) >= 0.7:
+                    confidence = round((len(common) / len(id_words)) * 0.85, 2)
+                    result = MatchResult(
+                        client_id=client.id,
+                        client_name=client.name,
+                        match_type="partial",
+                        confidence=confidence,
+                    )
+                    if best is None or result.confidence > best.confidence:
+                        best = result
 
     return best or MatchResult(
         client_id=None,
