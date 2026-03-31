@@ -9,8 +9,9 @@ from pydantic import ValidationError
 from app.core.config import settings
 from app.core.database import create_tables
 from app.middleware.error_handler import global_error_handler
-from app.routers import auth, clients, classes, payments, dashboard
+from app.routers import clients, classes, payments, dashboard
 from app.routers import imports as imports_router
+from app.routers import google_calendar as google_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -51,12 +52,12 @@ async def validation_error_handler(request: Request, exc: ValidationError) -> JS
 app.add_exception_handler(ValidationError, validation_error_handler)
 app.add_exception_handler(Exception, global_error_handler)
 
-app.include_router(auth.router, prefix="/api")
 app.include_router(clients.router, prefix="/api")
 app.include_router(classes.router, prefix="/api")
 app.include_router(payments.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(imports_router.router, prefix="/api")
+app.include_router(google_router.router, prefix="/api")
 
 
 @app.get("/api/health")

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, type FormEvent, type ChangeEvent } from 'react'
 import { paymentService } from '../services/payment.service'
 import { clientService } from '../services/client.service'
-import { api } from '../services/api'
+import { supabase } from '../lib/supabase'
 import { Modal } from '../components/ui/Modal'
 import type { Payment, Client } from '../types'
 
@@ -153,10 +153,10 @@ function PdfImportModal({
       const formData = new FormData()
       formData.append('file', file)
 
-      const { accessToken } = api.getStoredTokens()
+      const { data: { session } } = await supabase.auth.getSession()
       const response = await fetch('/api/imports/pdf', {
         method: 'POST',
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
         body: formData,
       })
 
