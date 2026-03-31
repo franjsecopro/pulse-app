@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { classService } from '../services/class.service';
 import { clientService } from '../services/client.service';
+import { googleService } from '../services/google.service';
 import { Modal } from '../components/ui/Modal';
 import { CalendarView } from '../components/classes/CalendarView';
+import { GoogleSyncModal } from '../components/google/GoogleSyncModal';
 import type { ClassSession, Client, Contract } from '../types';
 
 type ViewMode = 'list' | 'calendar';
@@ -261,6 +263,18 @@ export function Classes() {
     () => (localStorage.getItem('classes-view') as ViewMode) ?? 'list',
   );
   const [newClassDate, setNewClassDate] = useState<string | null>(null);
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [showGoogleSync, setShowGoogleSync] = useState(false);
+
+  // Check Google connection status + handle redirect after OAuth
+  useEffect(() => {
+    googleService.getStatus().then(s => setGoogleConnected(s.connected));
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('google') === 'connected') {
+      setGoogleConnected(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const handleViewMode = (mode: ViewMode) => {
     setViewMode(mode);
@@ -352,6 +366,26 @@ export function Classes() {
               Calendario
             </button>
           </div>
+          {googleConnected ? (
+            <button
+              onClick={() => setShowGoogleSync(true)}
+              className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all"
+            >
+              <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
+              Sincronizar
+            </button>
+          ) : (
+            <button
+              onClick={async () => {
+                const { url } = await googleService.getAuthUrl();
+                window.location.href = url;
+              }}
+              className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all"
+            >
+              <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
+              Conectar calendario
+            </button>
+          )}
           <button
             onClick={() => {
               setNewClassDate(null);
@@ -560,6 +594,15 @@ export function Classes() {
           }}
         />
       </Modal>
+
+      <GoogleSyncModal
+        isOpen={showGoogleSync}
+        onClose={() => setShowGoogleSync(false)}
+        clients={clients}
+        defaultMonth={filterMonth}
+        defaultYear={filterYear}
+        onSynced={loadClasses}
+      />
 
       <Modal
         isOpen={!!editingClass}

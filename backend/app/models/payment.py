@@ -10,7 +10,7 @@ class Payment(Base):
     __tablename__ = "payments"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False)
     client_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("clients.id"), nullable=True
     )

@@ -1,3 +1,3 @@
-from app.routers import auth, clients, classes, payments, dashboard
+from app.routers import clients, classes, payments, dashboard
 
-__all__ = ["auth", "clients", "classes", "payments", "dashboard"]
+__all__ = ["clients", "classes", "payments", "dashboard"]
