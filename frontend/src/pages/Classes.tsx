@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { classService } from '../services/class.service';
 import { clientService } from '../services/client.service';
 import { Modal } from '../components/ui/Modal';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { CalendarView } from '../components/classes/CalendarView';
+import { DayView } from '../components/classes/DayView';
 import type { ClassSession, Client, Contract } from '../types';
 
 type ViewMode = 'list' | 'calendar';
@@ -27,11 +29,13 @@ function ClassForm({
   clients,
   onSave,
   onCancel,
+  onDelete,
 }: {
   initial?: Partial<ClassSession>;
   clients: Client[];
   onSave: (data: Partial<ClassSession>) => Promise<void>;
   onCancel: () => void;
+  onDelete?: () => Promise<void>;
 }) {
   const [selectedClientId, setSelectedClientId] = useState<number | ''>(
     initial?.client_id ?? '',
@@ -248,26 +252,39 @@ function ClassForm({
           </span>
         </div>
       )}
-      <div className="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20 flex items-center gap-2"
-        >
-          {isSubmitting && (
-            <span className="material-symbols-outlined text-base animate-spin">
-              sync
-            </span>
-          )}
-          Guardar clase
-        </button>
+      <div className="flex items-center justify-between gap-3 pt-2">
+        {onDelete ? (
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={isSubmitting}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60 flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-base">delete</span>
+            Eliminar clase
+          </button>
+        ) : <span />}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20 flex items-center gap-2"
+          >
+            {isSubmitting && (
+              <span className="material-symbols-outlined text-base animate-spin">
+                sync
+              </span>
+            )}
+            Guardar clase
+          </button>
+        </div>
       </div>
     </form>
   );
@@ -287,6 +304,13 @@ export function Classes() {
     () => (localStorage.getItem('classes-view') as ViewMode) ?? 'list',
   );
   const [newClassDate, setNewClassDate] = useState<string | null>(null);
+  const [dayDetailDate, setDayDetailDate] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
+  // Clases del día seleccionado — siempre frescas tras cualquier recarga
+  const dayDetailClasses = dayDetailDate
+    ? classes.filter(c => c.class_date === dayDetailDate)
+    : []
 
   const handleViewMode = (mode: ViewMode) => {
     setViewMode(mode);
@@ -297,6 +321,16 @@ export function Classes() {
     setNewClassDate(date);
     setShowCreateModal(true);
   };
+
+  const handleDayDetail = (date: string) => {
+    setDayDetailDate(date)
+  }
+
+  function formatDate(dateStr: string): string {
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    });
+  }
 
   const loadClasses = useCallback(async () => {
     setIsLoading(true);
@@ -332,11 +366,17 @@ export function Classes() {
     loadClasses();
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar esta clase?')) return;
-    await classService.delete(id);
-    loadClasses();
-  };
+  const handleDelete = (id: number) => {
+    setPendingDeleteId(id)
+  }
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return
+    await classService.delete(pendingDeleteId)
+    setPendingDeleteId(null)
+    setEditingClass(null)
+    loadClasses()
+  }
 
   const totalRevenue = classes.reduce(
     (sum, c) => sum + (c.total_amount ?? 0),
@@ -442,6 +482,7 @@ export function Classes() {
           month={filterMonth}
           onEdit={setEditingClass}
           onNewClass={handleNewClassFromCalendar}
+          onDayDetail={(date) => handleDayDetail(date)}
         />
       )}
 
@@ -567,6 +608,24 @@ export function Classes() {
         )
       )}
 
+      {/* Day detail — se renderiza primero para que los modales de edición/creación queden encima */}
+      <Modal
+        isOpen={!!dayDetailDate}
+        onClose={() => setDayDetailDate(null)}
+        title={dayDetailDate ? formatDate(dayDetailDate) : ''}
+        size="lg"
+      >
+        {dayDetailDate && (
+          <DayView
+            date={dayDetailDate}
+            classes={dayDetailClasses}
+            onEdit={(c) => setEditingClass(c)}
+            onNewClass={(date) => handleNewClassFromCalendar(date)}
+            onDelete={(id) => handleDelete(id)}
+          />
+        )}
+      </Modal>
+
       <Modal
         isOpen={showCreateModal}
         onClose={() => {
@@ -599,9 +658,17 @@ export function Classes() {
             clients={clients}
             onSave={handleUpdate}
             onCancel={() => setEditingClass(null)}
+            onDelete={() => handleDelete(editingClass.id)}
           />
         )}
       </Modal>
+
+      <ConfirmModal
+        isOpen={pendingDeleteId !== null}
+        message="¿Seguro que quieres eliminar esta clase? Esta acción no se puede deshacer."
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDeleteId(null)}
+      />
     </div>
   );
 }
