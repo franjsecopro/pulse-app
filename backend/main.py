@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from app.core.config import settings
-from app.core.database import create_tables
 from app.middleware.error_handler import global_error_handler
 from app.routers import auth, clients, classes, payments, dashboard
 from app.routers import imports as imports_router
@@ -17,8 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_tables()
-    yield
+    yield  # Tablas gestionadas por Alembic: ejecutar "make migrate"
 
 
 app = FastAPI(

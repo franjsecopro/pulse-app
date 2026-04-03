@@ -1,6 +1,6 @@
 from datetime import datetime, date, timezone
 from typing import Optional
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -28,8 +28,8 @@ class ClassRepository:
             query = query.where(Class.client_id == client_id)
         if month and year:
             query = query.where(
-                func.strftime("%m", Class.class_date) == f"{month:02d}",
-                func.strftime("%Y", Class.class_date) == str(year),
+                extract("month", Class.class_date) == month,
+                extract("year", Class.class_date) == year,
             )
         query = query.order_by(Class.class_date.desc(), Class.class_time.desc())
         result = await self._db.execute(query)
@@ -68,8 +68,8 @@ class ClassRepository:
             select(Class.client_id, func.sum(Class.duration_hours * Class.hourly_rate))
             .where(
                 Class.user_id == user_id,
-                func.strftime("%m", Class.class_date) == f"{month:02d}",
-                func.strftime("%Y", Class.class_date) == str(year),
+                extract("month", Class.class_date) == month,
+                extract("year", Class.class_date) == year,
             )
             .group_by(Class.client_id)
         )
@@ -80,8 +80,8 @@ class ClassRepository:
         result = await self._db.execute(
             select(func.count()).where(
                 Class.user_id == user_id,
-                func.strftime("%m", Class.class_date) == f"{now.month:02d}",
-                func.strftime("%Y", Class.class_date) == str(now.year),
+                extract("month", Class.class_date) == now.month,
+                extract("year", Class.class_date) == now.year,
             )
         )
         return result.scalar_one()

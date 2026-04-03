@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional
-from sqlalchemy import select, func
+from sqlalchemy import select, func, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -31,8 +31,8 @@ class PaymentRepository:
             query = query.where(Payment.status == status)
         if month and year:
             query = query.where(
-                func.strftime("%m", Payment.payment_date) == f"{month:02d}",
-                func.strftime("%Y", Payment.payment_date) == str(year),
+                extract("month", Payment.payment_date) == month,
+                extract("year", Payment.payment_date) == year,
             )
         query = query.order_by(Payment.payment_date.desc())
         result = await self._db.execute(query)
@@ -73,8 +73,8 @@ class PaymentRepository:
                 Payment.user_id == user_id,
                 Payment.client_id.is_not(None),
                 Payment.status == "confirmed",
-                func.strftime("%m", Payment.payment_date) == f"{month:02d}",
-                func.strftime("%Y", Payment.payment_date) == str(year),
+                extract("month", Payment.payment_date) == month,
+                extract("year", Payment.payment_date) == year,
             )
             .group_by(Payment.client_id)
         )
@@ -86,8 +86,8 @@ class PaymentRepository:
             select(func.sum(Payment.amount)).where(
                 Payment.user_id == user_id,
                 Payment.status == "confirmed",
-                func.strftime("%m", Payment.payment_date) == f"{now.month:02d}",
-                func.strftime("%Y", Payment.payment_date) == str(now.year),
+                extract("month", Payment.payment_date) == now.month,
+                extract("year", Payment.payment_date) == now.year,
             )
         )
         return result.scalar_one() or 0.0

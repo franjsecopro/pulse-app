@@ -1,4 +1,5 @@
 import io
+from datetime import date
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
@@ -98,7 +99,7 @@ async def confirm_import(
             user_id=current_user.id,
             client_id=item.client_id,
             amount=item.amount,
-            payment_date=item.date,
+            payment_date=date.fromisoformat(item.date),
             concept=item.concept,
             source="bank_import",
             status="confirmed" if item.client_id else "unmatched",

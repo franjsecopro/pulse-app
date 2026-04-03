@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    DATABASE_URL: str = "sqlite+aiosqlite:///./pulse.db"
+    DATABASE_URL: str  # Sin default — debe venir del .env
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 
 

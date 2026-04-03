@@ -1,5 +1,5 @@
 .ONESHELL:
-.PHONY: dev build lint test install migrate
+.PHONY: dev install migrate makemigrations
 
 # Verificar que estamos en Windows y que el entorno virtual existe
 venv_exists := $(shell if [ -d "venv" ]; then echo "yes"; else echo "no"; fi)
@@ -13,17 +13,12 @@ install:
 	@echo "Dependencies installed"
 
 migrate:
-	./venv/Scripts/python -m alembic upgrade head
+	./venv/Scripts/alembic upgrade head
 	@echo "Database migrated"
 
-dev: install migrate
+makemigrations:
+	./venv/Scripts/alembic revision --autogenerate -m "$(msg)"
+	@echo "Migration created"
+
+dev: install
 	./venv/Scripts/uvicorn main:app --reload
-
-build:
-	# Build commands (add as needed)
-
-lint:
-	# Lint commands (add as needed)
-
-test:
-	# Test commands (add as needed)
