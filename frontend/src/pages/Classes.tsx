@@ -51,6 +51,23 @@ function ClassForm({
   const activeContracts: Contract[] =
     selectedClient?.contracts?.filter((c) => c.is_active) ?? [];
 
+  // Auto-seleccionar contrato si el cliente solo tiene uno activo
+  const handleClientChange = (clientId: string) => {
+    const cid = parseInt(clientId) || '';
+    setSelectedClientId(cid);
+    const client = clients.find((c) => c.id === cid);
+    const contracts = client?.contracts?.filter((c) => c.is_active) ?? [];
+    if (contracts.length === 1) {
+      setForm((f) => ({
+        ...f,
+        contract_id: contracts[0].id,
+        hourly_rate: contracts[0].hourly_rate,
+      }));
+    } else {
+      setForm((f) => ({ ...f, contract_id: null }));
+    }
+  };
+
   const handleContractChange = (contractId: string) => {
     const cid = contractId ? parseInt(contractId) : null;
     setForm((f) => {
@@ -67,6 +84,10 @@ function ClassForm({
     e.preventDefault();
     if (!selectedClientId) {
       setError('Selecciona un cliente');
+      return;
+    }
+    if (activeContracts.length > 1 && !form.contract_id) {
+      setError('Este cliente tiene varios contratos. Selecciona uno.');
       return;
     }
     setError(null);
@@ -101,10 +122,7 @@ function ClassForm({
           <select
             required
             value={selectedClientId}
-            onChange={(e) => {
-              setSelectedClientId(parseInt(e.target.value) || '');
-              handleContractChange('');
-            }}
+            onChange={(e) => handleClientChange(e.target.value)}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white"
           >
             <option value="">Seleccionar cliente</option>
@@ -117,17 +135,25 @@ function ClassForm({
               ))}
           </select>
         </div>
-        {activeContracts.length > 0 && (
+        {activeContracts.length === 1 && (
+          <div className="sm:col-span-2">
+            <p className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+              Contrato: <span className="font-semibold text-slate-700">{activeContracts[0].description}</span> — €{activeContracts[0].hourly_rate}/h
+            </p>
+          </div>
+        )}
+        {activeContracts.length > 1 && (
           <div className="sm:col-span-2">
             <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Contrato
+              Contrato <span className="text-red-500">*</span>
             </label>
             <select
+              required
               value={form.contract_id ?? ''}
               onChange={(e) => handleContractChange(e.target.value)}
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white"
             >
-              <option value="">Sin contrato asociado</option>
+              <option value="">Seleccionar contrato...</option>
               {activeContracts.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.description} — €{c.hourly_rate}/h

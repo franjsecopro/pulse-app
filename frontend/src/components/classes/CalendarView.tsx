@@ -102,15 +102,27 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass }: Props
               {/* Class chips */}
               <div className="flex flex-col gap-0.5 flex-1">
                 {dayClasses.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => onEdit(c)}
-                    className={`w-full text-left text-[10px] font-semibold px-1.5 py-0.5 rounded border truncate
-                      hover:opacity-80 transition-opacity ${clientColor(c.client_id)}`}
-                    title={`${c.client_name} — ${c.duration_hours}h — €${(c.total_amount ?? 0).toFixed(2)}`}
-                  >
-                    {c.client_name ?? '?'}
-                  </button>
+                  <div key={c.id} className="relative group/chip">
+                    <button
+                      onClick={() => onEdit(c)}
+                      className={`w-full text-left text-[10px] font-semibold px-1.5 py-0.5 rounded border truncate
+                        hover:opacity-80 transition-opacity ${clientColor(c.client_id)}`}
+                    >
+                      {c.contract_description ?? c.client_name ?? '?'}
+                    </button>
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-0 mb-1 z-20 hidden group-hover/chip:block w-44 bg-slate-800 text-white text-[10px] rounded-lg p-2 shadow-lg pointer-events-none">
+                      <p className="font-bold text-slate-200 truncate">{c.client_name}</p>
+                      {c.contract_description && (
+                        <p className="text-slate-400 truncate">{c.contract_description}</p>
+                      )}
+                      <div className="mt-1 pt-1 border-t border-slate-700 flex justify-between">
+                        <span>{c.duration_hours}h</span>
+                        <span>€{c.hourly_rate}/h</span>
+                        <span className="font-bold text-emerald-400">€{(c.total_amount ?? 0).toFixed(0)}</span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
 

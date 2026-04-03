@@ -56,6 +56,7 @@ export interface ClassSession {
   notes: string | null
   created_at: string
   client_name: string | null
+  contract_description: string | null
   total_amount: number | null
 }
 

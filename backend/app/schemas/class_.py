@@ -36,6 +36,7 @@ class ClassResponse(BaseModel):
     created_at: datetime
     # Computed fields
     client_name: Optional[str] = None
+    contract_description: Optional[str] = None
     total_amount: Optional[float] = None
 
     model_config = {"from_attributes": True}

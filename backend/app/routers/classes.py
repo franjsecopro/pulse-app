@@ -13,9 +13,11 @@ router = APIRouter(prefix="/classes", tags=["classes"])
 
 def _build_response(class_: object) -> ClassResponse:
     client_name = class_.client.name if class_.client else None
+    contract_description = class_.contract.description if class_.contract else None
     total_amount = round(class_.duration_hours * class_.hourly_rate, 2)
     data = ClassResponse.model_validate(class_)
     data.client_name = client_name
+    data.contract_description = contract_description
     data.total_amount = total_amount
     return data
 

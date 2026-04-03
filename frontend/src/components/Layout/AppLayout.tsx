@@ -18,7 +18,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-background-light flex flex-col">
       <Header />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         <Outlet />
       </main>
       <footer className="border-t border-slate-200 bg-white py-4">

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.models.class_ import Class
+from app.models.contract import Contract
 from app.schemas.class_ import ClassCreateRequest, ClassUpdateRequest
 
 
@@ -21,7 +22,7 @@ class ClassRepository:
     ) -> list[Class]:
         query = (
             select(Class)
-            .options(joinedload(Class.client))
+            .options(joinedload(Class.client), joinedload(Class.contract))
             .where(Class.user_id == user_id)
         )
         if client_id:
@@ -38,7 +39,7 @@ class ClassRepository:
     async def get_by_id(self, class_id: int, user_id: int) -> Optional[Class]:
         result = await self._db.execute(
             select(Class)
-            .options(joinedload(Class.client))
+            .options(joinedload(Class.client), joinedload(Class.contract))
             .where(Class.id == class_id, Class.user_id == user_id)
         )
         return result.scalar_one_or_none()

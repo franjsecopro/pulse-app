@@ -32,3 +32,4 @@ class Class(Base):
     )
 
     client: Mapped["Client"] = relationship("Client", back_populates="classes")
+    contract: Mapped[Optional["Contract"]] = relationship("Contract", lazy="select")
