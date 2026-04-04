@@ -26,6 +26,8 @@ export interface Contract {
   hourly_rate: number
   is_active: boolean
   notes: string | null
+  // weekday ("0"=Mon…"6"=Sun) → duration_hours
+  schedule_days: Record<string, number> | null
   created_at: string
 }
 

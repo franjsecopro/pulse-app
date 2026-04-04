@@ -1,7 +1,19 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { clientService } from '../services/client.service';
 import { Modal } from '../components/ui/Modal';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
+import { formatDate } from '../utils/formatters';
 import type { Client, Contract, PaymentIdentifier } from '../types';
+
+const WEEKDAYS = [
+  { index: '0', label: 'Lun' },
+  { index: '1', label: 'Mar' },
+  { index: '2', label: 'Mié' },
+  { index: '3', label: 'Jue' },
+  { index: '4', label: 'Vie' },
+  { index: '5', label: 'Sáb' },
+  { index: '6', label: 'Dom' },
+]
 
 // --- Client Form ---
 function ClientForm({
@@ -22,6 +34,15 @@ function ClientForm({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isEditing = !!initial?.id
+  const isDirty = !isEditing || (
+    form.name     !== (initial?.name     ?? '')    ||
+    form.email    !== (initial?.email    ?? '')    ||
+    form.phone    !== (initial?.phone    ?? '')    ||
+    form.address  !== (initial?.address  ?? '')    ||
+    form.is_active !== (initial?.is_active ?? true)
+  )
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -116,15 +137,15 @@ function ClientForm({
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20 flex items-center gap-2"
+          disabled={isSubmitting || !isDirty}
+          className="px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-primary/20 flex items-center gap-2"
         >
           {isSubmitting && (
             <span className="material-symbols-outlined text-base animate-spin">
               sync
             </span>
           )}
-          Guardar
+          {isEditing && !isDirty ? 'Sin cambios' : 'Guardar'}
         </button>
       </div>
     </form>
@@ -149,21 +170,55 @@ function ContractForm({
     is_active: initial?.is_active ?? true,
     notes: initial?.notes ?? '',
   });
+  const [scheduleDays, setScheduleDays] = useState<Record<string, number>>(
+    initial?.schedule_days ?? {}
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const toggleDay = (dayIndex: string) => {
+    setScheduleDays(prev => {
+      const next = { ...prev }
+      if (dayIndex in next) {
+        delete next[dayIndex]
+      } else {
+        next[dayIndex] = 1
+      }
+      return next
+    })
+  }
+
+  const setDayHours = (dayIndex: string, hours: number) => {
+    setScheduleDays(prev => ({ ...prev, [dayIndex]: hours }))
+  }
+
+  const weeklyHours = Object.values(scheduleDays).reduce((s, h) => s + h, 0)
+  const weeklyRevenue = weeklyHours * form.hourly_rate
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (form.end_date && form.start_date > form.end_date) {
+      setError('La fecha de inicio no puede ser posterior a la fecha de fin.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await onSave({ ...form, end_date: form.end_date || null });
+      await onSave({
+        ...form,
+        end_date: form.end_date || null,
+        schedule_days: Object.keys(scheduleDays).length > 0 ? scheduleDays : null,
+      });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al guardar');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const hasSchedule = Object.keys(scheduleDays).length > 0
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -172,6 +227,8 @@ function ContractForm({
           {error}
         </div>
       )}
+
+      {/* Descripción */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
           Descripción *
@@ -179,13 +236,13 @@ function ContractForm({
         <input
           required
           value={form.description}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, description: e.target.value }))
-          }
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
           placeholder="Ej: Clases de inglés"
           className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
         />
       </div>
+
+      {/* Fechas y tarifa */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">
@@ -195,9 +252,8 @@ function ContractForm({
             required
             type="date"
             value={form.start_date}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, start_date: e.target.value }))
-            }
+            max={form.end_date || undefined}
+            onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
           />
         </div>
@@ -208,9 +264,8 @@ function ContractForm({
           <input
             type="date"
             value={form.end_date}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, end_date: e.target.value }))
-            }
+            min={form.start_date || undefined}
+            onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
           />
         </div>
@@ -224,12 +279,7 @@ function ContractForm({
             step="0.01"
             min="0"
             value={form.hourly_rate}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                hourly_rate: parseFloat(e.target.value),
-              }))
-            }
+            onChange={(e) => setForm((f) => ({ ...f, hourly_rate: parseFloat(e.target.value) }))}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
           />
         </div>
@@ -238,17 +288,78 @@ function ContractForm({
             <input
               type="checkbox"
               checked={form.is_active}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, is_active: e.target.checked }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
               className="w-4 h-4 accent-primary"
             />
-            <span className="text-sm font-medium text-slate-700">
-              Contrato activo
-            </span>
+            <span className="text-sm font-medium text-slate-700">Contrato activo</span>
           </label>
         </div>
       </div>
+
+      {/* Horario semanal */}
+      <div className="space-y-3">
+        <label className="block text-sm font-semibold text-slate-700">
+          Horario semanal
+        </label>
+        <div className="flex gap-1.5 flex-wrap">
+          {WEEKDAYS.map(({ index, label }) => {
+            const active = index in scheduleDays
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => toggleDay(index)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                  active
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-primary/40 hover:text-primary'
+                }`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Inputs de horas por día activo */}
+        {hasSchedule && (
+          <div className="space-y-2">
+            {WEEKDAYS.filter(({ index }) => index in scheduleDays).map(({ index, label }) => (
+              <div key={index} className="flex items-center gap-3">
+                <span className="w-8 text-xs font-bold text-slate-500">{label}</span>
+                <input
+                  type="number"
+                  step="0.25"
+                  min="0.25"
+                  max="12"
+                  value={scheduleDays[index]}
+                  onChange={(e) => setDayHours(index, parseFloat(e.target.value) || 0.25)}
+                  className="w-24 px-2 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                />
+                <span className="text-xs text-slate-400">
+                  horas ({scheduleDays[index] % 1 === 0
+                    ? `${scheduleDays[index]}h`
+                    : `${Math.floor(scheduleDays[index])}h ${Math.round((scheduleDays[index] % 1) * 60)}min`})
+                </span>
+              </div>
+            ))}
+
+            {/* Resumen semanal */}
+            <div className="flex items-center gap-4 pt-1 px-1 text-xs text-slate-500">
+              <span>
+                <span className="font-bold text-slate-700">{weeklyHours % 1 === 0 ? weeklyHours : weeklyHours.toFixed(2)}h</span> / semana
+              </span>
+              {form.hourly_rate > 0 && (
+                <span>
+                  <span className="font-bold text-primary">€{weeklyRevenue.toFixed(2)}</span> / semana
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Notas */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
           Notas
@@ -260,6 +371,8 @@ function ContractForm({
           className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
         />
       </div>
+
+      {/* Footer */}
       <div className="flex justify-end gap-3 pt-2">
         <button
           type="button"
@@ -274,9 +387,7 @@ function ContractForm({
           className="px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20 flex items-center gap-2"
         >
           {isSubmitting && (
-            <span className="material-symbols-outlined text-base animate-spin">
-              sync
-            </span>
+            <span className="material-symbols-outlined text-base animate-spin">sync</span>
           )}
           Guardar contrato
         </button>
@@ -516,6 +627,252 @@ function ClientCard({
   );
 }
 
+// --- Contract Detail (view + actions, optional edit mode) ---
+function ContractDetail({
+  contract,
+  clientId,
+  isEditMode,
+  onStartEdit,
+  onSaveEdit,
+  onCancelEdit,
+  onClose,
+}: {
+  contract: Contract;
+  clientId: number;
+  isEditMode: boolean;
+  onStartEdit: () => void;
+  onSaveEdit: (data: Partial<Contract>) => Promise<void>;
+  onCancelEdit: () => void;
+  onClose: () => void;
+}) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateResult, setGenerateResult] = useState<number | null>(null);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+
+  const [pendingDeleteFuture, setPendingDeleteFuture] = useState(false);
+  const [isDeletingFuture, setIsDeletingFuture] = useState(false);
+  const [deleteResult, setDeleteResult] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const hasSchedule = !!(contract.schedule_days && Object.keys(contract.schedule_days).length > 0);
+  const weeklyHours = hasSchedule
+    ? Object.values(contract.schedule_days!).reduce((s, h) => s + h, 0)
+    : 0;
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    setGenerateResult(null);
+    setGenerateError(null);
+    try {
+      const { created } = await clientService.generateContractClasses(clientId, contract.id);
+      setGenerateResult(created);
+    } catch {
+      setGenerateError('Error al generar clases. Inténtalo de nuevo.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleConfirmDeleteFuture = async () => {
+    setPendingDeleteFuture(false);
+    setIsDeletingFuture(true);
+    setDeleteResult(null);
+    setDeleteError(null);
+    try {
+      const { deleted } = await clientService.deleteFutureContractClasses(clientId, contract.id);
+      setDeleteResult(deleted);
+    } catch {
+      setDeleteError('Error al eliminar las clases. Inténtalo de nuevo.');
+    } finally {
+      setIsDeletingFuture(false);
+    }
+  };
+
+  const actionDisabledTitle = isEditMode ? 'Guarda los cambios primero' : undefined;
+
+  return (
+    <div className="space-y-4">
+      {/* Modo lectura: datos del contrato */}
+      {!isEditMode && (
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Descripción</p>
+            <p className="text-sm font-semibold text-slate-900">{contract.description}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Fecha inicio</p>
+              <p className="text-sm text-slate-700">{formatDate(contract.start_date)}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Fecha fin</p>
+              <p className="text-sm text-slate-700">{formatDate(contract.end_date)}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Tarifa</p>
+              <p className="text-sm text-slate-700">€{contract.hourly_rate}/h</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Estado</p>
+              {contract.is_active
+                ? <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Activo</span>
+                : <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Inactivo</span>
+              }
+            </div>
+          </div>
+          {hasSchedule && (
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Horario semanal</p>
+              <div className="flex gap-1.5 flex-wrap mb-1">
+                {WEEKDAYS.filter(d => d.index in contract.schedule_days!).map(({ index, label }) => (
+                  <span key={index} className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md">
+                    {label} · {contract.schedule_days![index] % 1 === 0
+                      ? `${contract.schedule_days![index]}h`
+                      : `${Math.floor(contract.schedule_days![index])}h ${Math.round((contract.schedule_days![index] % 1) * 60)}min`}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500">
+                Total: <span className="font-bold text-slate-700">{weeklyHours % 1 === 0 ? weeklyHours : weeklyHours.toFixed(2)}h/semana</span>
+                {contract.hourly_rate > 0 && (
+                  <> · <span className="font-bold text-primary">€{(weeklyHours * contract.hourly_rate).toFixed(2)}/semana</span></>
+                )}
+              </p>
+            </div>
+          )}
+          {contract.notes && (
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Notas</p>
+              <p className="text-sm text-slate-600">{contract.notes}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modo edición: formulario */}
+      {isEditMode && (
+        <ContractForm
+          initial={contract}
+          onSave={onSaveEdit}
+          onCancel={onCancelEdit}
+        />
+      )}
+
+      {/* Acciones del calendario — siempre visibles, deshabilitadas en edición */}
+      <div className="border-t border-slate-100 pt-4 space-y-2">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Acciones del calendario</p>
+        <div className="flex flex-wrap gap-2">
+          {hasSchedule && (
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={isEditMode || isGenerating}
+              title={actionDisabledTitle}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isGenerating
+                ? <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+                : <span className="material-symbols-outlined text-sm">calendar_add_on</span>
+              }
+              Generar clases en el calendario
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => { setPendingDeleteFuture(true); setDeleteResult(null); setDeleteError(null); }}
+            disabled={isEditMode || isDeletingFuture}
+            title={actionDisabledTitle}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isDeletingFuture
+              ? <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+              : <span className="material-symbols-outlined text-sm">event_busy</span>
+            }
+            Eliminar clases futuras
+          </button>
+        </div>
+
+        {/* Confirmación inline para eliminar clases futuras */}
+        {pendingDeleteFuture && (
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <span className="material-symbols-outlined text-red-400 text-sm">warning</span>
+            <p className="text-xs text-red-700 font-semibold flex-1">
+              ¿Eliminar todas las clases futuras de este contrato?
+            </p>
+            <button
+              type="button"
+              onClick={() => setPendingDeleteFuture(false)}
+              className="text-xs text-slate-500 hover:text-slate-700 font-semibold px-2 py-1 rounded hover:bg-slate-100 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDeleteFuture}
+              className="text-xs text-white font-bold bg-red-500 hover:bg-red-600 px-2 py-1 rounded transition-colors"
+            >
+              Eliminar
+            </button>
+          </div>
+        )}
+
+        {generateResult !== null && (
+          <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+            <span className="material-symbols-outlined text-sm">check_circle</span>
+            {generateResult === 0
+              ? 'No había clases nuevas que generar'
+              : `${generateResult} ${generateResult === 1 ? 'clase creada' : 'clases creadas'} en el calendario`}
+          </p>
+        )}
+        {generateError && (
+          <p className="text-xs text-red-500 flex items-center gap-1">
+            <span className="material-symbols-outlined text-sm">error</span>
+            {generateError}
+          </p>
+        )}
+        {deleteResult !== null && (
+          <p className="text-xs text-slate-600 font-semibold flex items-center gap-1">
+            <span className="material-symbols-outlined text-sm">check_circle</span>
+            {deleteResult === 0
+              ? 'No hay clases futuras asociadas a este contrato'
+              : `${deleteResult} ${deleteResult === 1 ? 'clase eliminada' : 'clases eliminadas'} del calendario`}
+          </p>
+        )}
+        {deleteError && (
+          <p className="text-xs text-red-500 flex items-center gap-1">
+            <span className="material-symbols-outlined text-sm">error</span>
+            {deleteError}
+          </p>
+        )}
+        {isEditMode && (
+          <p className="text-xs text-slate-400 italic">Guarda los cambios para poder usar las acciones del calendario.</p>
+        )}
+      </div>
+
+      {/* Footer — solo en modo lectura (ContractForm tiene el suyo propio en modo edición) */}
+      {!isEditMode && (
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+          <button
+            type="button"
+            onClick={onStartEdit}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors"
+          >
+            <span className="material-symbols-outlined text-base">edit</span>
+            Editar contrato
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // --- Contracts Manager ---
 function ContractsManager({
   client,
@@ -526,11 +883,13 @@ function ContractsManager({
   onContractsChanged: (clientId: number, contracts: Contract[]) => void;
   onClose: () => void;
 }) {
-  const [contracts, setContracts] = useState<Contract[]>(
-    client.contracts ?? [],
-  );
-  const [showForm, setShowForm] = useState(false);
-  const [editingContract, setEditingContract] = useState<Contract | null>(null);
+  const [contracts, setContracts] = useState<Contract[]>(client.contracts ?? []);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [viewingContractId, setViewingContractId] = useState<number | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [pendingDeleteContractId, setPendingDeleteContractId] = useState<number | null>(null);
+
+  const viewingContract = contracts.find(c => c.id === viewingContractId) ?? null;
 
   const reload = useCallback(async () => {
     const updated = await clientService.getContracts(client.id);
@@ -538,25 +897,38 @@ function ContractsManager({
     onContractsChanged(client.id, updated);
   }, [client.id]);
 
+  const openDetail = (contractId: number) => {
+    setViewingContractId(contractId);
+    setIsEditMode(false);
+    setShowNewForm(false);
+  };
+
+  const closeDetail = () => {
+    setViewingContractId(null);
+    setIsEditMode(false);
+  };
+
   const handleCreate = async (data: Partial<Contract>) => {
     await clientService.createContract(
       client.id,
       data as Omit<Contract, 'id' | 'client_id' | 'created_at'>,
     );
     await reload();
-    setShowForm(false);
+    setShowNewForm(false);
   };
 
   const handleUpdate = async (data: Partial<Contract>) => {
-    if (!editingContract) return;
-    await clientService.updateContract(client.id, editingContract.id, data);
+    if (!viewingContractId) return;
+    await clientService.updateContract(client.id, viewingContractId, data);
     await reload();
-    setEditingContract(null);
+    setIsEditMode(false); // vuelve a modo lectura, el detalle permanece abierto
   };
 
-  const handleDelete = async (contractId: number) => {
-    if (!confirm('¿Eliminar este contrato?')) return;
-    await clientService.deleteContract(client.id, contractId);
+  const confirmDeleteContract = async () => {
+    if (!pendingDeleteContractId) return;
+    await clientService.deleteContract(client.id, pendingDeleteContractId);
+    setPendingDeleteContractId(null);
+    if (viewingContractId === pendingDeleteContractId) closeDetail();
     await reload();
   };
 
@@ -567,79 +939,100 @@ function ContractsManager({
           Contratos de <strong>{client.name}</strong>
         </p>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => { setShowNewForm(true); closeDetail(); }}
           className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-hover transition-colors"
         >
           <span className="material-symbols-outlined text-base">add</span> Nuevo
         </button>
       </div>
 
-      {(showForm || editingContract) && (
+      {/* Formulario para nuevo contrato */}
+      {showNewForm && (
         <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Nuevo contrato</p>
           <ContractForm
-            initial={editingContract ?? undefined}
-            onSave={editingContract ? handleUpdate : handleCreate}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingContract(null);
-            }}
+            onSave={handleCreate}
+            onCancel={() => setShowNewForm(false)}
           />
         </div>
       )}
 
-      {contracts.length === 0 ? (
+      {/* Lista de contratos */}
+      {contracts.length === 0 && !showNewForm ? (
         <div className="text-center py-8 text-slate-400">
-          <span className="material-symbols-outlined text-3xl block mb-2">
-            description
-          </span>
+          <span className="material-symbols-outlined text-3xl block mb-2">description</span>
           No hay contratos. Añade uno para empezar.
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {contracts.map((c) => (
-            <div
-              key={c.id}
-              className={`flex items-center justify-between gap-4 p-4 rounded-xl border ${c.is_active ? 'border-slate-200 bg-white' : 'border-slate-100 bg-slate-50 opacity-60'}`}
-            >
-              <div>
-                <p className="font-semibold text-slate-900 text-sm">
-                  {c.description}
-                </p>
-                <p className="text-xs text-slate-500">
-                  €{c.hourly_rate}/h · Desde {c.start_date}
-                  {c.end_date ? ` hasta ${c.end_date}` : ''}
-                </p>
-                {c.notes && (
-                  <p className="text-xs text-slate-400 mt-0.5">{c.notes}</p>
-                )}
+            <div key={c.id}>
+              {/* Card del contrato */}
+              <div
+                className={`flex items-center justify-between gap-4 p-4 border transition-colors ${
+                  viewingContractId === c.id
+                    ? 'rounded-t-xl border-primary/30 bg-primary/5'
+                    : c.is_active
+                      ? 'rounded-xl border-slate-200 bg-white'
+                      : 'rounded-xl border-slate-100 bg-slate-50 opacity-60'
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-slate-900 text-sm">{c.description}</p>
+                  <p className="text-xs text-slate-500">
+                    €{c.hourly_rate}/h · Desde {formatDate(c.start_date)}
+                    {c.end_date ? ` hasta ${formatDate(c.end_date)}` : ''}
+                  </p>
+                  {c.schedule_days && Object.keys(c.schedule_days).length > 0 && (
+                    <p className="text-xs text-primary/70 mt-0.5">
+                      {WEEKDAYS.filter(d => d.index in c.schedule_days!).map(d => d.label).join(', ')}
+                      {' · '}
+                      {Object.values(c.schedule_days).reduce((s, h) => s + h, 0).toFixed(1)}h/semana
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {c.is_active
+                    ? <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Activo</span>
+                    : <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Inactivo</span>
+                  }
+                  <button
+                    onClick={() => viewingContractId === c.id ? closeDetail() : openDetail(c.id)}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      viewingContractId === c.id
+                        ? 'text-primary bg-primary/10'
+                        : 'text-slate-400 hover:text-primary hover:bg-primary/5'
+                    }`}
+                    title="Ver detalle"
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      {viewingContractId === c.id ? 'expand_less' : 'expand_more'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setPendingDeleteContractId(c.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Eliminar contrato"
+                  >
+                    <span className="material-symbols-outlined text-base">delete</span>
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {c.is_active ? (
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                    Activo
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                    Inactivo
-                  </span>
-                )}
-                <button
-                  onClick={() => setEditingContract(c)}
-                  className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                >
-                  <span className="material-symbols-outlined text-base">
-                    edit
-                  </span>
-                </button>
-                <button
-                  onClick={() => handleDelete(c.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <span className="material-symbols-outlined text-base">
-                    delete
-                  </span>
-                </button>
-              </div>
+
+              {/* Panel de detalle expandible */}
+              {viewingContractId === c.id && viewingContract && (
+                <div className="bg-slate-50 rounded-b-xl border-x border-b border-primary/30 p-4">
+                  <ContractDetail
+                    contract={viewingContract}
+                    clientId={client.id}
+                    isEditMode={isEditMode}
+                    onStartEdit={() => setIsEditMode(true)}
+                    onSaveEdit={handleUpdate}
+                    onCancelEdit={() => setIsEditMode(false)}
+                    onClose={closeDetail}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -653,6 +1046,14 @@ function ContractsManager({
           Cerrar
         </button>
       </div>
+
+      <ConfirmModal
+        isOpen={pendingDeleteContractId !== null}
+        message="¿Eliminar este contrato? Esta acción no se puede deshacer."
+        onConfirm={confirmDeleteContract}
+        onCancel={() => setPendingDeleteContractId(null)}
+      />
+
     </div>
   );
 }

@@ -10,6 +10,8 @@ class ContractCreateRequest(BaseModel):
     hourly_rate: float
     is_active: bool = True
     notes: Optional[str] = None
+    # weekday (as str "0"=Mon…"6"=Sun) → duration_hours
+    schedule_days: Optional[dict[str, float]] = None
 
 
 class ContractUpdateRequest(BaseModel):
@@ -19,6 +21,7 @@ class ContractUpdateRequest(BaseModel):
     hourly_rate: Optional[float] = None
     is_active: Optional[bool] = None
     notes: Optional[str] = None
+    schedule_days: Optional[dict[str, float]] = None
 
 
 class ContractResponse(BaseModel):
@@ -30,6 +33,7 @@ class ContractResponse(BaseModel):
     hourly_rate: float
     is_active: bool
     notes: Optional[str]
+    schedule_days: Optional[dict[str, float]]
     created_at: datetime
 
     model_config = {"from_attributes": True}

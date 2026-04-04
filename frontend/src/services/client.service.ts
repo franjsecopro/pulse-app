@@ -36,6 +36,12 @@ export const clientService = {
   deleteContract: (clientId: number, contractId: number) =>
     api.delete(`/clients/${clientId}/contracts/${contractId}`),
 
+  generateContractClasses: (clientId: number, contractId: number) =>
+    api.post<{ created: number }>(`/clients/${clientId}/contracts/${contractId}/generate-classes`, {}),
+
+  deleteFutureContractClasses: (clientId: number, contractId: number) =>
+    api.delete<{ deleted: number }>(`/clients/${clientId}/contracts/${contractId}/future-classes`),
+
   getPayers: (clientId: number) =>
     api.get<PaymentIdentifier[]>(`/clients/${clientId}/payers`),
 

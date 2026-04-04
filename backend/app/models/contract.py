@@ -1,6 +1,6 @@
 from datetime import datetime, date, timezone
 from typing import Optional
-from sqlalchemy import String, Boolean, Integer, Float, ForeignKey, DateTime, Date, Text
+from sqlalchemy import String, Boolean, Integer, Float, ForeignKey, DateTime, Date, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -17,6 +17,8 @@ class Contract(Base):
     hourly_rate: Mapped[float] = mapped_column(Float, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # schedule_days: {"0": 1.25, "3": 0.5} — weekday (0=Mon…6=Sun) → duration in hours
+    schedule_days: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

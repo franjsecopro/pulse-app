@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venvScriptsalembic upgrade:*)",
+      "Read(//mnt/c/Users/luthe/Desktop/DEV/pulse-app/**)",
+      "Bash(.venv/bin/alembic upgrade:*)"
+    ]
+  }
+}
