@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, time as dt_time, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, delete as sql_delete
@@ -171,22 +171,26 @@ async def generate_contract_classes(
     )
     existing_dates: set[date] = {row[0] for row in existing_result.fetchall()}
 
-    # schedule_days: {"0": 1.25, "3": 0.5} — claves como str del weekday (0=Lun…6=Dom)
-    schedule: dict[int, float] = {int(k): v for k, v in contract.schedule_days.items()}
+    # schedule_days: {"0": {"start": "09:00", "end": "10:30"}, ...} — weekday (0=Lun…6=Dom)
+    schedule: dict[int, dict] = {int(k): v for k, v in contract.schedule_days.items()}
 
     created_count = 0
     current = range_start
     while current <= range_end:
         weekday = current.weekday()  # 0=Mon … 6=Sun
         if weekday in schedule and current not in existing_dates:
-            duration = schedule[weekday]
+            day = schedule[weekday]
+            sh, sm = map(int, day["start"].split(":"))
+            eh, em = map(int, day["end"].split(":"))
+            class_time = dt_time(sh, sm)
+            duration_hours = (eh * 60 + em - sh * 60 - sm) / 60
             new_class = Class(
                 user_id=current_user.id,
                 client_id=client_id,
                 contract_id=contract_id,
                 class_date=current,
-                class_time=None,
-                duration_hours=duration,
+                class_time=class_time,
+                duration_hours=duration_hours,
                 hourly_rate=contract.hourly_rate,
                 notes=None,
             )

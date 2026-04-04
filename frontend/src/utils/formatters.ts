@@ -33,3 +33,15 @@ export function formatHours(hours: number): string {
 export function formatCurrency(amount: number, currency = '€'): string {
   return `${currency}${amount.toFixed(2)}`
 }
+
+/**
+ * Calculates duration in decimal hours between two "HH:MM" time strings.
+ * @param start - Start time string (e.g. "09:00")
+ * @param end - End time string (e.g. "10:30")
+ * @returns Duration in hours (e.g. 1.5)
+ */
+export function calcDuration(start: string, end: string): number {
+  const [sh, sm] = start.split(':').map(Number)
+  const [eh, em] = end.split(':').map(Number)
+  return (eh * 60 + em - sh * 60 - sm) / 60
+}

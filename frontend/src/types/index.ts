@@ -17,6 +17,11 @@ export interface PaymentIdentifier {
   created_at: string
 }
 
+export interface DaySchedule {
+  start: string  // "HH:MM"
+  end: string    // "HH:MM"
+}
+
 export interface Contract {
   id: number
   client_id: number
@@ -26,8 +31,8 @@ export interface Contract {
   hourly_rate: number
   is_active: boolean
   notes: string | null
-  // weekday ("0"=Mon…"6"=Sun) → duration_hours
-  schedule_days: Record<string, number> | null
+  // weekday ("0"=Mon…"6"=Sun) → {start, end} in "HH:MM"
+  schedule_days: Record<string, DaySchedule> | null
   created_at: string
 }
 

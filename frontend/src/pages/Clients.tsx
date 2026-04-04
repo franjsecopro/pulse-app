@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { clientService } from '../services/client.service';
 import { Modal } from '../components/ui/Modal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
-import { formatDate } from '../utils/formatters';
-import type { Client, Contract, PaymentIdentifier } from '../types';
+import { formatDate, formatHours, calcDuration } from '../utils/formatters';
+import type { Client, Contract, DaySchedule, PaymentIdentifier } from '../types';
 
 const WEEKDAYS = [
   { index: '0', label: 'Lun' },
@@ -170,8 +170,8 @@ function ContractForm({
     is_active: initial?.is_active ?? true,
     notes: initial?.notes ?? '',
   });
-  const [scheduleDays, setScheduleDays] = useState<Record<string, number>>(
-    initial?.schedule_days ?? {}
+  const [scheduleDays, setScheduleDays] = useState<Record<string, DaySchedule>>(
+    (initial?.schedule_days as Record<string, DaySchedule> | null) ?? {}
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -182,17 +182,22 @@ function ContractForm({
       if (dayIndex in next) {
         delete next[dayIndex]
       } else {
-        next[dayIndex] = 1
+        next[dayIndex] = { start: '09:00', end: '10:00' }
       }
       return next
     })
   }
 
-  const setDayHours = (dayIndex: string, hours: number) => {
-    setScheduleDays(prev => ({ ...prev, [dayIndex]: hours }))
+  const setDayTime = (dayIndex: string, field: 'start' | 'end', value: string) => {
+    setScheduleDays(prev => ({
+      ...prev,
+      [dayIndex]: { ...prev[dayIndex], [field]: value }
+    }))
   }
 
-  const weeklyHours = Object.values(scheduleDays).reduce((s, h) => s + h, 0)
+  const weeklyHours = Object.values(scheduleDays).reduce(
+    (s, d) => s + calcDuration(d.start, d.end), 0
+  )
   const weeklyRevenue = weeklyHours * form.hourly_rate
 
   const handleSubmit = async (e: FormEvent) => {
@@ -202,6 +207,15 @@ function ContractForm({
     if (form.end_date && form.start_date > form.end_date) {
       setError('La fecha de inicio no puede ser posterior a la fecha de fin.');
       return;
+    }
+
+    const invalidDay = Object.entries(scheduleDays).find(
+      ([, d]) => d.start >= d.end
+    )
+    if (invalidDay) {
+      const label = WEEKDAYS.find(w => w.index === invalidDay[0])?.label ?? invalidDay[0]
+      setError(`La hora de fin de ${label} debe ser posterior a la hora de inicio.`)
+      return
     }
 
     setIsSubmitting(true);
@@ -321,33 +335,45 @@ function ContractForm({
           })}
         </div>
 
-        {/* Inputs de horas por día activo */}
+        {/* Inputs de horario por día activo */}
         {hasSchedule && (
           <div className="space-y-2">
-            {WEEKDAYS.filter(({ index }) => index in scheduleDays).map(({ index, label }) => (
-              <div key={index} className="flex items-center gap-3">
-                <span className="w-8 text-xs font-bold text-slate-500">{label}</span>
-                <input
-                  type="number"
-                  step="0.25"
-                  min="0.25"
-                  max="12"
-                  value={scheduleDays[index]}
-                  onChange={(e) => setDayHours(index, parseFloat(e.target.value) || 0.25)}
-                  className="w-24 px-2 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                />
-                <span className="text-xs text-slate-400">
-                  horas ({scheduleDays[index] % 1 === 0
-                    ? `${scheduleDays[index]}h`
-                    : `${Math.floor(scheduleDays[index])}h ${Math.round((scheduleDays[index] % 1) * 60)}min`})
-                </span>
-              </div>
-            ))}
+            {WEEKDAYS.filter(({ index }) => index in scheduleDays).map(({ index, label }) => {
+              const day = scheduleDays[index]
+              const duration = calcDuration(day.start, day.end)
+              const isInvalid = day.start >= day.end
+              return (
+                <div key={index} className="flex items-center gap-2">
+                  <span className="w-8 text-xs font-bold text-slate-500">{label}</span>
+                  <input
+                    type="time"
+                    value={day.start}
+                    onChange={(e) => setDayTime(index, 'start', e.target.value)}
+                    className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  />
+                  <span className="text-xs text-slate-400">a</span>
+                  <input
+                    type="time"
+                    value={day.end}
+                    onChange={(e) => setDayTime(index, 'end', e.target.value)}
+                    className={`px-2 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none ${
+                      isInvalid ? 'border-red-300 bg-red-50' : 'border-slate-200'
+                    }`}
+                  />
+                  {!isInvalid && (
+                    <span className="text-xs text-slate-400">{formatHours(duration)}</span>
+                  )}
+                  {isInvalid && (
+                    <span className="text-xs text-red-500">Hora inválida</span>
+                  )}
+                </div>
+              )
+            })}
 
             {/* Resumen semanal */}
             <div className="flex items-center gap-4 pt-1 px-1 text-xs text-slate-500">
               <span>
-                <span className="font-bold text-slate-700">{weeklyHours % 1 === 0 ? weeklyHours : weeklyHours.toFixed(2)}h</span> / semana
+                <span className="font-bold text-slate-700">{formatHours(weeklyHours)}</span> / semana
               </span>
               {form.hourly_rate > 0 && (
                 <span>
@@ -656,7 +682,7 @@ function ContractDetail({
 
   const hasSchedule = !!(contract.schedule_days && Object.keys(contract.schedule_days).length > 0);
   const weeklyHours = hasSchedule
-    ? Object.values(contract.schedule_days!).reduce((s, h) => s + h, 0)
+    ? Object.values(contract.schedule_days!).reduce((s, d) => s + calcDuration(d.start, d.end), 0)
     : 0;
 
   const handleGenerate = async () => {
@@ -724,16 +750,18 @@ function ContractDetail({
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Horario semanal</p>
               <div className="flex gap-1.5 flex-wrap mb-1">
-                {WEEKDAYS.filter(d => d.index in contract.schedule_days!).map(({ index, label }) => (
-                  <span key={index} className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md">
-                    {label} · {contract.schedule_days![index] % 1 === 0
-                      ? `${contract.schedule_days![index]}h`
-                      : `${Math.floor(contract.schedule_days![index])}h ${Math.round((contract.schedule_days![index] % 1) * 60)}min`}
-                  </span>
-                ))}
+                {WEEKDAYS.filter(d => d.index in contract.schedule_days!).map(({ index, label }) => {
+                  const day = contract.schedule_days![index]
+                  const duration = calcDuration(day.start, day.end)
+                  return (
+                    <span key={index} className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md">
+                      {label} · {day.start}–{day.end} <span className="font-normal opacity-70">({formatHours(duration)})</span>
+                    </span>
+                  )
+                })}
               </div>
               <p className="text-xs text-slate-500">
-                Total: <span className="font-bold text-slate-700">{weeklyHours % 1 === 0 ? weeklyHours : weeklyHours.toFixed(2)}h/semana</span>
+                Total: <span className="font-bold text-slate-700">{formatHours(weeklyHours)}/semana</span>
                 {contract.hourly_rate > 0 && (
                   <> · <span className="font-bold text-primary">€{(weeklyHours * contract.hourly_rate).toFixed(2)}/semana</span></>
                 )}
@@ -987,7 +1015,7 @@ function ContractsManager({
                     <p className="text-xs text-primary/70 mt-0.5">
                       {WEEKDAYS.filter(d => d.index in c.schedule_days!).map(d => d.label).join(', ')}
                       {' · '}
-                      {Object.values(c.schedule_days).reduce((s, h) => s + h, 0).toFixed(1)}h/semana
+                      {formatHours(Object.values(c.schedule_days).reduce((s, d) => s + calcDuration(d.start, d.end), 0))}/semana
                     </p>
                   )}
                 </div>
