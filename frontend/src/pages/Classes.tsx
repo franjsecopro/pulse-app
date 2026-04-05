@@ -581,6 +581,12 @@ export function Classes() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <span
+                            title={c.google_calendar_id ? 'Sincronizado con Google Calendar' : 'No sincronizado con Google Calendar'}
+                            className={`material-symbols-outlined text-base ${c.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
+                          >
+                            {c.google_calendar_id ? 'event_available' : 'calendar_month'}
+                          </span>
                           <button
                             onClick={() => setEditingClass(c)}
                             className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"

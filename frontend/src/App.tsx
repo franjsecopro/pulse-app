@@ -7,6 +7,7 @@ import { Clients } from './pages/Clients'
 import { Classes } from './pages/Classes'
 import { Payments } from './pages/Payments'
 import { Alerts } from './pages/Alerts'
+import { Settings } from './pages/Settings'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/classes" element={<Classes />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/alerts" element={<Alerts />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -169,7 +169,18 @@ function ContractForm({
     hourly_rate: initial?.hourly_rate ?? 0,
     is_active: initial?.is_active ?? true,
     notes: initial?.notes ?? '',
+    calendar_description: initial?.calendar_description ?? '',
   });
+
+  // Reminders: track as two independent booleans mapped to the standard reminder objects
+  const [reminderEmail24h, setReminderEmail24h] = useState(() => {
+    const reminders = initial?.calendar_reminders
+    return reminders ? reminders.some(r => r.method === 'email' && r.minutes === 1440) : true
+  })
+  const [reminderPopup1h, setReminderPopup1h] = useState(() => {
+    const reminders = initial?.calendar_reminders
+    return reminders ? reminders.some(r => r.method === 'popup' && r.minutes === 60) : true
+  })
   const [scheduleDays, setScheduleDays] = useState<Record<string, DaySchedule>>(
     (initial?.schedule_days as Record<string, DaySchedule> | null) ?? {}
   );
@@ -200,6 +211,13 @@ function ContractForm({
   )
   const weeklyRevenue = weeklyHours * form.hourly_rate
 
+  const buildReminders = () => {
+    const result = []
+    if (reminderEmail24h) result.push({ method: 'email', minutes: 1440 })
+    if (reminderPopup1h) result.push({ method: 'popup', minutes: 60 })
+    return result.length > 0 ? result : null
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -224,6 +242,8 @@ function ContractForm({
         ...form,
         end_date: form.end_date || null,
         schedule_days: Object.keys(scheduleDays).length > 0 ? scheduleDays : null,
+        calendar_description: form.calendar_description || null,
+        calendar_reminders: buildReminders(),
       });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al guardar');
@@ -396,6 +416,51 @@ function ContractForm({
           rows={2}
           className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
         />
+      </div>
+
+      {/* Google Calendar */}
+      <div className="space-y-3 pt-1 border-t border-slate-100">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-base text-blue-400">calendar_month</span>
+          <p className="text-sm font-semibold text-slate-700">Google Calendar</p>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+            Descripción del evento
+          </label>
+          <textarea
+            value={form.calendar_description}
+            onChange={(e) => setForm((f) => ({ ...f, calendar_description: e.target.value }))}
+            rows={3}
+            placeholder="Aparece en el cuerpo del evento y en los emails de recordatorio. Incluye links de tareas, plataforma, contraseñas de reunión, etc."
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+            Recordatorios automáticos
+          </label>
+          <div className="space-y-1.5">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={reminderEmail24h}
+                onChange={(e) => setReminderEmail24h(e.target.checked)}
+                className="w-4 h-4 accent-primary"
+              />
+              <span className="text-sm text-slate-700">Email 24h antes (al alumno)</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={reminderPopup1h}
+                onChange={(e) => setReminderPopup1h(e.target.checked)}
+                className="w-4 h-4 accent-primary"
+              />
+              <span className="text-sm text-slate-700">Aviso 1h antes (en tu calendario)</span>
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* Footer */}

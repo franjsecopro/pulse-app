@@ -17,8 +17,12 @@ class Contract(Base):
     hourly_rate: Mapped[float] = mapped_column(Float, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    # schedule_days: {"0": 1.25, "3": 0.5} — weekday (0=Mon…6=Sun) → duration in hours
+    # schedule_days: {"0": {"start": "09:00", "end": "10:30"}, ...} — weekday → {start, end}
     schedule_days: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    # Descripción que aparece en el evento de Google Calendar y en los emails de recordatorio
+    calendar_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Recordatorios personalizados: [{"method": "email", "minutes": 1440}, ...]
+    calendar_reminders: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

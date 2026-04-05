@@ -21,4 +21,4 @@ makemigrations:
 	@echo "Migration created"
 
 dev: install
-	./venv/Scripts/uvicorn main:app --reload
+	./venv/Scripts/uvicorn main:app --reload --port 8001

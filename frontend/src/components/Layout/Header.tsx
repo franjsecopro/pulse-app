@@ -7,6 +7,7 @@ const navItems = [
   { path: '/classes', label: 'Clases', icon: 'school' },
   { path: '/payments', label: 'Pagos', icon: 'payments' },
   { path: '/alerts', label: 'Alertas', icon: 'notifications' },
+  { path: '/settings', label: 'Ajustes', icon: 'settings' },
 ]
 
 export function Header() {

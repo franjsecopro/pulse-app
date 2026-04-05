@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -8,10 +9,15 @@ from pydantic import ValidationError
 
 from app.core.config import settings
 from app.middleware.error_handler import global_error_handler
-from app.routers import auth, clients, classes, payments, dashboard
+from app.routers import auth, clients, classes, payments, dashboard, google_calendar
 from app.routers import imports as imports_router
 
 logging.basicConfig(level=logging.INFO)
+
+# Required for OAuth2 flow over HTTP in local development
+os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+# Google returns full scope URLs (e.g. userinfo.email) instead of short aliases (email)
+os.environ.setdefault("OAUTHLIB_RELAX_TOKEN_SCOPE", "1")
 
 
 @asynccontextmanager
@@ -55,6 +61,7 @@ app.include_router(classes.router, prefix="/api")
 app.include_router(payments.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(imports_router.router, prefix="/api")
+app.include_router(google_calendar.router, prefix="/api")
 
 
 @app.get("/api/health")

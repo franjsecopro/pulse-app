@@ -34,6 +34,7 @@ class ClassResponse(BaseModel):
     hourly_rate: float
     notes: Optional[str]
     created_at: datetime
+    google_calendar_id: Optional[str] = None
     # Computed fields
     client_name: Optional[str] = None
     contract_description: Optional[str] = None

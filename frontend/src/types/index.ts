@@ -33,6 +33,8 @@ export interface Contract {
   notes: string | null
   // weekday ("0"=Mon…"6"=Sun) → {start, end} in "HH:MM"
   schedule_days: Record<string, DaySchedule> | null
+  calendar_description: string | null
+  calendar_reminders: Array<{ method: 'email' | 'popup'; minutes: number }> | null
   created_at: string
 }
 
@@ -61,10 +63,17 @@ export interface ClassSession {
   duration_hours: number
   hourly_rate: number
   notes: string | null
+  google_calendar_id: string | null
   created_at: string
   client_name: string | null
   contract_description: string | null
   total_amount: number | null
+}
+
+export interface GoogleCalendarStatus {
+  connected: boolean
+  email?: string
+  calendar_id?: string
 }
 
 export interface Payment {
