@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
+from sqlalchemy import select, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.pdf_import import PDFImport
 from app.repositories.client_repository import ClientRepository
 from app.repositories.class_repository import ClassRepository
 from app.repositories.payment_repository import PaymentRepository
@@ -81,7 +83,62 @@ class DashboardService:
                 "year": year,
             })
 
+        # Alerta de PDF no subido: si ya pasaron 5 días del mes actual y no hay PDF del mes anterior
+        pdf_alert = await self._check_pdf_missing(user_id, now)
+        if pdf_alert:
+            alerts.append(pdf_alert)
+
         return sorted(alerts, key=lambda a: a["diff"])
+
+
+    async def _check_pdf_missing(self, user_id: int, now: datetime) -> dict | None:
+        """Returns a pdf_missing alert if it's past day 5 of the month and no PDF was imported
+        for the previous month."""
+        if now.day <= 5:
+            return None
+
+        prev_month = now.month - 1 if now.month > 1 else 12
+        prev_year = now.year if now.month > 1 else now.year - 1
+
+        # Only alert if there was actual activity (classes) in the previous month
+        from app.models.class_ import Class
+        activity_result = await self._class_repo._db.execute(
+            select(Class)
+            .where(
+                Class.user_id == user_id,
+                extract("month", Class.class_date) == prev_month,
+                extract("year", Class.class_date) == prev_year,
+            )
+            .limit(1)
+        )
+        had_activity = activity_result.scalar_one_or_none()
+        if not had_activity:
+            return None
+
+        result = await self._class_repo._db.execute(
+            select(PDFImport)
+            .where(
+                PDFImport.user_id == user_id,
+                PDFImport.month == prev_month,
+                PDFImport.year == prev_year,
+            )
+            .limit(1)
+        )
+        already_imported = result.scalar_one_or_none()
+        if already_imported:
+            return None
+
+        return {
+            "client_id": None,
+            "client_name": None,
+            "type": "pdf_missing",
+            "message": f"No has subido el extracto bancario de {_month_name(prev_month)} {prev_year}",
+            "expected": 0,
+            "paid": 0,
+            "diff": 0,
+            "month": prev_month,
+            "year": prev_year,
+        }
 
 
 def _month_name(month: int) -> str:

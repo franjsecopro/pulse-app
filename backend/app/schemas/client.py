@@ -11,6 +11,7 @@ class ClientCreateRequest(BaseModel):
     payment_name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
+    whatsapp_phone: Optional[str] = None
     address: Optional[str] = None
     is_active: bool = True
 
@@ -20,6 +21,7 @@ class ClientUpdateRequest(BaseModel):
     payment_name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
+    whatsapp_phone: Optional[str] = None
     address: Optional[str] = None
     is_active: Optional[bool] = None
 
@@ -30,6 +32,7 @@ class ClientResponse(BaseModel):
     payment_name: Optional[str]
     email: Optional[str]
     phone: Optional[str]
+    whatsapp_phone: Optional[str]
     address: Optional[str]
     is_active: bool
     created_at: datetime
@@ -47,6 +50,7 @@ class ClientListResponse(BaseModel):
     payment_name: Optional[str]
     email: Optional[str]
     phone: Optional[str]
+    whatsapp_phone: Optional[str]
     is_active: bool
     created_at: datetime
     contracts: list[ContractResponse] = []

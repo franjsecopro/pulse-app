@@ -64,13 +64,15 @@ class ClassRepository:
         await self._db.commit()
 
     async def get_monthly_totals(self, user_id: int, year: int, month: int) -> dict[int, float]:
-        """Returns a mapping of client_id -> total amount owed for the given month."""
+        """Returns a mapping of client_id -> total billable amount for the given month.
+        Excludes cancelled_without_payment classes (those are not charged)."""
         result = await self._db.execute(
             select(Class.client_id, func.sum(Class.duration_hours * Class.hourly_rate))
             .where(
                 Class.user_id == user_id,
                 extract("month", Class.class_date) == month,
                 extract("year", Class.class_date) == year,
+                Class.status != "cancelled_without_payment",
             )
             .group_by(Class.client_id)
         )

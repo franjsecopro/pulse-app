@@ -5,7 +5,7 @@ import { Modal } from '../components/ui/Modal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { CalendarView } from '../components/classes/CalendarView';
 import { DayView } from '../components/classes/DayView';
-import type { ClassSession, Client, Contract } from '../types';
+import type { ClassSession, ClassStatus, Client, Contract } from '../types';
 
 type ViewMode = 'list' | 'calendar';
 
@@ -46,6 +46,7 @@ function ClassForm({
     class_time: initial?.class_time ?? '',
     duration_hours: initial?.duration_hours ?? 1,
     hourly_rate: initial?.hourly_rate ?? 0,
+    status: (initial?.status ?? 'normal') as ClassStatus,
     notes: initial?.notes ?? '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -233,6 +234,20 @@ function ClassForm({
         </div>
         <div className="sm:col-span-2">
           <label className="block text-sm font-semibold text-slate-700 mb-1">
+            Estado de la clase
+          </label>
+          <select
+            value={form.status}
+            onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ClassStatus }))}
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white"
+          >
+            <option value="normal">Normal — clase celebrada</option>
+            <option value="cancelled_with_payment">Cancelada con pago (menos de 24h)</option>
+            <option value="cancelled_without_payment">Cancelada sin pago (más de 24h)</option>
+          </select>
+        </div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
             Notas
           </label>
           <input
@@ -288,6 +303,12 @@ function ClassForm({
       </div>
     </form>
   );
+}
+
+const CLASS_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  normal: { label: 'Normal', className: 'bg-emerald-100 text-emerald-700' },
+  cancelled_with_payment: { label: 'Cancelada · con pago', className: 'bg-amber-100 text-amber-700' },
+  cancelled_without_payment: { label: 'Cancelada · sin pago', className: 'bg-slate-100 text-slate-500' },
 }
 
 export function Classes() {
@@ -534,6 +555,9 @@ export function Classes() {
                       Total
                     </th>
                     <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">
                       Notas
                     </th>
                     <th className="px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider">
@@ -575,6 +599,16 @@ export function Classes() {
                       </td>
                       <td className="px-6 py-4 font-bold text-slate-900">
                         €{(c.total_amount ?? 0).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4">
+                        {(() => {
+                          const cfg = CLASS_STATUS_CONFIG[c.status] ?? CLASS_STATUS_CONFIG.normal
+                          return c.status !== 'normal' ? (
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${cfg.className}`}>
+                              {cfg.label}
+                            </span>
+                          ) : <span className="text-slate-300 text-xs">—</span>
+                        })()}
                       </td>
                       <td className="px-6 py-4 text-slate-500 text-sm max-w-[160px] truncate">
                         {c.notes ?? '—'}
@@ -627,7 +661,7 @@ export function Classes() {
             classes={dayDetailClasses}
             onEdit={(c) => setEditingClass(c)}
             onNewClass={(date) => handleNewClassFromCalendar(date)}
-            onDelete={(id) => handleDelete(id)}
+            onDelete={async (id) => { handleDelete(id) }}
           />
         )}
       </Modal>
@@ -664,7 +698,7 @@ export function Classes() {
             clients={clients}
             onSave={handleUpdate}
             onCancel={() => setEditingClass(null)}
-            onDelete={() => handleDelete(editingClass.id)}
+            onDelete={async () => { handleDelete(editingClass.id) }}
           />
         )}
       </Modal>

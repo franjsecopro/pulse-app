@@ -7,6 +7,8 @@ import { Clients } from './pages/Clients'
 import { Classes } from './pages/Classes'
 import { Payments } from './pages/Payments'
 import { Alerts } from './pages/Alerts'
+import { Accounting } from './pages/Accounting'
+import { Notifications } from './pages/Notifications'
 import { Settings } from './pages/Settings'
 
 export default function App() {
@@ -20,6 +22,8 @@ export default function App() {
             <Route path="/clients" element={<Clients />} />
             <Route path="/classes" element={<Classes />} />
             <Route path="/payments" element={<Payments />} />
+            <Route path="/accounting" element={<Accounting />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/settings" element={<Settings />} />
           </Route>

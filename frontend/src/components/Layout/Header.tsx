@@ -6,7 +6,9 @@ const navItems = [
   { path: '/clients', label: 'Clientes', icon: 'people' },
   { path: '/classes', label: 'Clases', icon: 'school' },
   { path: '/payments', label: 'Pagos', icon: 'payments' },
+  { path: '/accounting', label: 'Contabilidad', icon: 'account_balance' },
   { path: '/alerts', label: 'Alertas', icon: 'notifications' },
+  { path: '/notifications', label: 'Notificaciones', icon: 'send' },
   { path: '/settings', label: 'Ajustes', icon: 'settings' },
 ]
 

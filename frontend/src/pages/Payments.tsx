@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef, type FormEvent, type ChangeEvent } from 'react'
 import { paymentService } from '../services/payment.service'
 import { clientService } from '../services/client.service'
+import { accountingService } from '../services/accounting.service'
 import { api } from '../services/api'
 import { Modal } from '../components/ui/Modal'
-import type { Payment, Client } from '../types'
+import type { Payment, Client, PDFImportRecord } from '../types'
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
@@ -181,6 +182,15 @@ function PdfImportModal({
     const toImport = rows.filter(r => !r.skip)
     if (toImport.length === 0) return
 
+    // Extract month/year from the first transaction date
+    let month: number | null = null
+    let year: number | null = null
+    if (toImport[0]?.date) {
+      const [y, m] = toImport[0].date.split('-').map(Number)
+      month = m ?? null
+      year = y ?? null
+    }
+
     setIsConfirming(true)
     try {
       await api.post('/imports/pdf/confirm', {
@@ -190,6 +200,9 @@ function PdfImportModal({
           amount: r.amount,
           client_id: r.selected_client_id,
         })),
+        filename: fileName ?? 'extracto.pdf',
+        month,
+        year,
       })
       onImported()
       onClose()
@@ -336,9 +349,12 @@ const statusConfig: Record<string, { label: string; className: string; icon: str
 // --- Main Page ---
 export function Payments() {
   const now = new Date()
+  const [activeTab, setActiveTab] = useState<'payments' | 'pdf-history'>('payments')
   const [payments, setPayments] = useState<Payment[]>([])
   const [clients, setClients] = useState<Client[]>([])
+  const [pdfHistory, setPdfHistory] = useState<PDFImportRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isPdfHistoryLoading, setIsPdfHistoryLoading] = useState(false)
   const [filterMonth, setFilterMonth] = useState<number | ''>('')
   const [filterYear, setFilterYear] = useState(now.getFullYear())
   const [filterClient, setFilterClient] = useState<number | ''>('')
@@ -361,11 +377,25 @@ export function Payments() {
 
   useEffect(() => { clientService.getAll().then(setClients) }, [])
   useEffect(() => { loadPayments() }, [loadPayments])
+  useEffect(() => {
+    if (activeTab === 'pdf-history') {
+      setIsPdfHistoryLoading(true)
+      accountingService.getPdfHistory()
+        .then(setPdfHistory)
+        .finally(() => setIsPdfHistoryLoading(false))
+    }
+  }, [activeTab])
 
   const handleCreate = async (data: Partial<Payment>) => {
     await paymentService.create(data as Parameters<typeof paymentService.create>[0])
     setShowCreateModal(false)
     loadPayments()
+  }
+
+  const handleImported = () => {
+    loadPayments()
+    // Refresh PDF history if it's been loaded
+    setPdfHistory([])
   }
 
   const handleUpdate = async (data: Partial<Payment>) => {
@@ -405,6 +435,28 @@ export function Payments() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+        {(['payments', 'pdf-history'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === tab
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            {tab === 'payments' ? 'Pagos' : 'PDFs importados'}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'pdf-history' && (
+        <PdfHistoryView records={pdfHistory} isLoading={isPdfHistoryLoading} />
+      )}
+
+      {activeTab === 'payments' && <>
       {/* Filters */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap items-center gap-3">
         <select value={filterMonth} onChange={e => setFilterMonth(parseInt(e.target.value) || '')}
@@ -508,6 +560,8 @@ export function Payments() {
         </div>
       )}
 
+      </>}
+
       <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Registrar pago">
         <PaymentForm clients={clients} onSave={handleCreate} onCancel={() => setShowCreateModal(false)} />
       </Modal>
@@ -527,9 +581,73 @@ export function Payments() {
         <PdfImportModal
           clients={clients}
           onClose={() => setShowImportModal(false)}
-          onImported={loadPayments}
+          onImported={handleImported}
         />
       </Modal>
+    </div>
+  )
+}
+
+// --- PDF History View ---
+function PdfHistoryView({ records, isLoading }: { records: PDFImportRecord[]; isLoading: boolean }) {
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <span className="material-symbols-outlined text-primary text-3xl animate-spin">sync</span>
+      </div>
+    )
+  }
+
+  if (records.length === 0) {
+    return (
+      <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
+        <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">upload_file</span>
+        <p className="text-slate-500 font-medium">No hay PDFs importados</p>
+        <p className="text-slate-400 text-sm mt-1">Los extractos bancarios importados aparecerán aquí.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <table className="w-full text-sm">
+        <thead className="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th className="text-left px-5 py-3 font-semibold text-slate-600">Archivo</th>
+            <th className="text-left px-4 py-3 font-semibold text-slate-600">Mes</th>
+            <th className="text-left px-4 py-3 font-semibold text-slate-600">Fecha de importación</th>
+            <th className="text-right px-4 py-3 font-semibold text-slate-600">Transacciones</th>
+            <th className="text-right px-5 py-3 font-semibold text-slate-600">Total importado</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {records.map(record => (
+            <tr key={record.id} className="hover:bg-slate-50 transition-colors">
+              <td className="px-5 py-4">
+                <div className="flex items-center gap-2 text-slate-700">
+                  <span className="material-symbols-outlined text-slate-400 text-base">picture_as_pdf</span>
+                  <span className="font-medium truncate max-w-[200px]" title={record.filename}>{record.filename}</span>
+                </div>
+              </td>
+              <td className="px-4 py-4 text-slate-600">
+                {record.month && record.year
+                  ? `${MONTHS[record.month - 1]} ${record.year}`
+                  : '—'}
+              </td>
+              <td className="px-4 py-4 text-slate-500">
+                {new Date(record.imported_at).toLocaleDateString('es-ES', {
+                  day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                })}
+              </td>
+              <td className="px-4 py-4 text-right text-slate-700 font-medium">{record.transaction_count}</td>
+              <td className="px-5 py-4 text-right font-bold text-slate-900">€{record.total_amount.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

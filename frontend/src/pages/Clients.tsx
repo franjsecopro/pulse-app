@@ -29,6 +29,7 @@ function ClientForm({
     name: initial?.name ?? '',
     email: initial?.email ?? '',
     phone: initial?.phone ?? '',
+    whatsapp_phone: initial?.whatsapp_phone ?? '',
     address: initial?.address ?? '',
     is_active: initial?.is_active ?? true,
   });
@@ -37,10 +38,11 @@ function ClientForm({
 
   const isEditing = !!initial?.id
   const isDirty = !isEditing || (
-    form.name     !== (initial?.name     ?? '')    ||
-    form.email    !== (initial?.email    ?? '')    ||
-    form.phone    !== (initial?.phone    ?? '')    ||
-    form.address  !== (initial?.address  ?? '')    ||
+    form.name          !== (initial?.name          ?? '')   ||
+    form.email         !== (initial?.email         ?? '')   ||
+    form.phone         !== (initial?.phone         ?? '')   ||
+    form.whatsapp_phone !== (initial?.whatsapp_phone ?? '') ||
+    form.address       !== (initial?.address       ?? '')   ||
     form.is_active !== (initial?.is_active ?? true)
   )
 
@@ -96,6 +98,18 @@ function ClientForm({
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            WhatsApp
+          </label>
+          <input
+            placeholder="+34 600 000 000"
+            value={form.whatsapp_phone}
+            onChange={(e) => setForm((f) => ({ ...f, whatsapp_phone: e.target.value }))}
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+          />
+          <p className="text-xs text-slate-400 mt-1">Número para recordatorios automáticos</p>
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">
@@ -211,8 +225,8 @@ function ContractForm({
   )
   const weeklyRevenue = weeklyHours * form.hourly_rate
 
-  const buildReminders = () => {
-    const result = []
+  const buildReminders = (): Array<{ method: 'email' | 'popup'; minutes: number }> | null => {
+    const result: Array<{ method: 'email' | 'popup'; minutes: number }> = []
     if (reminderEmail24h) result.push({ method: 'email', minutes: 1440 })
     if (reminderPopup1h) result.push({ method: 'popup', minutes: 60 })
     return result.length > 0 ? result : null

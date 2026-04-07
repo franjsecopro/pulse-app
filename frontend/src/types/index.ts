@@ -44,6 +44,7 @@ export interface Client {
   payment_name: string | null
   email: string | null
   phone: string | null
+  whatsapp_phone: string | null
   address: string | null
   is_active: boolean
   created_at: string
@@ -52,6 +53,8 @@ export interface Client {
   contracts: Contract[]
   payers: PaymentIdentifier[]
 }
+
+export type ClassStatus = 'normal' | 'cancelled_with_payment' | 'cancelled_without_payment'
 
 export interface ClassSession {
   id: number
@@ -62,12 +65,47 @@ export interface ClassSession {
   class_time: string | null
   duration_hours: number
   hourly_rate: number
+  status: ClassStatus
   notes: string | null
   google_calendar_id: string | null
   created_at: string
   client_name: string | null
   contract_description: string | null
   total_amount: number | null
+}
+
+export interface PDFImportRecord {
+  id: number
+  filename: string
+  imported_at: string
+  month: number | null
+  year: number | null
+  transaction_count: number
+  total_amount: number
+}
+
+export interface ContractBreakdown {
+  contract_id: number | null
+  contract_description: string
+  hourly_rate: number
+  class_count: number
+  normal_count: number
+  cancelled_with_payment_count: number
+  cancelled_without_payment_count: number
+  expected: number
+}
+
+export interface AccountingSummaryEntry {
+  client_id: number
+  client_name: string
+  expected: number
+  paid: number
+  previous_credit: number
+  balance: number
+  month: number
+  year: number
+  month_name: string
+  contracts: ContractBreakdown[]
 }
 
 export interface GoogleCalendarStatus {
@@ -101,10 +139,32 @@ export interface DashboardSummary {
   year: number
 }
 
-export interface Alert {
+export type NotificationStatus = 'pending' | 'sent' | 'skipped'
+export type NotificationChannel = 'whatsapp' | 'email'
+
+export interface AppNotification {
+  id: number
   client_id: number
   client_name: string
-  type: 'debt' | 'credit'
+  class_id: number
+  class_date: string
+  class_time: string | null
+  channel: NotificationChannel
+  status: NotificationStatus
+  message: string
+  whatsapp_url: string | null
+  sent_at: string | null
+}
+
+export interface NotificationSettings {
+  default_channel: NotificationChannel
+  message_template: string
+}
+
+export interface Alert {
+  client_id: number | null
+  client_name: string | null
+  type: 'debt' | 'credit' | 'pdf_missing'
   message: string
   expected: number
   paid: number

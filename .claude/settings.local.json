@@ -11,7 +11,10 @@
       "Bash(alembic current:*)",
       "Bash(echo $OAUTHLIB_INSECURE_TRANSPORT)",
       "Bash(grep -rn 8000 /c/Users/luthe/Desktop/DEV/pulse-app/backend/.env /c/Users/luthe/Desktop/DEV/pulse-app/backend/Makefile /c/Users/luthe/Desktop/DEV/pulse-app/frontend/.env* /c/Users/luthe/Desktop/DEV/pulse-app/frontend/vite.config.ts)",
-      "Bash(grep -rn 8000 /c/Users/luthe/Desktop/DEV/pulse-app --include=*.env --include=Makefile --include=*.config.* --include=*.json --exclude-dir=node_modules --exclude-dir=venv)"
+      "Bash(grep -rn 8000 /c/Users/luthe/Desktop/DEV/pulse-app --include=*.env --include=Makefile --include=*.config.* --include=*.json --exclude-dir=node_modules --exclude-dir=venv)",
+      "Bash(alembic upgrade:*)",
+      "Bash(npm run:*)",
+      "Bash(make migrate:*)"
     ]
   }
 }

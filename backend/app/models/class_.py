@@ -20,6 +20,8 @@ class Class(Base):
     duration_hours: Mapped[float] = mapped_column(Float, default=1.0)
     # Hourly rate captured at time of class creation (contract rate snapshot)
     hourly_rate: Mapped[float] = mapped_column(Float, nullable=False)
+    # normal | cancelled_with_payment | cancelled_without_payment
+    status: Mapped[str] = mapped_column(String(30), nullable=False, default="normal")
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     google_calendar_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
