@@ -25,13 +25,13 @@ class ClientRepository:
             .where(Client.user_id == user_id)
         )
 
-        # Handle deleted_at filtering
+        # Handle archived_at filtering
         if deleted_filter == "exclude":
             # Show ONLY non-deleted clients
-            query = query.where(Client.deleted_at.is_(None))
+            query = query.where(Client.archived_at.is_(None))
         elif deleted_filter == "only":
             # Show ONLY deleted clients
-            query = query.where(Client.deleted_at.is_not(None))
+            query = query.where(Client.archived_at.is_not(None))
         # elif deleted_filter == "include": no filter, show all
 
         # Handle is_active filtering (only when not filtering by deleted_filter='only')
@@ -51,7 +51,7 @@ class ClientRepository:
             .where(Client.id == client_id, Client.user_id == user_id)
         )
         if not include_deleted:
-            query = query.where(Client.deleted_at.is_(None))
+            query = query.where(Client.archived_at.is_(None))
         result = await self._db.execute(query)
         return result.scalar_one_or_none()
 
@@ -73,19 +73,29 @@ class ClientRepository:
     async def update(self, client: Client, data: ClientUpdateRequest) -> Client:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(client, field, value)
+        # Clear archived_at when explicitly reactivating
+        if data.is_active is True:
+            client.archived_at = None
         client.updated_at = datetime.now(timezone.utc)
         await self._db.commit()
         return await self._get_with_relations(client.id, client.user_id)
 
-    async def soft_delete(self, client: Client) -> Client:
-        client.deleted_at = datetime.now(timezone.utc)
+    async def archive(self, client: Client) -> Client:
+        client.archived_at = datetime.now(timezone.utc)
         client.is_active = False
+        await self._db.commit()
+        return await self._get_with_relations(client.id, client.user_id)
+
+    async def activate(self, client: Client) -> Client:
+        client.archived_at = None
+        client.is_active = True
+        client.updated_at = datetime.now(timezone.utc)
         await self._db.commit()
         return await self._get_with_relations(client.id, client.user_id)
 
     async def count_active(self, user_id: int) -> int:
         result = await self._db.execute(
             select(func.count())
-            .where(Client.user_id == user_id, Client.is_active.is_(True), Client.deleted_at.is_(None))
+            .where(Client.user_id == user_id, Client.is_active.is_(True), Client.archived_at.is_(None))
         )
         return result.scalar_one()

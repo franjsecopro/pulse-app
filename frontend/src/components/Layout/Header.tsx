@@ -12,10 +12,16 @@ const navItems = [
   { path: '/settings', label: 'Ajustes', icon: 'settings' },
 ]
 
+const adminNavItem = { path: '/admin', label: 'Admin', icon: 'admin_panel_settings' }
+
 export function Header() {
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+
+  const visibleNavItems = user?.role === 'admin'
+    ? [...navItems, adminNavItem]
+    : navItems
 
   const handleLogout = () => {
     logout()
@@ -39,7 +45,7 @@ export function Header() {
                 <span className="text-slate-900">Pulse</span>
               </Link>
               <nav className="hidden md:flex items-center gap-1">
-                {navItems.map(({ path, label }) => (
+                {visibleNavItems.map(({ path, label }) => (
                   <Link
                     key={path}
                     to={path}
@@ -74,7 +80,7 @@ export function Header() {
       {/* ── Mobile bottom navigation ── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200">
         <div className="flex items-center justify-around h-16">
-          {navItems.map(({ path, label, icon }) => (
+          {visibleNavItems.map(({ path, label, icon }) => (
             <Link
               key={path}
               to={path}

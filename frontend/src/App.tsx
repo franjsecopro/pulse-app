@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
 import { AuthProvider } from './context/AuthContext'
 import { AppLayout } from './components/Layout/AppLayout'
 import { Login } from './pages/Login'
@@ -9,7 +10,13 @@ import { Payments } from './pages/Payments'
 import { Alerts } from './pages/Alerts'
 import { Accounting } from './pages/Accounting'
 import { Notifications } from './pages/Notifications'
+import { Admin } from './pages/Admin'
 import { Settings } from './pages/Settings'
+
+function AdminRoute() {
+  const { user } = useAuth()
+  return user?.role === 'admin' ? <Outlet /> : <Navigate to="/" replace />
+}
 
 export default function App() {
   return (
@@ -24,6 +31,9 @@ export default function App() {
             <Route path="/payments" element={<Payments />} />
             <Route path="/accounting" element={<Accounting />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<Admin />} />
+            </Route>
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/settings" element={<Settings />} />
           </Route>

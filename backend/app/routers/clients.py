@@ -11,7 +11,7 @@ from app.models.class_ import Class
 from app.repositories.client_repository import ClientRepository
 from app.repositories.contract_repository import ContractRepository
 from app.repositories.payer_repository import PayerRepository
-from app.routers.classes import _sync_create
+from app.routers.classes import _sync_create, _sync_update
 from app.schemas.client import ClientCreateRequest, ClientUpdateRequest, ClientResponse, ClientListResponse
 from app.schemas.contract import ContractCreateRequest, ContractUpdateRequest, ContractResponse
 from app.schemas.payment_identifier import PayerCreateRequest, PayerUpdateRequest, PayerResponse
@@ -57,6 +57,7 @@ async def get_client(
 async def update_client(
     client_id: int,
     data: ClientUpdateRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -64,11 +65,38 @@ async def update_client(
     client = await repo.get_by_id(client_id, current_user.id, include_deleted=True)
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
-    return await repo.update(client, data)
+    updated = await repo.update(client, data)
+
+    # If client name changed, re-sync all future classes to update GCal event titles
+    if data.name is not None and data.name != client.name:
+        classes_result = await db.execute(
+            select(Class).where(
+                Class.client_id == client_id,
+                Class.class_date >= date.today(),
+                Class.google_calendar_id.isnot(None),
+            )
+        )
+        for cls in classes_result.scalars().all():
+            background_tasks.add_task(_sync_update, cls.id, current_user.id, cls.google_calendar_id)
+
+    return updated
 
 
-@router.delete("/{client_id}", status_code=204)
-async def delete_client(
+@router.post("/{client_id}/archive", status_code=204)
+async def archive_client(
+    client_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    repo = ClientRepository(db)
+    client = await repo.get_by_id(client_id, current_user.id, include_deleted=False)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    await repo.archive(client)
+
+
+@router.post("/{client_id}/activate", status_code=204)
+async def activate_client(
     client_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -77,7 +105,7 @@ async def delete_client(
     client = await repo.get_by_id(client_id, current_user.id, include_deleted=True)
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
-    await repo.soft_delete(client)
+    await repo.activate(client)
 
 
 # --- Contracts sub-resource ---
@@ -112,6 +140,7 @@ async def update_contract(
     client_id: int,
     contract_id: int,
     data: ContractUpdateRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -122,7 +151,22 @@ async def update_contract(
     contract = await contract_repo.get_by_id(contract_id, client_id)
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
-    return await contract_repo.update(contract, data)
+    updated = await contract_repo.update(contract, data)
+
+    # Re-sync future classes if contract description or reminders changed (affects GCal event)
+    fields_affecting_gcal = {"description", "calendar_description", "calendar_reminders", "hourly_rate"}
+    if any(getattr(data, f, None) is not None for f in fields_affecting_gcal):
+        classes_result = await db.execute(
+            select(Class).where(
+                Class.contract_id == contract_id,
+                Class.class_date >= date.today(),
+                Class.google_calendar_id.isnot(None),
+            )
+        )
+        for cls in classes_result.scalars().all():
+            background_tasks.add_task(_sync_update, cls.id, current_user.id, cls.google_calendar_id)
+
+    return updated
 
 
 @router.delete("/{client_id}/contracts/{contract_id}", status_code=204)

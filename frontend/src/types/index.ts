@@ -1,6 +1,7 @@
 export interface User {
   id: number
   email: string
+  role: 'admin' | 'user'
 }
 
 export interface TokenResponse {
@@ -49,7 +50,7 @@ export interface Client {
   is_active: boolean
   created_at: string
   updated_at?: string
-  deleted_at?: string | null
+  archived_at?: string | null
   contracts: Contract[]
   payers: PaymentIdentifier[]
 }

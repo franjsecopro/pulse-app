@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { classService } from '../services/class.service';
 import { clientService } from '../services/client.service';
+import { api } from '../services/api';
 import { Modal } from '../components/ui/Modal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { CalendarView } from '../components/classes/CalendarView';
 import { DayView } from '../components/classes/DayView';
+import { useAuth } from '../context/AuthContext';
 import type { ClassSession, ClassStatus, Client, Contract } from '../types';
 
 type ViewMode = 'list' | 'calendar';
@@ -313,9 +315,12 @@ const CLASS_STATUS_CONFIG: Record<string, { label: string; className: string }> 
 
 export function Classes() {
   const now = new Date();
+  const { user } = useAuth();
   const [classes, setClasses] = useState<ClassSession[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1);
   const [filterYear, setFilterYear] = useState(now.getFullYear());
   const [filterClient, setFilterClient] = useState<number | ''>('');
@@ -336,6 +341,21 @@ export function Classes() {
   const handleViewMode = (mode: ViewMode) => {
     setViewMode(mode);
     localStorage.setItem('classes-view', mode);
+  };
+
+  const handleSyncGCal = async () => {
+    if (!user) return;
+    setIsSyncing(true);
+    setSyncMsg(null);
+    try {
+      const result = await api.post<{ scheduled: number }>(`/admin/users/${user.id}/sync-gcal`, {});
+      setSyncMsg(`${result.scheduled} clases encoladas`);
+      setTimeout(() => setSyncMsg(null), 4000);
+    } catch {
+      setSyncMsg('Error al sincronizar');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleNewClassFromCalendar = (date: string) => {
@@ -439,6 +459,20 @@ export function Classes() {
               Calendario
             </button>
           </div>
+          {syncMsg && (
+            <span className="text-xs text-emerald-600 font-medium">{syncMsg}</span>
+          )}
+          <button
+            onClick={handleSyncGCal}
+            disabled={isSyncing}
+            title="Sincronizar clases futuras con Google Calendar"
+            className="flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
+          >
+            <span className={`material-symbols-outlined text-base ${isSyncing ? 'animate-spin' : ''}`}>
+              {isSyncing ? 'refresh' : 'calendar_month'}
+            </span>
+            {isSyncing ? 'Sincronizando...' : 'Sync GCal'}
+          </button>
           <button
             onClick={() => {
               setNewClassDate(null);

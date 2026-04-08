@@ -16,13 +16,15 @@ export const clientService = {
     return api.get<Client>(`/clients/${id}${query}`)
   },
 
-  create: (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'contracts'>) =>
+  create: (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>) =>
     api.post<Client>('/clients', data),
 
   update: (id: number, data: Partial<Client>) =>
     api.put<Client>(`/clients/${id}`, data),
 
-  delete: (id: number) => api.delete(`/clients/${id}`),
+  archive: (id: number) => api.post(`/clients/${id}/archive`, {}),
+
+  activate: (id: number) => api.post(`/clients/${id}/activate`, {}),
 
   getContracts: (clientId: number) =>
     api.get<Contract[]>(`/clients/${clientId}/contracts`),

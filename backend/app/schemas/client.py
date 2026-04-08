@@ -37,7 +37,7 @@ class ClientResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    deleted_at: Optional[datetime]
+    archived_at: Optional[datetime]
     contracts: list[ContractResponse] = []
     payers: list[PayerResponse] = []
 
@@ -53,6 +53,7 @@ class ClientListResponse(BaseModel):
     whatsapp_phone: Optional[str]
     is_active: bool
     created_at: datetime
+    archived_at: Optional[datetime]
     contracts: list[ContractResponse] = []
     payers: list[PayerResponse] = []
 

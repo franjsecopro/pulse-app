@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { clientService } from '../services/client.service';
+import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/ui/Modal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { formatDate, formatHours, calcDuration } from '../utils/formatters';
@@ -625,15 +627,17 @@ function ClientCard({
   onDelete,
   onActivate,
   onManageContracts,
+  onHardDelete,
 }: {
   client: Client;
   onEdit: () => void;
   onDelete: () => void;
   onActivate: () => void;
   onManageContracts: () => void;
+  onHardDelete?: () => void;
 }) {
   const activeContracts = client.contracts?.filter((c) => c.is_active) ?? [];
-  const isArchived = !!client.deleted_at;
+  const isArchived = !!client.archived_at;
 
   return (
     <div
@@ -711,13 +715,24 @@ function ClientCard({
           <span className="material-symbols-outlined">edit</span>
         </button>
         {isArchived ? (
-          <button
-            onClick={onActivate}
-            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-            title="Activar"
-          >
-            <span className="material-symbols-outlined">restore</span>
-          </button>
+          <>
+            <button
+              onClick={onActivate}
+              className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              title="Activar"
+            >
+              <span className="material-symbols-outlined">restore</span>
+            </button>
+            {onHardDelete && (
+              <button
+                onClick={onHardDelete}
+                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Eliminar permanentemente"
+              >
+                <span className="material-symbols-outlined">delete_forever</span>
+              </button>
+            )}
+          </>
         ) : (
           <button
             onClick={onDelete}
@@ -958,7 +973,7 @@ function ContractDetail({
 
       {/* Footer — solo en modo lectura (ContractForm tiene el suyo propio en modo edición) */}
       {!isEditMode && (
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+        <div className="pt-2 border-t border-slate-100">
           <button
             type="button"
             onClick={onStartEdit}
@@ -966,13 +981,6 @@ function ContractDetail({
           >
             <span className="material-symbols-outlined text-base">edit</span>
             Editar contrato
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-          >
-            Cerrar
           </button>
         </div>
       )}
@@ -1225,6 +1233,7 @@ function ConfirmDialog({
 
 // --- Main Page ---
 export function Clients() {
+  const { user } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -1239,6 +1248,8 @@ export function Clients() {
     client: Client;
   } | null>(null);
   const [isConfirmingAction, setIsConfirmingAction] = useState(false);
+  const [hardDeleteTarget, setHardDeleteTarget] = useState<Client | null>(null);
+  const [isHardDeleting, setIsHardDeleting] = useState(false);
 
   const loadClients = useCallback(async () => {
     setIsLoading(true);
@@ -1277,22 +1288,18 @@ export function Clients() {
   }, [loadClients]);
 
   const handleCreate = async (data: Partial<Client>) => {
-    const created = await clientService.create(
-      data as Omit<Client, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'contracts'>,
+    await clientService.create(
+      data as Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>,
     );
-    setClients((prev) => [created, ...prev]);
     setShowCreateModal(false);
+    loadClients();
   };
 
   const handleUpdate = async (data: Partial<Client>) => {
     if (!editingClient) return;
-    const updated = await clientService.update(editingClient.id, data);
-    // Preserve payers since update endpoint doesn't return them in the same call
-    const withPayers = { ...updated, payers: editingClient.payers };
-    setClients((prev) =>
-      prev.map((c) => (c.id === editingClient.id ? withPayers : c)),
-    );
+    await clientService.update(editingClient.id, data);
     setEditingClient(null);
+    loadClients();
   };
 
   const handleDelete = async (client: Client) => {
@@ -1308,27 +1315,26 @@ export function Clients() {
     setIsConfirmingAction(true);
     try {
       if (confirmDialog.action === 'archive') {
-        await clientService.delete(confirmDialog.client.id);
-        setClients((prev) =>
-          prev.map((c) =>
-            c.id === confirmDialog.client.id
-              ? { ...c, is_active: false, deleted_at: new Date().toISOString() }
-              : c,
-          ),
-        );
+        await clientService.archive(confirmDialog.client.id);
       } else if (confirmDialog.action === 'activate') {
-        const updated = await clientService.update(confirmDialog.client.id, {
-          is_active: true,
-          deleted_at: null as any,
-        });
-        const withPayers = { ...updated, payers: confirmDialog.client.payers };
-        setClients((prev) =>
-          prev.map((c) => (c.id === confirmDialog.client.id ? withPayers : c)),
-        );
+        await clientService.activate(confirmDialog.client.id);
       }
       setConfirmDialog(null);
+      loadClients();
     } finally {
       setIsConfirmingAction(false);
+    }
+  };
+
+  const handleHardDelete = async () => {
+    if (!hardDeleteTarget) return;
+    setIsHardDeleting(true);
+    try {
+      await api.delete(`/admin/clients/${hardDeleteTarget.id}`);
+      setHardDeleteTarget(null);
+      loadClients();
+    } finally {
+      setIsHardDeleting(false);
     }
   };
 
@@ -1428,13 +1434,14 @@ export function Clients() {
                 // Include deleted clients in case we're editing an archived client
                 const fullClient = await clientService.getById(
                   client.id,
-                  !!client.deleted_at,
+                  !!client.archived_at,
                 );
                 setEditingClient(fullClient);
               }}
               onDelete={() => handleDelete(client)}
               onActivate={() => handleActivate(client)}
               onManageContracts={() => setContractsClient(client)}
+              onHardDelete={user?.role === 'admin' ? () => setHardDeleteTarget(client) : undefined}
             />
           ))}
         </div>
@@ -1507,6 +1514,17 @@ export function Clients() {
         isLoading={isConfirmingAction}
         onConfirm={handleConfirmAction}
         onCancel={() => setConfirmDialog(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={!!hardDeleteTarget}
+        title={`Eliminar a ${hardDeleteTarget?.name}`}
+        message={`¿Eliminar permanentemente a ${hardDeleteTarget?.name} y todos sus datos (contratos, clases, pagos)? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        isDangerous
+        isLoading={isHardDeleting}
+        onConfirm={handleHardDelete}
+        onCancel={() => setHardDeleteTarget(null)}
       />
     </div>
   );

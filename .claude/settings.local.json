@@ -14,7 +14,10 @@
       "Bash(grep -rn 8000 /c/Users/luthe/Desktop/DEV/pulse-app --include=*.env --include=Makefile --include=*.config.* --include=*.json --exclude-dir=node_modules --exclude-dir=venv)",
       "Bash(alembic upgrade:*)",
       "Bash(npm run:*)",
-      "Bash(make migrate:*)"
+      "Bash(make migrate:*)",
+      "Bash(./venv/Scripts/python -c \"from app.routers.clients import router; print\\(''OK''\\)\")",
+      "Bash(python -m alembic upgrade head)",
+      "Bash(./venv/Scripts/alembic upgrade:*)"
     ]
   }
 }

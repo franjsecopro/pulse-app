@@ -97,7 +97,7 @@ def _build_event_body(class_, client, contract) -> dict:
     # Format as RFC3339 without timezone suffix (timezone passed separately)
     fmt = "%Y-%m-%dT%H:%M:%S"
     event: dict = {
-        "summary": f"Clase · {client.name}",
+        "summary": f"Clase · {client.name}" + (f" — {contract.description}" if contract and contract.description else ""),
         "description": (contract.calendar_description if contract and contract.calendar_description else ""),
         "start": {"dateTime": start_dt.strftime(fmt), "timeZone": TIMEZONE},
         "end":   {"dateTime": end_dt.strftime(fmt),   "timeZone": TIMEZONE},
