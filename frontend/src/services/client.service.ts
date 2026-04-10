@@ -55,4 +55,6 @@ export const clientService = {
 
   deletePayer: (clientId: number, payerId: number) =>
     api.delete(`/clients/${clientId}/payers/${payerId}`),
+
+  hardDelete: (id: number) => api.delete(`/admin/clients/${id}`),
 }

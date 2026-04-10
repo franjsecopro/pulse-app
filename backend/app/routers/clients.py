@@ -1,7 +1,8 @@
-from datetime import date, time as dt_time, timedelta
+from datetime import date
 from typing import Optional
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
-from sqlalchemy import select, delete as sql_delete
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -11,10 +12,11 @@ from app.models.class_ import Class
 from app.repositories.client_repository import ClientRepository
 from app.repositories.contract_repository import ContractRepository
 from app.repositories.payer_repository import PayerRepository
-from app.routers.classes import _sync_create, _sync_update
 from app.schemas.client import ClientCreateRequest, ClientUpdateRequest, ClientResponse, ClientListResponse
 from app.schemas.contract import ContractCreateRequest, ContractUpdateRequest, ContractResponse
 from app.schemas.payment_identifier import PayerCreateRequest, PayerUpdateRequest, PayerResponse
+from app.services import class_calendar_service
+from app.services import contract_service
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
@@ -77,7 +79,7 @@ async def update_client(
             )
         )
         for cls in classes_result.scalars().all():
-            background_tasks.add_task(_sync_update, cls.id, current_user.id, cls.google_calendar_id)
+            background_tasks.add_task(class_calendar_service.sync_update, cls.id, current_user.id, cls.google_calendar_id)
 
     return updated
 
@@ -164,7 +166,7 @@ async def update_contract(
             )
         )
         for cls in classes_result.scalars().all():
-            background_tasks.add_task(_sync_update, cls.id, current_user.id, cls.google_calendar_id)
+            background_tasks.add_task(class_calendar_service.sync_update, cls.id, current_user.id, cls.google_calendar_id)
 
     return updated
 
@@ -196,8 +198,7 @@ async def generate_contract_classes(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Genera clases en el calendario para cada día configurado en el horario del contrato.
-    Omite fechas donde ya existe una clase para este contrato."""
+    """Genera clases en el calendario para cada día configurado en el horario del contrato."""
     client = await ClientRepository(db).get_by_id(client_id, current_user.id, include_deleted=True)
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
@@ -207,56 +208,7 @@ async def generate_contract_classes(
     if not contract.schedule_days:
         raise HTTPException(status_code=400, detail="Contract has no schedule configured")
 
-    # Rango de fechas
-    range_start: date = contract.start_date
-    range_end: date = contract.end_date if contract.end_date else range_start + timedelta(days=365)
-
-    # Fechas ya existentes para este contrato (evitar duplicados)
-    existing_result = await db.execute(
-        select(Class.class_date).where(Class.contract_id == contract_id)
-    )
-    existing_dates: set[date] = {row[0] for row in existing_result.fetchall()}
-
-    # schedule_days: {"0": {"start": "09:00", "end": "10:30"}, ...} — weekday (0=Lun…6=Dom)
-    schedule: dict[int, dict] = {int(k): v for k, v in contract.schedule_days.items()}
-
-    created_count = 0
-    current = range_start
-    while current <= range_end:
-        weekday = current.weekday()  # 0=Mon … 6=Sun
-        if weekday in schedule and current not in existing_dates:
-            day = schedule[weekday]
-            sh, sm = map(int, day["start"].split(":"))
-            eh, em = map(int, day["end"].split(":"))
-            class_time = dt_time(sh, sm)
-            duration_hours = (eh * 60 + em - sh * 60 - sm) / 60
-            new_class = Class(
-                user_id=current_user.id,
-                client_id=client_id,
-                contract_id=contract_id,
-                class_date=current,
-                class_time=class_time,
-                duration_hours=duration_hours,
-                hourly_rate=contract.hourly_rate,
-                notes=None,
-            )
-            db.add(new_class)
-            created_count += 1
-        current += timedelta(days=1)
-
-    await db.commit()
-
-    # Refresh to get IDs, then schedule Google Calendar sync for each new class
-    if created_count > 0:
-        new_ids_result = await db.execute(
-            select(Class.id)
-            .where(Class.contract_id == contract_id)
-            .where(Class.class_date.notin_(list(existing_dates)))
-        )
-        for (class_id,) in new_ids_result.fetchall():
-            background_tasks.add_task(_sync_create, class_id, current_user.id)
-
-    return {"created": created_count}
+    return await contract_service.generate_contract_classes(db, contract, current_user.id, background_tasks)
 
 
 @router.delete("/{client_id}/contracts/{contract_id}/future-classes")
@@ -267,8 +219,7 @@ async def delete_future_contract_classes(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Elimina todas las clases futuras (desde hoy inclusive) del contrato.
-    Las clases ya celebradas (en el pasado) no se tocan."""
+    """Elimina todas las clases futuras (desde hoy inclusive) del contrato."""
     client = await ClientRepository(db).get_by_id(client_id, current_user.id, include_deleted=True)
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
@@ -276,33 +227,7 @@ async def delete_future_contract_classes(
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
 
-    # Fetch google_calendar_id before deleting so we can sync removals
-    gcal_result = await db.execute(
-        select(Class.google_calendar_id)
-        .where(
-            Class.contract_id == contract_id,
-            Class.class_date >= date.today(),
-            Class.google_calendar_id.isnot(None),
-        )
-    )
-    google_event_ids = [row[0] for row in gcal_result.fetchall()]
-
-    result = await db.execute(
-        sql_delete(Class)
-        .where(
-            Class.contract_id == contract_id,
-            Class.class_date >= date.today(),
-        )
-        .returning(Class.id)
-    )
-    deleted_ids = result.fetchall()
-    await db.commit()
-
-    from app.routers.classes import _sync_delete
-    for event_id in google_event_ids:
-        background_tasks.add_task(_sync_delete, event_id, current_user.id)
-
-    return {"deleted": len(deleted_ids)}
+    return await contract_service.delete_future_contract_classes(db, contract_id, current_user.id, background_tasks)
 
 
 # --- Payers sub-resource ---

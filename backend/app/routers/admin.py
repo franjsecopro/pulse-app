@@ -1,4 +1,6 @@
 import logging
+from datetime import date
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy import select, delete as sql_delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.dependencies import require_admin
 from app.models.user import User
+from app.services import class_calendar_service
 from app.models.class_ import Class
 from app.models.client import Client
 from app.models.payment import Payment
@@ -133,7 +136,6 @@ async def force_gcal_sync(
     if not google_auth:
         raise HTTPException(status_code=400, detail="User has no Google Calendar connected")
 
-    from datetime import date
     classes_result = await db.execute(
         select(Class).where(
             Class.user_id == user_id,
@@ -142,13 +144,12 @@ async def force_gcal_sync(
     )
     classes = classes_result.scalars().all()
 
-    from app.routers.classes import _sync_create, _sync_update
     synced = 0
     for cls in classes:
         if cls.google_calendar_id:
-            background_tasks.add_task(_sync_update, cls.id, user_id, cls.google_calendar_id)
+            background_tasks.add_task(class_calendar_service.sync_update, cls.id, user_id, cls.google_calendar_id)
         else:
-            background_tasks.add_task(_sync_create, cls.id, user_id)
+            background_tasks.add_task(class_calendar_service.sync_create, cls.id, user_id)
         synced += 1
 
     return {"scheduled": synced, "user_id": user_id}

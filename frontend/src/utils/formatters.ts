@@ -8,6 +8,7 @@ export function formatDate(date: string | null | undefined, fallback = '—'): s
   if (!date) return fallback
   const [year, month, day] = date.split('-')
   if (!year || !month || !day) return fallback
+  if (!/^\d{4}$/.test(year) || !/^\d{1,2}$/.test(month) || !/^\d{1,2}$/.test(day)) return fallback
   return `${day}/${month}/${year}`
 }
 

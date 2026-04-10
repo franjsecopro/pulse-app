@@ -25,4 +25,7 @@ export const classService = {
     api.put<ClassSession>(`/classes/${id}`, data),
 
   delete: (id: number) => api.delete(`/classes/${id}`),
+
+  syncGCal: (userId: number) =>
+    api.post<{ scheduled: number }>(`/admin/users/${userId}/sync-gcal`, {}),
 }
