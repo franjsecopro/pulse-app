@@ -216,16 +216,60 @@ Usuario puede:
   └─ Enviar por WhatsApp
 ```
 
-### **4. Recordatorios automáticos**
+### **4. Notificaciones de clases (flujo diario)**
+
+> **Estado actual:** implementación temporal vía `wa.me`. El flujo con WhatsApp API + n8n está diseñado pero pendiente de validación de coste con el cliente.
+
+#### Datos ya implementados en BD
+
 ```
-APScheduler cada 24h:
-  ├─ Chequea clases de mañana
-  ├─ Para cada clase, obtiene cliente
-  ├─ Si recordatorios habilitados:
-  │   ├─ Obtiene configuración (horas antes, hora envío)
-  │   ├─ Si es hora correcta → envía WhatsApp
-  │   └─ Registra en historial
-  └─ Retry automático si falla
+contracts
+  ├─ phone: str (nullable)   # Teléfono del alumno — puede diferir del pagador
+  └─ notify: bool            # Flag por contrato — activa el envío
+```
+
+#### Flujo temporal (wa.me)
+
+```
+Usuario → abre página "Notificaciones de mañana"
+  ↓
+Backend: GET /api/notifications/tomorrow
+  ├─ Obtiene clases con class_date = hoy + 1
+  ├─ Filtra: contract.notify == true AND contract.phone IS NOT NULL
+  └─ Retorna lista con: cliente, alumno, hora, teléfono
+  ↓
+Frontend: renderiza una card por clase
+  └─ Botón "Notificar" → abre wa.me/+34XXXXXXXXX?text=<mensaje pre-rellenado>
+```
+
+#### Flujo objetivo (WhatsApp API + n8n) — pendiente validación
+
+```
+n8n workflow — disparado cada día a las 18:00
+  ↓
+Paso 1: HTTP Request → GET /api/notifications/tomorrow
+  └─ Header: Authorization: Bearer <api_key interna>
+  ↓
+Paso 2: Para cada clase en la respuesta:
+  ├─ Construye mensaje con: nombre alumno, hora, fecha
+  └─ WhatsApp Business API → envía al contract.phone
+  ↓
+Paso 3: HTTP Request → POST /api/notifications/log
+  └─ Body: [{ class_id, phone, status: "sent"|"failed", sent_at }]
+```
+
+#### Endpoints necesarios (aún no implementados)
+
+```
+GET  /api/notifications/tomorrow   # Devuelve clases de mañana con notify=true
+POST /api/notifications/log        # Registra resultado de envíos (para historial)
+```
+
+#### Mensaje de notificación (template)
+
+```
+Hola, te recuerdo que mañana {fecha} a las {hora} tenés clase con {nombre_profesor}.
+¡Hasta mañana!
 ```
 
 ---
@@ -327,32 +371,50 @@ Hard Delete (automático después 1 año):
 
 ## 📦 Stack Tecnológico
 
-### **Backend**
-- **FastAPI** 0.104.1 - API RESTful asincrónica
-- **PostgreSQL** - Base de datos robusta, escalable
-- **SQLAlchemy** 2.0 - ORM Python
-- **Pydantic** 2.5 - Validación de datos
-- **Cryptography** - Encriptación AES-256
-- **pdfplumber** 0.10 - Parser de PDFs
-- **WeasyPrint** 59.0 - Generación de PDFs (HTML → PDF)
-- **APScheduler** 3.10 - Tareas programadas
-- **Google Auth** - Integración Google Calendar
-- **Twilio** - WhatsApp Business API
+### Stack actual (en desarrollo)
 
-### **Frontend Desktop**
-- **PyQt6** 6.6 - GUI nativa multiplataforma
-- **Requests** - Cliente HTTP
-- **SQLite** - Backup local
+El stack original contemplaba una app de escritorio con PyQt6 y móvil con Flutter. Durante el desarrollo se optó por una **web app** con React, decisión que cumple los mismos requisitos de seguridad y flexibilidad con ventajas adicionales: sin instalación, cross-platform por defecto, y stack más moderno y mantenible.
 
-### **Frontend Móvil (Fase 3)**
-- **Flutter** 3.0+ - iOS + Android
+#### **Backend**
+- **FastAPI** 0.115.0 — API RESTful asincrónica
+- **PostgreSQL** — Base de datos principal (asyncpg como driver)
+- **SQLAlchemy** 2.0 — ORM Python (async)
+- **Alembic** — Migraciones de BD
+- **Pydantic** 2.9 — Validación de datos y schemas
+- **python-jose + bcrypt** — JWT y hashing de contraseñas
+- **pdfplumber** 0.11 — Parser de extractos bancarios (PDF)
+- **Google Calendar API** — Integración sincronización de clases
 
-### **Infraestructura**
-- **DigitalOcean App Platform** - Hosting (€12-27/mes)
-- **PostgreSQL Managed** - BD (€15/mes)
-- **Docker** - Contenedores
-- **Nginx** - Reverse proxy + HTTPS
-- **Git/GitHub** - Control de versiones (privado)
+#### **Frontend**
+- **React** 18 + **TypeScript** — UI web
+- **Vite** — Bundler y dev server
+- **TailwindCSS** — Estilos
+- **React Router** 6 — Navegación SPA
+- **Vitest** + **@testing-library/react** — Tests unitarios
+
+#### **Testing**
+- Backend: **pytest** + **pytest-asyncio** + **httpx** + SQLite in-memory
+- Frontend: **Vitest** + **@testing-library/react** + jsdom
+
+---
+
+### Stack objetivo (app final)
+
+> Lo siguiente está planificado pero aún no implementado. Se mantiene como referencia de hacia dónde evoluciona la app.
+
+#### **Backend (pendiente)**
+- **APScheduler** — Tareas programadas (notificaciones automáticas)
+- **WeasyPrint** — Generación de facturas en PDF
+- **WhatsApp Business API** (vía n8n) — Notificaciones automáticas *(pendiente validación de coste)*
+
+#### **Infraestructura (pendiente definir)**
+- **Hosting**: DigitalOcean App Platform u equivalente
+- **PostgreSQL Managed** — BD en producción
+- **Docker** — Contenedores
+- **Nginx** — Reverse proxy + HTTPS
+
+#### **Fase 3: Móvil (futuro)**
+- **Flutter** 3.0+ — iOS + Android
 
 ---
 

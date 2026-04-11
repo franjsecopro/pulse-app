@@ -7,6 +7,7 @@ import { ClassForm } from '../components/classes/ClassForm'
 import { CLASS_STATUS_CONFIG } from '../components/classes/constants'
 import { MONTHS } from '../utils/constants'
 import { useClasses } from '../hooks/useClasses'
+import { Pagination } from '../components/ui/Pagination'
 import { useAuth } from '../context/AuthContext'
 import type { ClassSession } from '../types'
 
@@ -34,8 +35,9 @@ export function Classes() {
   const [dayDetailDate, setDayDetailDate] = useState<string | null>(null)
 
   const {
-    classes, clients, isLoading, isSyncing, syncMsg,
+    classes, clients, isLoading, isSyncing,
     pendingDeleteId, totalRevenue,
+    page, pageCount, totalCount, goToPage,
     createClass, updateClass, requestDelete, confirmDelete, cancelDelete, syncGCal,
   } = useClasses({ filterMonth, filterYear, filterClient })
 
@@ -93,7 +95,6 @@ export function Classes() {
               Calendario
             </button>
           </div>
-          {syncMsg && <span className="text-xs text-emerald-600 font-medium">{syncMsg}</span>}
           <button
             onClick={() => user && syncGCal(user.id)}
             disabled={isSyncing}
@@ -177,7 +178,7 @@ export function Classes() {
       ) : viewMode === 'list' && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left" id="classes-table">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Fecha</th>
@@ -246,6 +247,7 @@ export function Classes() {
               </tbody>
             </table>
           </div>
+          <Pagination page={page} pageCount={pageCount} totalCount={totalCount} onPage={goToPage} />
         </div>
       )}
 

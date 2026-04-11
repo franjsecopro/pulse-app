@@ -5,13 +5,19 @@
  *  - month/year coupling: year is only sent when filterMonth is set
  *  - status and client_id filters forwarded (or undefined when empty)
  *  - totalAmount sums all loaded payment amounts
+ *  - requestDelete / cancelDelete / confirmDelete manage pendingDeleteId
+ *    (same pattern as useClasses — no window.confirm)
  */
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { usePayments } from './usePayments'
 import { paymentService } from '../services/payment.service'
 import { clientService } from '../services/client.service'
 import { accountingService } from '../services/accounting.service'
+
+vi.mock('../context/ToastContext', () => ({
+  useToast: () => ({ addToast: vi.fn() }),
+}))
 
 vi.mock('../services/payment.service', () => ({
   paymentService: {
@@ -46,7 +52,7 @@ const defaults = {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockGetAllPayments.mockResolvedValue([])
+  mockGetAllPayments.mockResolvedValue({ data: [], total: 0 })
   mockGetAllClients.mockResolvedValue([])
 })
 
@@ -121,14 +127,49 @@ describe('optional filter forwarding', () => {
 })
 
 
+// ─── pendingDeleteId ─────────────────────────────────────────────────────────
+
+describe('requestDelete / cancelDelete', () => {
+  it('pendingDeleteId starts as null', async () => {
+    const { result } = renderHook(() => usePayments(defaults))
+
+    expect(result.current.pendingDeleteId).toBeNull()
+  })
+
+  it('requestDelete sets pendingDeleteId', async () => {
+    const { result } = renderHook(() => usePayments(defaults))
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    act(() => result.current.requestDelete(7))
+
+    expect(result.current.pendingDeleteId).toBe(7)
+  })
+
+  it('cancelDelete clears pendingDeleteId back to null', async () => {
+    const { result } = renderHook(() => usePayments(defaults))
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    act(() => result.current.requestDelete(7))
+    act(() => result.current.cancelDelete())
+
+    expect(result.current.pendingDeleteId).toBeNull()
+  })
+})
+
+
 // ─── totalAmount ─────────────────────────────────────────────────────────────
 
 describe('totalAmount', () => {
   it('sums all payment amounts', async () => {
-    mockGetAllPayments.mockResolvedValue([
-      { id: 1, amount: 100.0 } as any,
-      { id: 2, amount:  50.0 } as any,
-    ])
+    mockGetAllPayments.mockResolvedValue({
+      data: [
+        { id: 1, amount: 100.0 } as any,
+        { id: 2, amount:  50.0 } as any,
+      ],
+      total: 2,
+    })
 
     const { result } = renderHook(() => usePayments(defaults))
 

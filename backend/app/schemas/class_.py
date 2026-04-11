@@ -8,7 +8,7 @@ CLASS_STATUSES = ("normal", "cancelled_with_payment", "cancelled_without_payment
 
 class ClassCreateRequest(BaseModel):
     client_id: int
-    contract_id: Optional[int] = None
+    contract_id: int
     class_date: date
     class_time: Optional[time] = None
     duration_hours: float = 1.0
@@ -32,7 +32,7 @@ class ClassResponse(BaseModel):
     id: int
     user_id: int
     client_id: int
-    contract_id: Optional[int]
+    contract_id: int
     class_date: date
     class_time: Optional[time]
     duration_hours: float

@@ -2,14 +2,16 @@ import { api } from './api'
 import type { Payment } from '../types'
 
 export const paymentService = {
-  getAll: (params?: { client_id?: number; month?: number; year?: number; status?: string }) => {
+  getAll: (params?: { client_id?: number; month?: number; year?: number; status?: string; limit?: number; offset?: number }) => {
     const query = new URLSearchParams()
     if (params?.client_id) query.set('client_id', String(params.client_id))
     if (params?.month) query.set('month', String(params.month))
     if (params?.year) query.set('year', String(params.year))
     if (params?.status) query.set('status', params.status)
+    if (params?.limit != null) query.set('limit', String(params.limit))
+    if (params?.offset != null) query.set('offset', String(params.offset))
     const qs = query.toString()
-    return api.get<Payment[]>(`/payments${qs ? `?${qs}` : ''}`)
+    return api.getPageable<Payment[]>(`/payments${qs ? `?${qs}` : ''}`)
   },
 
   create: (data: {

@@ -2,13 +2,15 @@ import { api } from './api'
 import type { ClassSession } from '../types'
 
 export const classService = {
-  getAll: (params?: { client_id?: number; month?: number; year?: number }) => {
+  getAll: (params?: { client_id?: number; month?: number; year?: number; limit?: number; offset?: number }) => {
     const query = new URLSearchParams()
     if (params?.client_id) query.set('client_id', String(params.client_id))
     if (params?.month) query.set('month', String(params.month))
     if (params?.year) query.set('year', String(params.year))
+    if (params?.limit != null) query.set('limit', String(params.limit))
+    if (params?.offset != null) query.set('offset', String(params.offset))
     const qs = query.toString()
-    return api.get<ClassSession[]>(`/classes${qs ? `?${qs}` : ''}`)
+    return api.getPageable<ClassSession[]>(`/classes${qs ? `?${qs}` : ''}`)
   },
 
   create: (data: {

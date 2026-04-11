@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { clientService } from '../services/client.service'
+import { useToast } from '../context/ToastContext'
 import type { Client, Contract, PaymentIdentifier } from '../types'
 
 type FilterActive = 'all' | 'active' | 'archived'
 
 export function useClients(search: string, filterActive: FilterActive) {
+  const { addToast } = useToast()
+
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -41,28 +44,53 @@ export function useClients(search: string, filterActive: FilterActive) {
   }, [loadClients])
 
   const createClient = async (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>) => {
-    await clientService.create(data)
-    loadClients()
+    try {
+      await clientService.create(data)
+      addToast('Cliente creado correctamente', 'success')
+      loadClients()
+    } catch {
+      addToast('Error al crear el cliente', 'error')
+    }
   }
 
   const updateClient = async (id: number, data: Partial<Client>) => {
-    await clientService.update(id, data)
-    loadClients()
+    try {
+      await clientService.update(id, data)
+      addToast('Cliente actualizado', 'success')
+      loadClients()
+    } catch {
+      addToast('Error al actualizar el cliente', 'error')
+    }
   }
 
   const archiveClient = async (id: number) => {
-    await clientService.archive(id)
-    loadClients()
+    try {
+      await clientService.archive(id)
+      addToast('Cliente archivado', 'success')
+      loadClients()
+    } catch {
+      addToast('Error al archivar el cliente', 'error')
+    }
   }
 
   const activateClient = async (id: number) => {
-    await clientService.activate(id)
-    loadClients()
+    try {
+      await clientService.activate(id)
+      addToast('Cliente activado', 'success')
+      loadClients()
+    } catch {
+      addToast('Error al activar el cliente', 'error')
+    }
   }
 
   const hardDeleteClient = async (id: number) => {
-    await clientService.hardDelete(id)
-    loadClients()
+    try {
+      await clientService.hardDelete(id)
+      addToast('Cliente eliminado permanentemente', 'success')
+      loadClients()
+    } catch {
+      addToast('Error al eliminar el cliente', 'error')
+    }
   }
 
   const updateClientContracts = (clientId: number, contracts: Contract[]) => {

@@ -47,11 +47,11 @@ async function refreshAccessToken(): Promise<string | null> {
   return data.access_token
 }
 
-async function request<T>(
+async function requestFull<T>(
   path: string,
   options: RequestInit = {},
   retry = true,
-): Promise<T> {
+): Promise<{ data: T; headers: Headers }> {
   const { accessToken } = getStoredTokens()
 
   const headers: Record<string, string> = {
@@ -68,7 +68,7 @@ async function request<T>(
   if (response.status === 401 && retry) {
     const newToken = await refreshAccessToken()
     if (newToken) {
-      return request<T>(path, options, false)
+      return requestFull<T>(path, options, false)
     }
     // Token refresh failed — redirect to login
     clearTokens()
@@ -76,7 +76,7 @@ async function request<T>(
     throw new ApiError(401, 'Session expired')
   }
 
-  if (response.status === 204) return undefined as T
+  if (response.status === 204) return { data: undefined as T, headers: response.headers }
 
   const data = await response.json()
 
@@ -97,11 +97,20 @@ async function request<T>(
     throw new ApiError(response.status, errorMessage)
   }
 
-  return data as T
+  return { data: data as T, headers: response.headers }
+}
+
+function request<T>(path: string, options: RequestInit = {}, retry = true): Promise<T> {
+  return requestFull<T>(path, options, retry).then(r => r.data)
 }
 
 export const api = {
   get: <T>(path: string) => request<T>(path),
+  getPageable: <T>(path: string) =>
+    requestFull<T>(path).then(({ data, headers }) => ({
+      data,
+      total: parseInt(headers.get('X-Total-Count') ?? '0', 10),
+    })),
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
   put: <T>(path: string, body: unknown) =>

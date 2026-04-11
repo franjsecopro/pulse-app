@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -19,16 +19,22 @@ def _build_response(payment: object) -> PaymentResponse:
 
 @router.get("", response_model=list[PaymentResponse])
 async def list_payments(
+    response: Response,
     client_id: Optional[int] = Query(None),
     month: Optional[int] = Query(None, ge=1, le=12),
     year: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    payments = await PaymentRepository(db).get_all(
-        current_user.id, client_id=client_id, month=month, year=year, status=status
+    repo = PaymentRepository(db)
+    total = await repo.count_all(current_user.id, client_id=client_id, month=month, year=year, status=status)
+    payments = await repo.get_all(
+        current_user.id, client_id=client_id, month=month, year=year, status=status, limit=limit, offset=offset
     )
+    response.headers["X-Total-Count"] = str(total)
     return [_build_response(p) for p in payments]
 
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { dashboardService } from '../services/dashboard.service'
 import { paymentService } from '../services/payment.service'
-import type { DashboardSummary, Alert, Payment } from '../types'
+import type { DashboardSummary, Alert, Payment, UpcomingClasses } from '../types'
 
 const MONTH_NAMES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -27,17 +27,24 @@ export function Dashboard() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [recentPayments, setRecentPayments] = useState<Payment[]>([])
+  const [upcoming, setUpcoming] = useState<UpcomingClasses | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    const now = new Date()
+    const month = now.getMonth() + 1
+    const year = now.getFullYear()
+
     Promise.all([
-      dashboardService.getSummary(),
-      dashboardService.getAlerts(),
-      paymentService.getAll(),
-    ]).then(([s, a, p]) => {
+      dashboardService.getSummary(month, year),
+      dashboardService.getAlerts(month, year),
+      paymentService.getAll({ limit: 5 }),
+      dashboardService.getUpcoming(),
+    ]).then(([s, a, p, u]) => {
       setSummary(s)
       setAlerts(a)
-      setRecentPayments(p.slice(0, 5))
+      setRecentPayments(p.data)
+      setUpcoming(u)
     }).finally(() => setIsLoading(false))
   }, [])
 
@@ -67,6 +74,51 @@ export function Dashboard() {
         <StatCard label="Pendiente" value={`€${summary?.total_pending.toFixed(2) ?? '0.00'}`} icon="schedule" iconColor="text-amber-600" />
         <StatCard label="Clientes activos" value={String(summary?.active_clients ?? 0)} icon="groups" iconColor="text-slate-500" />
       </div>
+
+      {/* Upcoming Classes */}
+      {upcoming && (upcoming.today.length > 0 || upcoming.tomorrow.length > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {(['today', 'tomorrow'] as const).map((day) => {
+            const classes = upcoming[day]
+            const label = day === 'today' ? 'Hoy' : 'Mañana'
+            return (
+              <div key={day} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-900 text-sm">{label}</h3>
+                  <span className="text-xs font-semibold text-slate-400">{classes.length} clase{classes.length !== 1 ? 's' : ''}</span>
+                </div>
+                {classes.length === 0 ? (
+                  <div className="px-5 py-6 text-center text-slate-400 text-sm">Sin clases</div>
+                ) : (
+                  <ul className="divide-y divide-slate-100">
+                    {classes.map((c) => (
+                      <li key={c.id} className="px-5 py-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                            {(c.client_name ?? '?').slice(0, 2).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 truncate">{c.client_name ?? 'Sin cliente'}</p>
+                            {c.contract_description && (
+                              <p className="text-xs text-slate-400 truncate">{c.contract_description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-bold text-slate-900">
+                            {c.class_time ? c.class_time.slice(0, 5) : '—'}
+                          </p>
+                          <p className="text-xs text-slate-400">{c.duration_hours}h · €{c.total_amount.toFixed(2)}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Debt Alerts */}
       {debtAlerts.length > 0 && (

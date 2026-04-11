@@ -20,6 +20,8 @@ class ContractCreateRequest(BaseModel):
     schedule_days: Optional[dict[str, DaySchedule]] = None
     calendar_description: Optional[str] = None
     calendar_reminders: Optional[list[dict]] = None
+    phone: Optional[str] = None
+    notify: bool = False
 
 
 class ContractUpdateRequest(BaseModel):
@@ -32,6 +34,8 @@ class ContractUpdateRequest(BaseModel):
     schedule_days: Optional[dict[str, DaySchedule]] = None
     calendar_description: Optional[str] = None
     calendar_reminders: Optional[list[dict]] = None
+    phone: Optional[str] = None
+    notify: Optional[bool] = None
 
 
 class ContractResponse(BaseModel):
@@ -46,6 +50,8 @@ class ContractResponse(BaseModel):
     schedule_days: Optional[dict[str, DaySchedule]]
     calendar_description: Optional[str]
     calendar_reminders: Optional[list[dict]]
+    phone: Optional[str]
+    notify: bool
     created_at: datetime
 
     model_config = {"from_attributes": True}

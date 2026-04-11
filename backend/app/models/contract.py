@@ -23,6 +23,10 @@ class Contract(Base):
     calendar_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     # Recordatorios personalizados: [{"method": "email", "minutes": 1440}, ...]
     calendar_reminders: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    # Teléfono del alumno (puede diferir del pagador/client)
+    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    # Habilita notificaciones/recordatorios para este contrato
+    notify: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

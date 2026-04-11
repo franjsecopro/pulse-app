@@ -12,6 +12,38 @@ class PaymentRepository:
     def __init__(self, db: AsyncSession):
         self._db = db
 
+    def _base_filter(
+        self,
+        user_id: int,
+        client_id: Optional[int] = None,
+        month: Optional[int] = None,
+        year: Optional[int] = None,
+        status: Optional[str] = None,
+    ):
+        q = select(Payment).where(Payment.user_id == user_id)
+        if client_id:
+            q = q.where(Payment.client_id == client_id)
+        if status:
+            q = q.where(Payment.status == status)
+        if month and year:
+            q = q.where(
+                extract("month", Payment.payment_date) == month,
+                extract("year", Payment.payment_date) == year,
+            )
+        return q
+
+    async def count_all(
+        self,
+        user_id: int,
+        client_id: Optional[int] = None,
+        month: Optional[int] = None,
+        year: Optional[int] = None,
+        status: Optional[str] = None,
+    ) -> int:
+        base = self._base_filter(user_id, client_id=client_id, month=month, year=year, status=status)
+        result = await self._db.execute(select(func.count()).select_from(base.subquery()))
+        return result.scalar_one()
+
     async def get_all(
         self,
         user_id: int,
@@ -19,22 +51,16 @@ class PaymentRepository:
         month: Optional[int] = None,
         year: Optional[int] = None,
         status: Optional[str] = None,
+        limit: int = 1000,
+        offset: int = 0,
     ) -> list[Payment]:
         query = (
-            select(Payment)
+            self._base_filter(user_id, client_id=client_id, month=month, year=year, status=status)
             .options(joinedload(Payment.client))
-            .where(Payment.user_id == user_id)
+            .order_by(Payment.payment_date.desc())
+            .limit(limit)
+            .offset(offset)
         )
-        if client_id:
-            query = query.where(Payment.client_id == client_id)
-        if status:
-            query = query.where(Payment.status == status)
-        if month and year:
-            query = query.where(
-                extract("month", Payment.payment_date) == month,
-                extract("year", Payment.payment_date) == year,
-            )
-        query = query.order_by(Payment.payment_date.desc())
         result = await self._db.execute(query)
         return list(result.scalars().all())
 

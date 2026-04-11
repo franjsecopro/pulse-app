@@ -17,6 +17,7 @@ def _class(
     *,
     user_id: int = USER_A,
     client_id: int = 10,
+    contract_id: int = 1,
     class_date: str = "2026-04-10",
     duration_hours: float = 1.0,
     hourly_rate: float = 20.0,
@@ -25,6 +26,7 @@ def _class(
     return Class(
         user_id=user_id,
         client_id=client_id,
+        contract_id=contract_id,
         class_date=date.fromisoformat(class_date),
         duration_hours=duration_hours,
         hourly_rate=hourly_rate,
@@ -173,6 +175,7 @@ class TestCreate:
         repo = ClassRepository(db)
         data = ClassCreateRequest(
             client_id=10,
+            contract_id=1,
             class_date=date(2026, 4, 10),
             duration_hours=1.5,
             hourly_rate=25.0,

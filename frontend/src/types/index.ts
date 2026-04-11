@@ -36,6 +36,8 @@ export interface Contract {
   schedule_days: Record<string, DaySchedule> | null
   calendar_description: string | null
   calendar_reminders: Array<{ method: 'email' | 'popup'; minutes: number }> | null
+  phone: string | null
+  notify: boolean
   created_at: string
 }
 
@@ -160,6 +162,22 @@ export interface AppNotification {
 export interface NotificationSettings {
   default_channel: NotificationChannel
   message_template: string
+}
+
+export interface UpcomingClass {
+  id: number
+  client_name: string | null
+  contract_description: string | null
+  class_date: string
+  class_time: string | null
+  duration_hours: number
+  total_amount: number
+  status: ClassStatus
+}
+
+export interface UpcomingClasses {
+  today: UpcomingClass[]
+  tomorrow: UpcomingClass[]
 }
 
 export interface Alert {

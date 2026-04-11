@@ -5,15 +5,22 @@ import type { Alert } from '../types'
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
+const now = new Date()
+const CURRENT_YEAR = now.getFullYear()
+const YEARS = [CURRENT_YEAR - 1, CURRENT_YEAR]
+
 export function Alerts() {
+  const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1)
+  const [filterYear, setFilterYear] = useState(CURRENT_YEAR)
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    dashboardService.getAlerts()
+    setIsLoading(true)
+    dashboardService.getAlerts(filterMonth, filterYear)
       .then(setAlerts)
       .finally(() => setIsLoading(false))
-  }, [])
+  }, [filterMonth, filterYear])
 
   const debtAlerts = alerts.filter(a => a.type === 'debt')
   const creditAlerts = alerts.filter(a => a.type === 'credit')
@@ -21,11 +28,29 @@ export function Alerts() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-slate-900">Centro de Alertas</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Discrepancias entre clases impartidas y pagos recibidos.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900">Centro de Alertas</h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Discrepancias entre clases impartidas y pagos recibidos.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(parseInt(e.target.value))}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+          >
+            {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+          </select>
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(parseInt(e.target.value))}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+          >
+            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
       </div>
 
       {isLoading ? (

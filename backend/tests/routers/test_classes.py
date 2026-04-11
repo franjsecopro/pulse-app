@@ -20,12 +20,14 @@ from tests.conftest import FAKE_USER
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
-CLIENT_ID = 42  # arbitrary — FK constraints are off in SQLite
+CLIENT_ID   = 42  # arbitrary — FK constraints are off in SQLite
+CONTRACT_ID =  1  # arbitrary — FK constraints are off in SQLite
 
 
 def _class(
     *,
     client_id: int = CLIENT_ID,
+    contract_id: int = CONTRACT_ID,
     class_date: str = "2026-04-10",
     duration_hours: float = 1.0,
     hourly_rate: float = 20.0,
@@ -33,6 +35,7 @@ def _class(
     return Class(
         user_id=FAKE_USER.id,
         client_id=client_id,
+        contract_id=contract_id,
         class_date=date.fromisoformat(class_date),
         duration_hours=duration_hours,
         hourly_rate=hourly_rate,
@@ -108,6 +111,7 @@ class TestCreateClass:
     async def test_creates_class_and_returns_201(self, app_client: AsyncClient):
         response = await app_client.post("/api/classes", json={
             "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
             "class_date": "2026-04-10",
             "duration_hours": 1.5,
             "hourly_rate": 30.0,
@@ -121,6 +125,7 @@ class TestCreateClass:
     async def test_total_amount_is_computed_correctly(self, app_client: AsyncClient):
         response = await app_client.post("/api/classes", json={
             "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
             "class_date": "2026-04-10",
             "duration_hours": 2.0,
             "hourly_rate": 25.0,
@@ -132,6 +137,7 @@ class TestCreateClass:
     async def test_created_class_appears_in_list(self, app_client: AsyncClient):
         await app_client.post("/api/classes", json={
             "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
             "class_date": "2026-04-10",
             "duration_hours": 1.0,
             "hourly_rate": 20.0,
@@ -151,6 +157,7 @@ class TestCreateClass:
     async def test_default_status_is_normal(self, app_client: AsyncClient):
         response = await app_client.post("/api/classes", json={
             "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
             "class_date": "2026-04-10",
             "duration_hours": 1.0,
             "hourly_rate": 20.0,

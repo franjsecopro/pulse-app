@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, date, timedelta, timezone
 from sqlalchemy import select, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,9 +14,10 @@ class DashboardService:
         self._class_repo = ClassRepository(db)
         self._payment_repo = PaymentRepository(db)
 
-    async def get_summary(self, user_id: int) -> dict:
+    async def get_summary(self, user_id: int, month: int | None = None, year: int | None = None) -> dict:
         now = datetime.now(timezone.utc)
-        year, month = now.year, now.month
+        year = year or now.year
+        month = month or now.month
 
         class_totals = await self._class_repo.get_monthly_totals(user_id, year, month)
         payment_totals = await self._payment_repo.get_monthly_totals(user_id, year, month)
@@ -40,13 +41,14 @@ class DashboardService:
             "year": year,
         }
 
-    async def get_alerts(self, user_id: int) -> list[dict]:
+    async def get_alerts(self, user_id: int, month: int | None = None, year: int | None = None) -> list[dict]:
         """
-        Compares expected vs paid for the current month per client.
+        Compares expected vs paid for the given month per client.
         Returns alert objects for discrepancies.
         """
         now = datetime.now(timezone.utc)
-        year, month = now.year, now.month
+        year = year or now.year
+        month = month or now.month
 
         class_totals = await self._class_repo.get_monthly_totals(user_id, year, month)
         payment_totals = await self._payment_repo.get_monthly_totals(user_id, year, month)
@@ -90,6 +92,28 @@ class DashboardService:
 
         return sorted(alerts, key=lambda a: a["diff"])
 
+
+    async def get_upcoming(self, user_id: int) -> dict:
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        classes = await self._class_repo.get_by_dates(user_id, [today, tomorrow])
+
+        def _build(c) -> dict:
+            return {
+                "id": c.id,
+                "client_name": c.client.name if c.client else None,
+                "contract_description": c.contract.description if c.contract else None,
+                "class_date": c.class_date.isoformat(),
+                "class_time": c.class_time.isoformat() if c.class_time else None,
+                "duration_hours": c.duration_hours,
+                "total_amount": round(c.duration_hours * c.hourly_rate, 2),
+                "status": c.status,
+            }
+
+        return {
+            "today": [_build(c) for c in classes if c.class_date == today],
+            "tomorrow": [_build(c) for c in classes if c.class_date == tomorrow],
+        }
 
     async def _check_pdf_missing(self, user_id: int, now: datetime) -> dict | None:
         """Returns a pdf_missing alert if it's past day 5 of the month and no PDF was imported

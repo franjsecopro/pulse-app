@@ -27,6 +27,7 @@ CLIENT_ID = 42
 def _class(
     *,
     client_id: int = CLIENT_ID,
+    contract_id: int = 1,
     class_date: date | None = None,
     duration_hours: float = 2.0,
     hourly_rate: float = 20.0,
@@ -35,6 +36,7 @@ def _class(
     return Class(
         user_id=FAKE_USER.id,
         client_id=client_id,
+        contract_id=contract_id,
         class_date=class_date or date.today(),
         duration_hours=duration_hours,
         hourly_rate=hourly_rate,

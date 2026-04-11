@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Modal } from '../components/ui/Modal'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { PaymentForm } from '../components/payments/PaymentForm'
 import { PdfImportModal } from '../components/payments/PdfImportModal'
 import { PdfHistoryView } from '../components/payments/PdfHistoryView'
 import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
 import { MONTHS } from '../utils/constants'
 import { usePayments } from '../hooks/usePayments'
+import { Pagination } from '../components/ui/Pagination'
 import type { Payment } from '../types'
 
 export function Payments() {
@@ -22,7 +24,9 @@ export function Payments() {
 
   const {
     payments, clients, pdfHistory, isLoading, isPdfHistoryLoading, totalAmount,
-    loadPdfHistory, createPayment, updatePayment, deletePayment, handleImported,
+    pendingDeleteId, page, pageCount, totalCount, goToPage,
+    loadPdfHistory, createPayment, updatePayment,
+    requestDelete, confirmDelete, cancelDelete, handleImported,
   } = usePayments({ filterMonth, filterYear, filterClient, filterStatus })
 
   useEffect(() => {
@@ -195,7 +199,7 @@ export function Payments() {
                                 <span className="material-symbols-outlined text-base">edit</span>
                               </button>
                               <button
-                                onClick={() => deletePayment(p.id)}
+                                onClick={() => requestDelete(p.id)}
                                 className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               >
                                 <span className="material-symbols-outlined text-base">delete</span>
@@ -208,6 +212,7 @@ export function Payments() {
                   </tbody>
                 </table>
               </div>
+              <Pagination page={page} pageCount={pageCount} totalCount={totalCount} onPage={goToPage} />
             </div>
           )}
         </>
@@ -227,6 +232,16 @@ export function Payments() {
           />
         )}
       </Modal>
+
+      <ConfirmDialog
+        isOpen={pendingDeleteId !== null}
+        title="Eliminar pago"
+        message="¿Estás seguro de que querés eliminar este pago? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        isDangerous
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
 
       <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Importar extracto bancario" size="lg">
         <PdfImportModal

@@ -121,6 +121,19 @@ export function ContractDetail({
               </p>
             </div>
           )}
+          {contract.phone && (
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Teléfono alumno</p>
+              <p className="text-sm text-slate-700">{contract.phone}</p>
+            </div>
+          )}
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Notificaciones</p>
+            {contract.notify
+              ? <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">Activadas</span>
+              : <span className="text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Desactivadas</span>
+            }
+          </div>
           {contract.notes && (
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Notas</p>

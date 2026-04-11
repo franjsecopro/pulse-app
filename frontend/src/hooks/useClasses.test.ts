@@ -12,6 +12,10 @@ import { useClasses } from './useClasses'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
 
+vi.mock('../context/ToastContext', () => ({
+  useToast: () => ({ addToast: vi.fn() }),
+}))
+
 vi.mock('../services/class.service', () => ({
   classService: {
     getAll:    vi.fn(),
@@ -35,7 +39,7 @@ const defaultFilters = { filterMonth: 4, filterYear: 2026, filterClient: '' as c
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockGetAllClasses.mockResolvedValue([])
+  mockGetAllClasses.mockResolvedValue({ data: [], total: 0 })
   mockGetAllClients.mockResolvedValue([])
 })
 
@@ -76,10 +80,13 @@ describe('requestDelete / cancelDelete', () => {
 
 describe('totalRevenue', () => {
   it('sums total_amount across all loaded classes', async () => {
-    mockGetAllClasses.mockResolvedValue([
-      { id: 1, total_amount: 40.0 } as any,
-      { id: 2, total_amount: 20.0 } as any,
-    ])
+    mockGetAllClasses.mockResolvedValue({
+      data: [
+        { id: 1, total_amount: 40.0 } as any,
+        { id: 2, total_amount: 20.0 } as any,
+      ],
+      total: 2,
+    })
 
     const { result } = renderHook(() => useClasses(defaultFilters))
 
@@ -89,10 +96,13 @@ describe('totalRevenue', () => {
   })
 
   it('treats null total_amount as 0', async () => {
-    mockGetAllClasses.mockResolvedValue([
-      { id: 1, total_amount: null  } as any,
-      { id: 2, total_amount: 30.0 } as any,
-    ])
+    mockGetAllClasses.mockResolvedValue({
+      data: [
+        { id: 1, total_amount: null  } as any,
+        { id: 2, total_amount: 30.0 } as any,
+      ],
+      total: 2,
+    })
 
     const { result } = renderHook(() => useClasses(defaultFilters))
 
@@ -118,11 +128,9 @@ describe('filter forwarding to classService.getAll', () => {
     renderHook(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
 
     await waitFor(() =>
-      expect(mockGetAllClasses).toHaveBeenCalledWith({
-        month: 5,
-        year: 2026,
-        client_id: 10,
-      })
+      expect(mockGetAllClasses).toHaveBeenCalledWith(
+        expect.objectContaining({ month: 5, year: 2026, client_id: 10 })
+      )
     )
   })
 

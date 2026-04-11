@@ -17,6 +17,8 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
     hourly_rate: initial?.hourly_rate ?? 0,
     is_active: initial?.is_active ?? true,
     notes: initial?.notes ?? '',
+    phone: initial?.phone ?? '',
+    notify: initial?.notify ?? false,
     calendar_description: initial?.calendar_description ?? '',
   })
 
@@ -87,6 +89,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       await onSave({
         ...form,
         end_date: form.end_date || null,
+        phone: form.phone || null,
         schedule_days: Object.keys(scheduleDays).length > 0 ? scheduleDays : null,
         calendar_description: form.calendar_description || null,
         calendar_reminders: buildReminders(),
@@ -174,6 +177,19 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
         </div>
       </div>
 
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-1">
+          Teléfono del alumno
+        </label>
+        <input
+          type="tel"
+          value={form.phone}
+          onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+          placeholder="Ej: +34 600 000 000"
+          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+        />
+      </div>
+
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-slate-700">
           Horario semanal
@@ -259,9 +275,20 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       </div>
 
       <div className="space-y-3 pt-1 border-t border-slate-100">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-base text-blue-400">calendar_month</span>
-          <p className="text-sm font-semibold text-slate-700">Google Calendar</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-base text-blue-400">calendar_month</span>
+            <p className="text-sm font-semibold text-slate-700">Google Calendar</p>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.notify}
+              onChange={(e) => setForm((f) => ({ ...f, notify: e.target.checked }))}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm text-slate-600">Activar notificaciones</span>
+          </label>
         </div>
         <div>
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">

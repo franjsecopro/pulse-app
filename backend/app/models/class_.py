@@ -12,8 +12,8 @@ class Class(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=False)
-    contract_id: Mapped[Optional[int]] = mapped_column(
-        Integer, ForeignKey("contracts.id"), nullable=True
+    contract_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("contracts.id"), nullable=False
     )
     class_date: Mapped[date] = mapped_column(Date, nullable=False)
     class_time: Mapped[Optional[time]] = mapped_column(Time, nullable=True)

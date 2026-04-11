@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { paymentService } from '../services/payment.service'
 import { clientService } from '../services/client.service'
 import { accountingService } from '../services/accounting.service'
+import { useToast } from '../context/ToastContext'
 import type { Payment, Client, PDFImportRecord } from '../types'
+
+const PAGE_LIMIT = 100
 
 interface UsePaymentsFilters {
   filterMonth: number | ''
@@ -12,21 +15,30 @@ interface UsePaymentsFilters {
 }
 
 export function usePayments({ filterMonth, filterYear, filterClient, filterStatus }: UsePaymentsFilters) {
+  const { addToast } = useToast()
+
   const [payments, setPayments] = useState<Payment[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [pdfHistory, setPdfHistory] = useState<PDFImportRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isPdfHistoryLoading, setIsPdfHistoryLoading] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
 
-  const loadPayments = useCallback(async () => {
+  const loadPayments = useCallback(async (targetPage = 1) => {
     setIsLoading(true)
-    const data = await paymentService.getAll({
+    const { data, total } = await paymentService.getAll({
       month: filterMonth || undefined,
       year: filterMonth ? filterYear : undefined,
       client_id: filterClient || undefined,
       status: filterStatus || undefined,
+      limit: PAGE_LIMIT,
+      offset: (targetPage - 1) * PAGE_LIMIT,
     })
     setPayments(data)
+    setTotalCount(total)
+    setPage(targetPage)
     setIsLoading(false)
   }, [filterMonth, filterYear, filterClient, filterStatus])
 
@@ -35,8 +47,10 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   }, [])
 
   useEffect(() => {
-    loadPayments()
+    loadPayments(1)
   }, [loadPayments])
+
+  const goToPage = (n: number) => loadPayments(n)
 
   const loadPdfHistory = useCallback(() => {
     setIsPdfHistoryLoading(true)
@@ -46,27 +60,49 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   }, [])
 
   const createPayment = async (data: Parameters<typeof paymentService.create>[0]) => {
-    await paymentService.create(data)
-    loadPayments()
+    try {
+      await paymentService.create(data)
+      addToast('Pago registrado correctamente', 'success')
+      loadPayments(page)
+    } catch {
+      addToast('Error al registrar el pago', 'error')
+    }
   }
 
   const updatePayment = async (id: number, data: Partial<Payment>) => {
-    await paymentService.update(id, data)
-    loadPayments()
+    try {
+      await paymentService.update(id, data)
+      addToast('Pago actualizado', 'success')
+      loadPayments(page)
+    } catch {
+      addToast('Error al actualizar el pago', 'error')
+    }
   }
 
-  const deletePayment = async (id: number) => {
-    if (!confirm('¿Eliminar este pago?')) return
-    await paymentService.delete(id)
-    loadPayments()
+  const requestDelete = (id: number) => setPendingDeleteId(id)
+  const cancelDelete = () => setPendingDeleteId(null)
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return
+    try {
+      await paymentService.delete(pendingDeleteId)
+      addToast('Pago eliminado', 'success')
+    } catch {
+      addToast('Error al eliminar el pago', 'error')
+    } finally {
+      setPendingDeleteId(null)
+      loadPayments(page)
+    }
   }
 
   const handleImported = () => {
-    loadPayments()
+    addToast('Extracto importado correctamente', 'success')
+    loadPayments(1)
     setPdfHistory([])
   }
 
   const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0)
+  const pageCount = Math.ceil(totalCount / PAGE_LIMIT)
 
   return {
     payments,
@@ -75,11 +111,18 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
     isLoading,
     isPdfHistoryLoading,
     totalAmount,
+    pendingDeleteId,
+    page,
+    pageCount,
+    totalCount,
     loadPayments,
+    goToPage,
     loadPdfHistory,
     createPayment,
     updatePayment,
-    deletePayment,
+    requestDelete,
+    confirmDelete,
+    cancelDelete,
     handleImported,
   }
 }

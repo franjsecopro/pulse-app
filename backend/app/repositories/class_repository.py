@@ -13,26 +13,50 @@ class ClassRepository:
     def __init__(self, db: AsyncSession):
         self._db = db
 
+    def _base_filter(
+        self,
+        user_id: int,
+        client_id: Optional[int] = None,
+        month: Optional[int] = None,
+        year: Optional[int] = None,
+    ):
+        q = select(Class).where(Class.user_id == user_id)
+        if client_id:
+            q = q.where(Class.client_id == client_id)
+        if month and year:
+            q = q.where(
+                extract("month", Class.class_date) == month,
+                extract("year", Class.class_date) == year,
+            )
+        return q
+
+    async def count_all(
+        self,
+        user_id: int,
+        client_id: Optional[int] = None,
+        month: Optional[int] = None,
+        year: Optional[int] = None,
+    ) -> int:
+        base = self._base_filter(user_id, client_id=client_id, month=month, year=year)
+        result = await self._db.execute(select(func.count()).select_from(base.subquery()))
+        return result.scalar_one()
+
     async def get_all(
         self,
         user_id: int,
         client_id: Optional[int] = None,
         month: Optional[int] = None,
         year: Optional[int] = None,
+        limit: int = 1000,
+        offset: int = 0,
     ) -> list[Class]:
         query = (
-            select(Class)
+            self._base_filter(user_id, client_id=client_id, month=month, year=year)
             .options(joinedload(Class.client), joinedload(Class.contract))
-            .where(Class.user_id == user_id)
+            .order_by(Class.class_date.desc(), Class.class_time.desc())
+            .limit(limit)
+            .offset(offset)
         )
-        if client_id:
-            query = query.where(Class.client_id == client_id)
-        if month and year:
-            query = query.where(
-                extract("month", Class.class_date) == month,
-                extract("year", Class.class_date) == year,
-            )
-        query = query.order_by(Class.class_date.desc(), Class.class_time.desc())
         result = await self._db.execute(query)
         return list(result.scalars().all())
 
@@ -62,6 +86,16 @@ class ClassRepository:
     async def delete(self, class_: Class) -> None:
         await self._db.delete(class_)
         await self._db.commit()
+
+    async def get_by_dates(self, user_id: int, dates: list[date]) -> list[Class]:
+        query = (
+            select(Class)
+            .options(joinedload(Class.client), joinedload(Class.contract))
+            .where(Class.user_id == user_id, Class.class_date.in_(dates))
+            .order_by(Class.class_date.asc(), Class.class_time.asc())
+        )
+        result = await self._db.execute(query)
+        return list(result.scalars().all())
 
     async def get_monthly_totals(self, user_id: int, year: int, month: int) -> dict[int, float]:
         """Returns a mapping of client_id -> total billable amount for the given month.

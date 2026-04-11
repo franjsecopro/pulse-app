@@ -12,6 +12,10 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { useClients } from './useClients'
 import { clientService } from '../services/client.service'
 
+vi.mock('../context/ToastContext', () => ({
+  useToast: () => ({ addToast: vi.fn() }),
+}))
+
 vi.mock('../services/client.service', () => ({
   clientService: {
     getAll:     vi.fn(),
