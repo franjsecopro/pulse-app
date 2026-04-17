@@ -14,8 +14,10 @@ from app.routers import imports as imports_router
 
 logging.basicConfig(level=logging.INFO)
 
-# Required for OAuth2 flow over HTTP in local development
-os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+if settings.APP_ENV == "development":
+    # Allow OAuth2 flow over plain HTTP — only in local development
+    os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
 # Google returns full scope URLs (e.g. userinfo.email) instead of short aliases (email)
 os.environ.setdefault("OAUTHLIB_RELAX_TOKEN_SCOPE", "1")
 

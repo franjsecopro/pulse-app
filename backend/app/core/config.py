@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     DATABASE_URL: str  # Sin default — debe venir del .env
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    APP_ENV: str = "development"   # "development" | "production"
+    COOKIE_SECURE: bool = False    # True en producción (requiere HTTPS)
 
     # Google Calendar OAuth — dejar vacíos si no se usa la integración
     GOOGLE_CLIENT_ID: str = ""
