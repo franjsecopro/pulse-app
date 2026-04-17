@@ -74,7 +74,18 @@ async def delete_user(
     if user.id == admin.id:
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
 
-    # Delete in dependency order to avoid FK violations
+    # Collect client IDs first — Contract and PaymentIdentifier have no user_id column
+    client_ids_result = await db.execute(
+        select(Client.id).where(Client.user_id == user_id)
+    )
+    client_ids = [row[0] for row in client_ids_result.all()]
+
+    # Delete models that reference client_id (no user_id column)
+    if client_ids:
+        await db.execute(sql_delete(PaymentIdentifier).where(PaymentIdentifier.client_id.in_(client_ids)))
+        await db.execute(sql_delete(Contract).where(Contract.client_id.in_(client_ids)))
+
+    # Delete models with user_id directly, in dependency order
     for model in (
         Notification,
         NotificationSettings,
