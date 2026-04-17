@@ -35,16 +35,16 @@ export function Dashboard() {
     const month = now.getMonth() + 1
     const year = now.getFullYear()
 
-    Promise.all([
+    Promise.allSettled([
       dashboardService.getSummary(month, year),
       dashboardService.getAlerts(month, year),
       paymentService.getAll({ limit: 5 }),
       dashboardService.getUpcoming(),
     ]).then(([s, a, p, u]) => {
-      setSummary(s)
-      setAlerts(a)
-      setRecentPayments(p.data)
-      setUpcoming(u)
+      if (s.status === 'fulfilled') setSummary(s.value)
+      if (a.status === 'fulfilled') setAlerts(a.value)
+      if (p.status === 'fulfilled') setRecentPayments(p.value.data)
+      if (u.status === 'fulfilled') setUpcoming(u.value)
     }).finally(() => setIsLoading(false))
   }, [])
 

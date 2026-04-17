@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 
 interface ConfirmModalProps {
   isOpen: boolean
+  title?: string
   message: string
   confirmLabel?: string
   cancelLabel?: string
@@ -12,6 +13,7 @@ interface ConfirmModalProps {
 
 export function ConfirmModal({
   isOpen,
+  title = 'Confirmar eliminación',
   message,
   confirmLabel = 'Eliminar',
   cancelLabel = 'Cancelar',
@@ -40,7 +42,7 @@ export function ConfirmModal({
             <span className="material-symbols-outlined text-red-500 text-xl">delete</span>
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-sm">Confirmar eliminación</p>
+            <p className="font-bold text-slate-900 text-sm">{title}</p>
             <p className="text-slate-500 text-sm mt-1">{message}</p>
           </div>
         </div>

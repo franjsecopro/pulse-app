@@ -9,6 +9,11 @@ interface AdminUser {
   created_at: string
 }
 
+interface PendingRoleChange {
+  user: AdminUser
+  newRole: 'admin' | 'user'
+}
+
 export function Admin() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -16,6 +21,7 @@ export function Admin() {
   const [syncResult, setSyncResult] = useState<Record<number, string>>({})
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null)
   const [roleChanging, setRoleChanging] = useState<number | null>(null)
+  const [pendingRoleChange, setPendingRoleChange] = useState<PendingRoleChange | null>(null)
 
   useEffect(() => {
     api.get<AdminUser[]>('/admin/users')
@@ -41,12 +47,18 @@ export function Admin() {
 
   async function handleDeleteUser() {
     if (!deleteTarget) return
-    await api.delete(`/admin/users/${deleteTarget.id}`)
-    setUsers(prev => prev.filter(u => u.id !== deleteTarget.id))
-    setDeleteTarget(null)
+    try {
+      await api.delete(`/admin/users/${deleteTarget.id}`)
+      setUsers(prev => prev.filter(u => u.id !== deleteTarget.id))
+    } finally {
+      setDeleteTarget(null)
+    }
   }
 
-  async function handleRoleChange(user: AdminUser, newRole: 'admin' | 'user') {
+  async function confirmRoleChange() {
+    if (!pendingRoleChange) return
+    const { user, newRole } = pendingRoleChange
+    setPendingRoleChange(null)
     setRoleChanging(user.id)
     try {
       const updated = await api.put<AdminUser>(`/admin/users/${user.id}/role?role=${newRole}`, {})
@@ -86,7 +98,7 @@ export function Admin() {
                     <select
                       value={user.role}
                       disabled={roleChanging === user.id}
-                      onChange={e => handleRoleChange(user, e.target.value as 'admin' | 'user')}
+                      onChange={e => setPendingRoleChange({ user, newRole: e.target.value as 'admin' | 'user' })}
                       className="text-xs border border-slate-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     >
                       <option value="user">user</option>
@@ -135,6 +147,15 @@ export function Admin() {
         confirmLabel="Eliminar"
         onConfirm={handleDeleteUser}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmModal
+        isOpen={!!pendingRoleChange}
+        title="Confirmar cambio de rol"
+        message={`¿Cambiar el rol de ${pendingRoleChange?.user.email} a "${pendingRoleChange?.newRole}"?`}
+        confirmLabel="Confirmar"
+        onConfirm={confirmRoleChange}
+        onCancel={() => setPendingRoleChange(null)}
       />
     </div>
   )
