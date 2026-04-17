@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { api } from '../services/api'
 import { authService } from '../services/auth.service'
 import type { User } from '../types'
 
@@ -8,7 +7,7 @@ interface AuthContextValue {
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -18,16 +17,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   const loadCurrentUser = useCallback(async () => {
-    const { accessToken } = api.getStoredTokens()
-    if (!accessToken) {
-      setIsLoading(false)
-      return
-    }
     try {
+      // Cookie is sent automatically — if valid, returns the user
       const currentUser = await authService.getMe()
       setUser(currentUser)
     } catch {
-      api.clearTokens()
+      setUser(null)
     } finally {
       setIsLoading(false)
     }
@@ -38,21 +33,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadCurrentUser])
 
   const login = async (email: string, password: string) => {
-    const tokens = await authService.login(email, password)
-    api.storeTokens(tokens.access_token, tokens.refresh_token)
-    const currentUser = await authService.getMe()
+    const currentUser = await authService.login(email, password)
     setUser(currentUser)
   }
 
   const register = async (email: string, password: string) => {
-    const tokens = await authService.register(email, password)
-    api.storeTokens(tokens.access_token, tokens.refresh_token)
-    const currentUser = await authService.getMe()
+    const currentUser = await authService.register(email, password)
     setUser(currentUser)
   }
 
-  const logout = () => {
-    authService.logout()
+  const logout = async () => {
+    await authService.logout()  // server clears httpOnly cookies
     setUser(null)
   }
 
