@@ -14,6 +14,13 @@ import { Notifications } from './pages/Notifications'
 import { Admin } from './pages/Admin'
 import { Settings } from './pages/Settings'
 
+function ProtectedRoute() {
+  const { user, isLoading } = useAuth()
+  if (isLoading) return null
+  if (!user) return <Navigate to="/login" replace />
+  return <Outlet />
+}
+
 function AdminRoute() {
   const { user } = useAuth()
   return user?.role === 'admin' ? <Outlet /> : <Navigate to="/" replace />
@@ -26,18 +33,20 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/classes" element={<Classes />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/accounting" element={<Accounting />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route element={<AdminRoute />}>
-              <Route path="/admin" element={<Admin />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/clients" element={<Clients />} />
+              <Route path="/classes" element={<Classes />} />
+              <Route path="/payments" element={<Payments />} />
+              <Route path="/accounting" element={<Accounting />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<Admin />} />
+              </Route>
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

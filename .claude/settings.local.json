@@ -18,7 +18,10 @@
       "Bash(./venv/Scripts/python -c \"from app.routers.clients import router; print\\(''OK''\\)\")",
       "Bash(python -m alembic upgrade head)",
       "Bash(./venv/Scripts/alembic upgrade:*)",
-      "Bash(./venv/Scripts/alembic heads:*)"
+      "Bash(./venv/Scripts/alembic heads:*)",
+      "mcp__plugin_engram_engram__mem_search",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
