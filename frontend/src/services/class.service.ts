@@ -28,6 +28,6 @@ export const classService = {
 
   delete: (id: number) => api.delete(`/classes/${id}`),
 
-  syncGCal: (userId: number) =>
-    api.post<{ scheduled: number }>(`/admin/users/${userId}/sync-gcal`, {}),
+  syncGCal: () =>
+    api.post<{ scheduled: number }>('/classes/sync-gcal', {}),
 }

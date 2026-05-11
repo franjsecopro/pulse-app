@@ -16,10 +16,13 @@ const adminNavItem = { path: '/admin', label: 'Admin', icon: 'admin_panel_settin
 
 export function Header() {
   const { pathname } = useLocation()
-  const { user, logout } = useAuth()
+  const { user, logout, isDemoActive, realEmail } = useAuth()
   const navigate = useNavigate()
 
-  const visibleNavItems = user?.role === 'admin'
+  const isAdmin = user?.role === 'admin' || isDemoActive
+  const displayEmail = isDemoActive && realEmail ? realEmail : user?.email
+
+  const visibleNavItems = isAdmin
     ? [...navItems, adminNavItem]
     : navItems
 
@@ -28,7 +31,7 @@ export function Header() {
     navigate('/login')
   }
 
-  const initials = user?.email.slice(0, 2).toUpperCase() ?? 'US'
+  const initials = displayEmail?.slice(0, 2).toUpperCase() ?? 'US'
 
   const isActive = (path: string) =>
     pathname === path || (path !== '/' && pathname.startsWith(path))
@@ -69,7 +72,7 @@ export function Header() {
                 <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
                   {initials}
                 </div>
-                <span className="hidden lg:inline">{user?.email}</span>
+                <span className="hidden lg:inline">{displayEmail}</span>
                 <span className="material-symbols-outlined text-base text-slate-400">logout</span>
               </button>
             </div>

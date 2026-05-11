@@ -22,8 +22,8 @@ function ProtectedRoute() {
 }
 
 function AdminRoute() {
-  const { user } = useAuth()
-  return user?.role === 'admin' ? <Outlet /> : <Navigate to="/" replace />
+  const { user, isDemoActive } = useAuth()
+  return user?.role === 'admin' || isDemoActive ? <Outlet /> : <Navigate to="/" replace />
 }
 
 export default function App() {

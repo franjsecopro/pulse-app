@@ -8,8 +8,7 @@ FAKE_ADMIN.id = 1.  The self-referential guards (demotion, self-delete)
 are exercised by seeding a User with that same id and sending requests
 that target it.
 
-delete_client filters by Client.user_id == admin.id, so client fixtures
-are seeded with user_id=FAKE_ADMIN.id.
+delete_client no longer filters by user_id — admin can hard-delete any client.
 """
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,8 +34,8 @@ def _user(id: int = 2, role: str = "user") -> User:
     return User(id=id, email=f"user{id}@test.dev", role=role, password_hash="x")
 
 
-def _client(name: str = "Test Client") -> Client:
-    return Client(user_id=FAKE_ADMIN.id, name=name, is_active=True)
+def _client(name: str = "Test Client", user_id: int | None = None) -> Client:
+    return Client(user_id=user_id or FAKE_ADMIN.id, name=name, is_active=True)
 
 
 def _google_auth(user_id: int) -> UserGoogleAuth:
@@ -195,13 +194,14 @@ class TestDeleteClient:
 
         assert response.status_code == 404
 
-    async def test_returns_404_for_other_users_client(self, db: AsyncSession, admin_client: AsyncClient):
-        """Client belonging to a different user_id must not be deleted."""
+    async def test_deletes_other_users_client(self, db: AsyncSession, admin_client: AsyncClient):
+        """Admin can hard-delete clients belonging to any user."""
         [client] = await _seed(db, Client(user_id=FAKE_ADMIN.id + 999, name="Ajeno", is_active=True))
 
         response = await admin_client.delete(f"/api/admin/clients/{client.id}")
 
-        assert response.status_code == 404
+        assert response.status_code == 200
+        assert response.json()["deleted"] == client.id
 
 
 # ─── POST /api/admin/users/{id}/sync-gcal ───────────────────────────────────

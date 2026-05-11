@@ -11,6 +11,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.core.config import settings
 from app.core.database import Base
+import os
+
+# Migrations need a direct (non-pooled) connection.
+# Use DATABASE_URL_DIRECT if set, fall back to DATABASE_URL.
+_migration_url = os.environ.get("DATABASE_URL_DIRECT") or settings.DATABASE_URL
 
 # Importar todos los modelos para que Alembic los detecte en Base.metadata
 from app.models import *  # noqa: F401, F403
@@ -23,7 +28,7 @@ target_metadata = Base.metadata
 def run_migrations_offline() -> None:
     """Modo offline: genera SQL sin conectar a la BD."""
     context.configure(
-        url=settings.DATABASE_URL,
+        url=_migration_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -40,7 +45,7 @@ def do_run_migrations(connection) -> None:
 
 async def run_migrations_online() -> None:
     """Modo online: conecta a la BD y aplica migraciones."""
-    connectable = create_async_engine(settings.DATABASE_URL)
+    connectable = create_async_engine(_migration_url)
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()

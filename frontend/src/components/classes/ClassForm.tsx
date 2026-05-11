@@ -116,6 +116,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           <input
             required
             type="date"
+            lang="es-ES"
             value={form.class_date}
             onChange={(e) => setForm((f) => ({ ...f, class_date: e.target.value }))}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"

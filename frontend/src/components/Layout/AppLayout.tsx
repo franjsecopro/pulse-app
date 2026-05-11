@@ -1,9 +1,10 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Header } from './Header'
+import { DemoSidebar } from './DemoSidebar'
 
 export function AppLayout() {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, isDemoActive } = useAuth()
 
   if (isLoading) {
     return (
@@ -16,7 +17,8 @@ export function AppLayout() {
   if (!user) return <Navigate to="/login" replace />
 
   return (
-    <div className="min-h-screen bg-background-light flex flex-col">
+    <div className={`min-h-screen bg-background-light flex flex-col ${isDemoActive ? 'pl-[25px]' : ''}`}>
+      {isDemoActive && <DemoSidebar />}
       <Header />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         <Outlet />

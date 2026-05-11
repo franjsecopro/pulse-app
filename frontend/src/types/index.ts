@@ -2,6 +2,17 @@ export interface User {
   id: number
   email: string
   role: 'admin' | 'user'
+  is_demo_active?: boolean
+  real_email?: string | null
+}
+
+export interface AdminClient {
+  id: number
+  name: string
+  owner_id: number
+  owner_email: string
+  is_active: boolean
+  archived_at: string | null
 }
 
 export interface PaymentIdentifier {

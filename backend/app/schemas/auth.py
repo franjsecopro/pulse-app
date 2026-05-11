@@ -30,5 +30,7 @@ class UserResponse(BaseModel):
     id: int
     email: str
     role: str = "user"
+    is_demo_active: bool = False
+    real_email: str | None = None
 
     model_config = {"from_attributes": True}
