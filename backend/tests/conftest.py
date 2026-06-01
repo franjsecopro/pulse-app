@@ -12,7 +12,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.core.database import Base, get_db
-from app.core.dependencies import get_current_user, require_admin
+from app.core.dependencies import get_current_user, get_real_user, require_admin
 from app.models.user import User
 
 # Re-import all models so Base.metadata knows about every table
@@ -102,6 +102,7 @@ async def admin_client(db: AsyncSession) -> AsyncClient:
         return FAKE_ADMIN
 
     app.dependency_overrides[get_db] = _override_get_db
+    app.dependency_overrides[get_real_user] = _override_require_admin
     app.dependency_overrides[require_admin] = _override_require_admin
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:

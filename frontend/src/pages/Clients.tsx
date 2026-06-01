@@ -15,7 +15,7 @@ type FilterActive = 'all' | 'active' | 'archived'
 export function Clients() {
   const { user } = useAuth()
   const [search, setSearch] = useState('')
-  const [filterActive, setFilterActive] = useState<FilterActive>('all')
+  const [filterActive, setFilterActive] = useState<FilterActive>('active')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [contractsClient, setContractsClient] = useState<Client | null>(null)

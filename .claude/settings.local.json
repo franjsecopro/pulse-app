@@ -21,7 +21,9 @@
       "Bash(./venv/Scripts/alembic heads:*)",
       "mcp__plugin_engram_engram__mem_search",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__plugin_engram_engram__mem_save",
+      "mcp__plugin_engram_engram__mem_session_summary"
     ]
   }
 }

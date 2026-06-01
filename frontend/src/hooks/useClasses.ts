@@ -84,10 +84,10 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     }
   }
 
-  const syncGCal = async (userId: number) => {
+  const syncGCal = async () => {
     setIsSyncing(true)
     try {
-      const result = await classService.syncGCal(userId)
+      const result = await classService.syncGCal()
       addToast(`${result.scheduled} clases encoladas para sincronizar`, 'success')
     } catch {
       addToast('Error al sincronizar con Google Calendar', 'error')

@@ -5,9 +5,12 @@ import type { User } from '../types'
 interface AuthContextValue {
   user: User | null
   isLoading: boolean
+  isDemoActive: boolean
+  realEmail: string | null
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  reloadUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -53,8 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const isDemoActive = user?.is_demo_active ?? false
+  const realEmail = user?.real_email ?? null
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isDemoActive, realEmail, login, register, logout, reloadUser: loadCurrentUser }}>
       {children}
     </AuthContext.Provider>
   )

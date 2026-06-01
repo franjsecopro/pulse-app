@@ -10,6 +10,9 @@ from app.models.user import User
 from app.schemas.auth import UserRegisterRequest, UserLoginRequest, UserResponse
 from app.services.auth_service import AuthService
 
+def _token_from_request(request: Request) -> str | None:
+    return request.cookies.get("access_token")
+
 limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -91,5 +94,13 @@ async def logout(response: Response):
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_me(current_user: User = Depends(get_current_user)):
-    return current_user
+async def get_me(request: Request, current_user: User = Depends(get_current_user)):
+    token = _token_from_request(request)
+    is_demo_active, real_email = AuthService.decode_demo_claims(token) if token else (False, None)
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        role=current_user.role,
+        is_demo_active=is_demo_active,
+        real_email=real_email,
+    )

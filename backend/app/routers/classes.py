@@ -1,11 +1,15 @@
+from datetime import date
 from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, get_real_user
+from app.models.class_ import Class
 from app.models.user import User
 from app.repositories.class_repository import ClassRepository
+from app.repositories.google_auth_repository import GoogleAuthRepository
 from app.schemas.class_ import ClassCreateRequest, ClassUpdateRequest, ClassResponse
 from app.services import class_calendar_service
 
@@ -100,6 +104,43 @@ async def delete_class(
     await repo.delete(class_)
     if google_event_id:
         background_tasks.add_task(class_calendar_service.sync_delete, google_event_id, current_user.id)
+
+
+@router.post("/sync-gcal")
+async def sync_gcal_all(
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_real_user),
+):
+    """Enqueue a Google Calendar sync for all future classes of the current user.
+
+    Uses get_real_user so that in demo mode the admin's own classes (not the
+    demo user's) are synced, and the admin's GCal credentials are used.
+    Returns {scheduled: N} before tasks complete — failures are logged server-side.
+    """
+    google_auth = await GoogleAuthRepository(db).get_by_user_id(current_user.id)
+    if not google_auth:
+        raise HTTPException(status_code=400, detail="No Google Calendar connected")
+
+    result = await db.execute(
+        select(Class).where(
+            Class.user_id == current_user.id,
+            Class.class_date >= date.today(),
+        )
+    )
+    classes = result.scalars().all()
+
+    for cls in classes:
+        if cls.google_calendar_id:
+            background_tasks.add_task(
+                class_calendar_service.sync_update, cls.id, current_user.id, cls.google_calendar_id
+            )
+        else:
+            background_tasks.add_task(
+                class_calendar_service.sync_create, cls.id, current_user.id
+            )
+
+    return {"scheduled": len(classes)}
 
 
 @router.post("/{class_id}/sync-calendar", status_code=202)

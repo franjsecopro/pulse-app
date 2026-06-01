@@ -132,6 +132,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           <input
             required
             type="date"
+            lang="es-ES"
             value={form.start_date}
             max={form.end_date || undefined}
             onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
@@ -144,6 +145,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           </label>
           <input
             type="date"
+            lang="es-ES"
             value={form.end_date}
             min={form.start_date || undefined}
             onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}

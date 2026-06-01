@@ -96,7 +96,7 @@ export function Classes() {
             </button>
           </div>
           <button
-            onClick={() => user && syncGCal(user.id)}
+            onClick={() => syncGCal()}
             disabled={isSyncing}
             title="Sincronizar clases futuras con Google Calendar"
             className="flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
@@ -303,7 +303,7 @@ export function Classes() {
       <ConfirmModal
         isOpen={pendingDeleteId !== null}
         message="¿Seguro que quieres eliminar esta clase? Esta acción no se puede deshacer."
-        onConfirm={confirmDelete}
+        onConfirm={async () => { await confirmDelete(); setEditingClass(null) }}
         onCancel={cancelDelete}
       />
     </div>
