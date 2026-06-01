@@ -71,7 +71,7 @@ export interface ClassSession {
   total_amount: number | null
 }
 
-export interface PDFImportRecord {
+export interface StatementImportRecord {
   id: number
   filename: string
   imported_at: string

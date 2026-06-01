@@ -2,7 +2,7 @@ from datetime import datetime, date, timedelta, timezone
 from sqlalchemy import select, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.pdf_import import PDFImport
+from app.models.statement_import import StatementImport
 from app.repositories.client_repository import ClientRepository
 from app.repositories.class_repository import ClassRepository
 from app.repositories.payment_repository import PaymentRepository
@@ -140,11 +140,11 @@ class DashboardService:
             return None
 
         result = await self._class_repo._db.execute(
-            select(PDFImport)
+            select(StatementImport)
             .where(
-                PDFImport.user_id == user_id,
-                PDFImport.month == prev_month,
-                PDFImport.year == prev_year,
+                StatementImport.user_id == user_id,
+                StatementImport.month == prev_month,
+                StatementImport.year == prev_year,
             )
             .limit(1)
         )

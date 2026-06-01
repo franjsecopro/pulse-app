@@ -3,7 +3,7 @@ import { paymentService } from '../services/payment.service'
 import { clientService } from '../services/client.service'
 import { accountingService } from '../services/accounting.service'
 import { useToast } from '../context/ToastContext'
-import type { Payment, Client, PDFImportRecord } from '../types'
+import type { Payment, Client, StatementImportRecord } from '../types'
 
 const PAGE_LIMIT = 100
 
@@ -19,9 +19,9 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
 
   const [payments, setPayments] = useState<Payment[]>([])
   const [clients, setClients] = useState<Client[]>([])
-  const [pdfHistory, setPdfHistory] = useState<PDFImportRecord[]>([])
+  const [statementHistory, setStatementHistory] = useState<StatementImportRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isPdfHistoryLoading, setIsPdfHistoryLoading] = useState(false)
+  const [isStatementHistoryLoading, setIsStatementHistoryLoading] = useState(false)
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const [page, setPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
@@ -52,11 +52,11 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
 
   const goToPage = (n: number) => loadPayments(n)
 
-  const loadPdfHistory = useCallback(() => {
-    setIsPdfHistoryLoading(true)
-    accountingService.getPdfHistory()
-      .then(setPdfHistory)
-      .finally(() => setIsPdfHistoryLoading(false))
+  const loadStatementHistory = useCallback(() => {
+    setIsStatementHistoryLoading(true)
+    accountingService.getStatementHistory()
+      .then(setStatementHistory)
+      .finally(() => setIsStatementHistoryLoading(false))
   }, [])
 
   const createPayment = async (data: Parameters<typeof paymentService.create>[0]) => {
@@ -98,7 +98,7 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   const handleImported = () => {
     addToast('Extracto importado correctamente', 'success')
     loadPayments(1)
-    setPdfHistory([])
+    setStatementHistory([])
   }
 
   const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0)
@@ -107,9 +107,9 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   return {
     payments,
     clients,
-    pdfHistory,
+    statementHistory,
     isLoading,
-    isPdfHistoryLoading,
+    isStatementHistoryLoading,
     totalAmount,
     pendingDeleteId,
     page,
@@ -117,7 +117,7 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
     totalCount,
     loadPayments,
     goToPage,
-    loadPdfHistory,
+    loadStatementHistory,
     createPayment,
     updatePayment,
     requestDelete,

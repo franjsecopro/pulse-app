@@ -6,19 +6,14 @@ The statement typically has a table with columns:
 We extract only Credit rows (income) and return them as ParsedTransaction objects.
 """
 import re
-from dataclasses import dataclass
-from datetime import date
-from typing import Optional
 
 import pdfplumber
 
-
-@dataclass
-class ParsedTransaction:
-    date: str          # ISO format YYYY-MM-DD
-    concept: str       # Raw description from the bank
-    amount: float      # Always positive (credit amount)
-    raw_text: str      # Full raw line for debugging
+from app.services.statement_parser import (
+    ParsedTransaction,
+    normalize_amount as _normalize_amount,
+    parse_date as _parse_date,
+)
 
 
 def parse_hello_bank_pdf(file_bytes: bytes) -> list[ParsedTransaction]:
@@ -46,34 +41,9 @@ def parse_hello_bank_pdf(file_bytes: bytes) -> list[ParsedTransaction]:
 
 
 # ---------------------------------------------------------------------------
-# Internal helpers
+# Internal helpers — amount/date parsing is shared via statement_parser
+# (imported above as _normalize_amount / _parse_date).
 # ---------------------------------------------------------------------------
-
-_DATE_RE = re.compile(r'^\d{2}/\d{2}/\d{4}$')
-_AMOUNT_RE = re.compile(r'^[\d\s]+[,.][\d]{2}$')
-
-
-def _normalize_amount(raw: str) -> Optional[float]:
-    """Convert European-style amount string to float. Returns None if unparseable."""
-    cleaned = raw.replace(' ', '').replace('.', '').replace(',', '.')
-    try:
-        return float(cleaned)
-    except ValueError:
-        return None
-
-
-def _parse_date(raw: str) -> Optional[str]:
-    """Convert DD/MM/YYYY to YYYY-MM-DD. Returns None if unparseable."""
-    raw = raw.strip()
-    m = re.match(r'^(\d{2})/(\d{2})/(\d{4})$', raw)
-    if not m:
-        return None
-    day, month, year = m.groups()
-    try:
-        date(int(year), int(month), int(day))
-        return f'{year}-{month}-{day}'
-    except ValueError:
-        return None
 
 
 def _parse_table(table: list[list]) -> list[ParsedTransaction]:

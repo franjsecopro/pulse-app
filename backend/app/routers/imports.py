@@ -1,5 +1,3 @@
-import io
-
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -8,29 +6,30 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.client import Client
-from app.models.pdf_import import PDFImport
+from app.models.statement_import import StatementImport
 from app.models.user import User
 from app.schemas.import_ import (
     ParsedTransactionResponse,
     ConfirmImportRequest,
-    PDFImportResponse,
+    StatementImportResponse,
 )
 from app.services.import_service import confirm_import
-from app.services.pdf_parser import parse_hello_bank_pdf
+from app.services.statement_parser import parse_statement, SUPPORTED_EXTENSIONS
 from app.services.payment_matcher import match_transaction
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
 
-@router.post("/pdf", response_model=list[ParsedTransactionResponse])
-async def parse_pdf(
+@router.post("/statement", response_model=list[ParsedTransactionResponse])
+async def parse_statement_file(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Parse a Hello Bank / BNP Paribas PDF statement and return matched transactions."""
-    if not file.filename or not file.filename.lower().endswith('.pdf'):
-        raise HTTPException(status_code=400, detail="El archivo debe ser un PDF")
+    """Parse a bank statement (CSV) and return its matched income transactions."""
+    if not file.filename or not file.filename.lower().endswith(SUPPORTED_EXTENSIONS):
+        allowed = ', '.join(SUPPORTED_EXTENSIONS)
+        raise HTTPException(status_code=400, detail=f"El archivo debe ser {allowed}")
 
     content = await file.read()
     if len(content) == 0:
@@ -48,14 +47,14 @@ async def parse_pdf(
     clients = list(result.scalars().all())
 
     try:
-        transactions = parse_hello_bank_pdf(io.BytesIO(content))
+        transactions = parse_statement(file.filename, content)
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"No se pudo parsear el PDF: {str(e)}")
+        raise HTTPException(status_code=422, detail=f"No se pudo parsear el extracto: {str(e)}")
 
     if not transactions:
         raise HTTPException(
             status_code=422,
-            detail="No se encontraron transacciones en el PDF. Verifica que sea un extracto de Hello Bank.",
+            detail="No se encontraron transacciones en el extracto. Verifica que sea un extracto de Hello Bank.",
         )
 
     return [
@@ -72,25 +71,25 @@ async def parse_pdf(
     ]
 
 
-@router.post("/pdf/confirm", status_code=201)
-async def confirm_pdf_import(
+@router.post("/statement/confirm", status_code=201)
+async def confirm_statement_import(
     data: ConfirmImportRequest,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create payments from the confirmed import list and register the PDF import."""
+    """Create payments from the confirmed import list and register the import."""
     return await confirm_import(db, current_user.id, data)
 
 
-@router.get("/pdf-history", response_model=list[PDFImportResponse])
-async def get_pdf_history(
+@router.get("/history", response_model=list[StatementImportResponse])
+async def get_statement_history(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Returns the list of PDF bank statements imported by the current user."""
+    """Returns the list of bank statements imported by the current user."""
     result = await db.execute(
-        select(PDFImport)
-        .where(PDFImport.user_id == current_user.id)
-        .order_by(PDFImport.imported_at.desc())
+        select(StatementImport)
+        .where(StatementImport.user_id == current_user.id)
+        .order_by(StatementImport.imported_at.desc())
     )
     return list(result.scalars().all())

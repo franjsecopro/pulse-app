@@ -1,10 +1,10 @@
-"""Business logic for PDF bank statement imports."""
+"""Business logic for bank statement imports."""
 from datetime import date, datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.payment import Payment
-from app.models.pdf_import import PDFImport
+from app.models.statement_import import StatementImport
 from app.schemas.import_ import ConfirmImportRequest
 
 
@@ -13,7 +13,7 @@ async def confirm_import(
     user_id: int,
     data: ConfirmImportRequest,
 ) -> dict:
-    """Persist payments from a confirmed PDF import and record the import history.
+    """Persist payments from a confirmed statement import and record the history.
 
     Returns the number of payments created.
     """
@@ -33,9 +33,9 @@ async def confirm_import(
         created += 1
         total_amount += item.amount
 
-    db.add(PDFImport(
+    db.add(StatementImport(
         user_id=user_id,
-        filename=data.filename or "extracto.pdf",
+        filename=data.filename or "extracto.csv",
         imported_at=datetime.now(timezone.utc),
         month=data.month,
         year=data.year,

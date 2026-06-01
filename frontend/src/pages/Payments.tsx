@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Modal } from '../components/ui/Modal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { PaymentForm } from '../components/payments/PaymentForm'
-import { PdfImportModal } from '../components/payments/PdfImportModal'
-import { PdfHistoryView } from '../components/payments/PdfHistoryView'
+import { ImportStatementModal } from '../components/payments/ImportStatementModal'
+import { StatementHistoryView } from '../components/payments/StatementHistoryView'
 import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
 import { MONTHS } from '../utils/constants'
 import { usePayments } from '../hooks/usePayments'
@@ -13,7 +13,7 @@ import type { Payment } from '../types'
 export function Payments() {
   const now = new Date()
 
-  const [activeTab, setActiveTab] = useState<'payments' | 'pdf-history'>('payments')
+  const [activeTab, setActiveTab] = useState<'payments' | 'history'>('payments')
   const [filterMonth, setFilterMonth] = useState<number | ''>('')
   const [filterYear, setFilterYear] = useState(now.getFullYear())
   const [filterClient, setFilterClient] = useState<number | ''>('')
@@ -23,15 +23,15 @@ export function Payments() {
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
 
   const {
-    payments, clients, pdfHistory, isLoading, isPdfHistoryLoading, totalAmount,
+    payments, clients, statementHistory, isLoading, isStatementHistoryLoading, totalAmount,
     pendingDeleteId, page, pageCount, totalCount, goToPage,
-    loadPdfHistory, createPayment, updatePayment,
+    loadStatementHistory, createPayment, updatePayment,
     requestDelete, confirmDelete, cancelDelete, handleImported,
   } = usePayments({ filterMonth, filterYear, filterClient, filterStatus })
 
   useEffect(() => {
-    if (activeTab === 'pdf-history') loadPdfHistory()
-  }, [activeTab, loadPdfHistory])
+    if (activeTab === 'history') loadStatementHistory()
+  }, [activeTab, loadStatementHistory])
 
   const handleCreate = async (data: Partial<Payment>) => {
     await createPayment(data as Parameters<typeof createPayment>[0])
@@ -59,7 +59,7 @@ export function Payments() {
             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200"
           >
             <span className="material-symbols-outlined text-base">upload_file</span>
-            Importar PDF
+            Importar extracto
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -73,7 +73,7 @@ export function Payments() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-        {(['payments', 'pdf-history'] as const).map(tab => (
+        {(['payments', 'history'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -83,13 +83,13 @@ export function Payments() {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {tab === 'payments' ? 'Pagos' : 'PDFs importados'}
+            {tab === 'payments' ? 'Pagos' : 'Extractos importados'}
           </button>
         ))}
       </div>
 
-      {activeTab === 'pdf-history' && (
-        <PdfHistoryView records={pdfHistory} isLoading={isPdfHistoryLoading} />
+      {activeTab === 'history' && (
+        <StatementHistoryView records={statementHistory} isLoading={isStatementHistoryLoading} />
       )}
 
       {activeTab === 'payments' && (
@@ -244,7 +244,7 @@ export function Payments() {
       />
 
       <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Importar extracto bancario" size="lg">
-        <PdfImportModal
+        <ImportStatementModal
           clients={clients}
           onClose={() => setShowImportModal(false)}
           onImported={handleImported}

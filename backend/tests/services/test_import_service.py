@@ -1,9 +1,9 @@
-"""Tests for import_service — PDF bank statement import business logic."""
+"""Tests for import_service — bank statement import business logic."""
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.payment import Payment
-from app.models.pdf_import import PDFImport
+from app.models.statement_import import StatementImport
 from app.schemas.import_ import ConfirmImportRequest, ConfirmPaymentItem
 from app.services.import_service import confirm_import
 
@@ -65,7 +65,7 @@ class TestConfirmImport:
         assert payment.client_id is None
 
     async def test_payment_source_is_bank_import(self, db: AsyncSession):
-        """All payments created from a PDF import have source='bank_import'."""
+        """All payments created from a statement import have source='bank_import'."""
         request = make_request([
             {"date": "2024-04-01", "concept": "A", "amount": 10.0, "client_id": 1},
         ])
@@ -75,8 +75,8 @@ class TestConfirmImport:
         payment = (await db.execute(select(Payment))).scalar_one()
         assert payment.source == "bank_import"
 
-    async def test_creates_pdf_import_record(self, db: AsyncSession):
-        """One PDFImport history record is created per confirm_import call."""
+    async def test_creates_statement_import_record(self, db: AsyncSession):
+        """One StatementImport history record is created per confirm_import call."""
         request = make_request(
             [
                 {"date": "2024-04-01", "concept": "A", "amount": 100.0},
@@ -89,7 +89,7 @@ class TestConfirmImport:
 
         await confirm_import(db, user_id=1, data=request)
 
-        record = (await db.execute(select(PDFImport))).scalar_one()
+        record = (await db.execute(select(StatementImport))).scalar_one()
         assert record.filename == "abril_2024.pdf"
         assert record.month == 4
         assert record.year == 2024
@@ -97,7 +97,7 @@ class TestConfirmImport:
         assert record.total_amount == 300.0
 
     async def test_total_amount_is_rounded_to_two_decimals(self, db: AsyncSession):
-        """Floating point amounts are rounded to 2 decimal places in the PDF record."""
+        """Floating point amounts are rounded to 2 decimal places in the record."""
         request = make_request([
             {"date": "2024-04-01", "concept": "A", "amount": 10.005},
             {"date": "2024-04-02", "concept": "B", "amount": 20.004},
@@ -105,11 +105,11 @@ class TestConfirmImport:
 
         await confirm_import(db, user_id=1, data=request)
 
-        record = (await db.execute(select(PDFImport))).scalar_one()
+        record = (await db.execute(select(StatementImport))).scalar_one()
         assert record.total_amount == round(10.005 + 20.004, 2)
 
     async def test_uses_default_filename_when_none_provided(self, db: AsyncSession):
-        """filename=None in the request defaults to 'extracto.pdf'."""
+        """filename=None in the request defaults to 'extracto.csv'."""
         request = make_request(
             [{"date": "2024-04-01", "concept": "A", "amount": 50.0}],
             filename=None,
@@ -117,8 +117,8 @@ class TestConfirmImport:
 
         await confirm_import(db, user_id=1, data=request)
 
-        record = (await db.execute(select(PDFImport))).scalar_one()
-        assert record.filename == "extracto.pdf"
+        record = (await db.execute(select(StatementImport))).scalar_one()
+        assert record.filename == "extracto.csv"
 
     async def test_payment_date_is_parsed_correctly(self, db: AsyncSession):
         """ISO date strings are parsed to Python date objects."""

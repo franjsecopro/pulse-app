@@ -28,7 +28,7 @@ class ConfirmImportRequest(BaseModel):
     year: Optional[int] = None
 
 
-class PDFImportResponse(BaseModel):
+class StatementImportResponse(BaseModel):
     id: int
     filename: str
     imported_at: datetime

@@ -36,7 +36,7 @@ vi.mock('../services/client.service', () => ({
 
 vi.mock('../services/accounting.service', () => ({
   accountingService: {
-    getPdfHistory: vi.fn(),
+    getStatementHistory: vi.fn(),
   },
 }))
 

@@ -6,9 +6,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database import Base
 
 
-class PDFImport(Base):
-    """Registro de cada PDF bancario importado por el usuario."""
-    __tablename__ = "pdf_imports"
+class StatementImport(Base):
+    """Registro de cada extracto bancario importado por el usuario.
+
+    El formato del extracto (CSV hoy; Excel / PDF a futuro) es indistinto: este
+    registro guarda el historial de la importación, no el archivo original.
+    """
+    __tablename__ = "statement_imports"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)

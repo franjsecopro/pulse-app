@@ -1,5 +1,5 @@
 import { api } from './api'
-import type { AccountingSummaryEntry, PDFImportRecord } from '../types'
+import type { AccountingSummaryEntry, StatementImportRecord } from '../types'
 
 export const accountingService = {
   getMonthlySummary: (month: number, year: number) =>
@@ -10,6 +10,6 @@ export const accountingService = {
       `/accounting/client/${clientId}`
     ),
 
-  getPdfHistory: () =>
-    api.get<PDFImportRecord[]>('/imports/pdf-history'),
+  getStatementHistory: () =>
+    api.get<StatementImportRecord[]>('/imports/history'),
 }

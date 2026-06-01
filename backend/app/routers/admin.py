@@ -12,7 +12,7 @@ from app.services import class_calendar_service
 from app.models.class_ import Class
 from app.models.client import Client
 from app.models.payment import Payment
-from app.models.pdf_import import PDFImport
+from app.models.statement_import import StatementImport
 from app.models.contract import Contract
 from app.models.notification import Notification
 from app.models.notification_settings import NotificationSettings
@@ -89,7 +89,7 @@ async def delete_user(
     for model in (
         Notification,
         NotificationSettings,
-        PDFImport,
+        StatementImport,
         Payment,
         Class,
         Client,

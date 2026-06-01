@@ -14,13 +14,13 @@ interface ParsedRow {
   skip: boolean
 }
 
-interface PdfImportModalProps {
+interface ImportStatementModalProps {
   clients: Client[]
   onClose: () => void
   onImported: () => void
 }
 
-export function PdfImportModal({ clients, onClose, onImported }: PdfImportModalProps) {
+export function ImportStatementModal({ clients, onClose, onImported }: ImportStatementModalProps) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [rows, setRows] = useState<ParsedRow[]>([])
   const [isParsing, setIsParsing] = useState(false)
@@ -40,17 +40,9 @@ export function PdfImportModal({ clients, onClose, onImported }: PdfImportModalP
       const formData = new FormData()
       formData.append('file', file)
 
-      const { accessToken } = api.getStoredTokens()
-      const response = await fetch('/api/imports/pdf', {
-        method: 'POST',
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-        body: formData,
-      })
+      const data = await api.postForm<ParsedRow[]>('/imports/statement', formData)
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data?.detail ?? 'Error al parsear el PDF')
-
-      setRows((data as ParsedRow[]).map(r => ({
+      setRows(data.map(r => ({
         ...r,
         selected_client_id: r.suggested_client_id,
         skip: false,
@@ -76,7 +68,7 @@ export function PdfImportModal({ clients, onClose, onImported }: PdfImportModalP
 
     setIsConfirming(true)
     try {
-      await api.post('/imports/pdf/confirm', {
+      await api.post('/imports/statement/confirm', {
         payments: toImport.map(r => ({
           date: r.date,
           concept: r.concept,
@@ -115,11 +107,11 @@ export function PdfImportModal({ clients, onClose, onImported }: PdfImportModalP
         >
           <span className="material-symbols-outlined text-4xl text-slate-300 block mb-2">upload_file</span>
           <p className="text-slate-600 font-semibold text-sm">
-            {isParsing ? 'Procesando PDF...' : 'Haz clic para seleccionar el PDF'}
+            {isParsing ? 'Procesando extracto...' : 'Haz clic para seleccionar el CSV'}
           </p>
-          <p className="text-slate-400 text-xs mt-1">Extracto de cuenta Hello Bank / BNP Paribas</p>
+          <p className="text-slate-400 text-xs mt-1">Extracto de cuenta Hello Bank / BNP Paribas (.csv)</p>
           {fileName && <p className="text-primary text-xs mt-2 font-medium">{fileName}</p>}
-          <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFileChange} />
+          <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
         </div>
       )}
 

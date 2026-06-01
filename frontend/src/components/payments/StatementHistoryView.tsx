@@ -1,12 +1,12 @@
 import { MONTHS } from '../../utils/constants'
-import type { PDFImportRecord } from '../../types'
+import type { StatementImportRecord } from '../../types'
 
-interface PdfHistoryViewProps {
-  records: PDFImportRecord[]
+interface StatementHistoryViewProps {
+  records: StatementImportRecord[]
   isLoading: boolean
 }
 
-export function PdfHistoryView({ records, isLoading }: PdfHistoryViewProps) {
+export function StatementHistoryView({ records, isLoading }: StatementHistoryViewProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -19,7 +19,7 @@ export function PdfHistoryView({ records, isLoading }: PdfHistoryViewProps) {
     return (
       <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
         <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">upload_file</span>
-        <p className="text-slate-500 font-medium">No hay PDFs importados</p>
+        <p className="text-slate-500 font-medium">No hay extractos importados</p>
         <p className="text-slate-400 text-sm mt-1">Los extractos bancarios importados aparecerán aquí.</p>
       </div>
     )
@@ -42,7 +42,7 @@ export function PdfHistoryView({ records, isLoading }: PdfHistoryViewProps) {
             <tr key={record.id} className="hover:bg-slate-50 transition-colors">
               <td className="px-5 py-4">
                 <div className="flex items-center gap-2 text-slate-700">
-                  <span className="material-symbols-outlined text-slate-400 text-base">picture_as_pdf</span>
+                  <span className="material-symbols-outlined text-slate-400 text-base">description</span>
                   <span className="font-medium truncate max-w-[200px]" title={record.filename}>{record.filename}</span>
                 </div>
               </td>
