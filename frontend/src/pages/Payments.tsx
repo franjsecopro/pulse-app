@@ -5,7 +5,7 @@ import { PaymentForm } from '../components/payments/PaymentForm'
 import { ImportStatementModal } from '../components/payments/ImportStatementModal'
 import { StatementHistoryView } from '../components/payments/StatementHistoryView'
 import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
-import { MONTHS } from '../utils/constants'
+import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { usePayments } from '../hooks/usePayments'
 import { Pagination } from '../components/ui/Pagination'
 import type { Payment } from '../types'
@@ -44,7 +44,6 @@ export function Payments() {
     setEditingPayment(null)
   }
 
-  const years = Array.from({ length: 3 }, (_, i) => now.getFullYear() - i)
 
   return (
     <div className="space-y-6">
@@ -95,48 +94,22 @@ export function Payments() {
       {activeTab === 'payments' && (
         <>
           {/* Filters */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap items-center gap-3">
-            <select
-              value={filterMonth}
-              onChange={e => setFilterMonth(parseInt(e.target.value) || '')}
-              className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
-            >
-              <option value="">Todos los meses</option>
-              {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-            </select>
-            {filterMonth !== '' && (
-              <select
-                value={filterYear}
-                onChange={e => setFilterYear(parseInt(e.target.value))}
-                className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
-              >
-                {years.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-            )}
-            <select
-              value={filterClient}
-              onChange={e => setFilterClient(parseInt(e.target.value) || '')}
-              className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
-            >
-              <option value="">Todos los clientes</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <select
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value)}
-              className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
-            >
-              <option value="">Todos los estados</option>
-              <option value="confirmed">Confirmados</option>
-              <option value="pending">Pendientes</option>
-              <option value="unmatched">Sin identificar</option>
-            </select>
-            {payments.length > 0 && (
-              <div className="ml-auto bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary">
+          <FinanceFilters
+            clients={clients}
+            month={filterMonth}
+            year={filterYear}
+            client={filterClient}
+            onMonthChange={setFilterMonth}
+            onYearChange={setFilterYear}
+            onClientChange={setFilterClient}
+            status={filterStatus}
+            onStatusChange={setFilterStatus}
+            trailing={payments.length > 0 ? (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary">
                 Total: €{totalAmount.toFixed(2)}
               </div>
-            )}
-          </div>
+            ) : undefined}
+          />
 
           {/* Table */}
           {isLoading ? (

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { accountingService } from '../services/accounting.service'
-import type { AccountingSummaryEntry, ContractBreakdown } from '../types'
+import { clientService } from '../services/client.service'
+import { FinanceFilters } from '../components/finance/FinanceFilters'
+import type { AccountingSummaryEntry, ContractBreakdown, Client } from '../types'
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
@@ -14,8 +16,14 @@ export function Accounting() {
   const { month: currentMonth, year: currentYear } = getCurrentMonthYear()
   const [month, setMonth] = useState(currentMonth)
   const [year, setYear] = useState(currentYear)
+  const [client, setClient] = useState<number | ''>('')
+  const [clients, setClients] = useState<Client[]>([])
   const [summary, setSummary] = useState<AccountingSummaryEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    clientService.getAll().then(setClients)
+  }, [])
 
   useEffect(() => {
     setIsLoading(true)
@@ -24,13 +32,15 @@ export function Accounting() {
       .finally(() => setIsLoading(false))
   }, [month, year])
 
-  const totalExpected = summary.reduce((s, e) => s + e.expected, 0)
-  const totalPaid = summary.reduce((s, e) => s + e.paid, 0)
-  const totalBalance = summary.reduce((s, e) => s + e.balance, 0)
+  // Client filter is applied on the client side (the summary endpoint is per-month).
+  const visibleSummary = client === '' ? summary : summary.filter(e => e.client_id === client)
+  const totalExpected = visibleSummary.reduce((s, e) => s + e.expected, 0)
+  const totalPaid = visibleSummary.reduce((s, e) => s + e.paid, 0)
+  const totalBalance = visibleSummary.reduce((s, e) => s + e.balance, 0)
 
   function exportCSV() {
     const header = ['Cliente', 'Esperado (€)', 'Pagado (€)', 'Crédito previo (€)', 'Balance (€)']
-    const rows = summary.map(e => [
+    const rows = visibleSummary.map(e => [
       e.client_name,
       e.expected.toFixed(2),
       e.paid.toFixed(2),
@@ -59,7 +69,7 @@ export function Accounting() {
         </div>
         <button
           onClick={exportCSV}
-          disabled={summary.length === 0}
+          disabled={visibleSummary.length === 0}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary/90 transition-colors"
         >
           <span className="material-symbols-outlined text-sm">download</span>
@@ -67,34 +77,23 @@ export function Accounting() {
         </button>
       </div>
 
-      {/* Month/Year selector */}
-      <div className="flex items-center gap-3 bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-        <span className="material-symbols-outlined text-slate-400">calendar_month</span>
-        <select
-          value={month}
-          onChange={e => setMonth(Number(e.target.value))}
-          className="text-sm border-0 bg-transparent font-medium text-slate-700 focus:ring-0 cursor-pointer"
-        >
-          {MONTHS.map((name, i) => (
-            <option key={i + 1} value={i + 1}>{name}</option>
-          ))}
-        </select>
-        <select
-          value={year}
-          onChange={e => setYear(Number(e.target.value))}
-          className="text-sm border-0 bg-transparent font-medium text-slate-700 focus:ring-0 cursor-pointer"
-        >
-          {[currentYear - 1, currentYear, currentYear + 1].map(y => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
-      </div>
+      {/* Filters */}
+      <FinanceFilters
+        clients={clients}
+        month={month}
+        year={year}
+        client={client}
+        onMonthChange={m => { if (m !== '') setMonth(m) }}
+        onYearChange={setYear}
+        onClientChange={setClient}
+        allowAllMonths={false}
+      />
 
       {isLoading ? (
         <div className="flex items-center justify-center h-32">
           <span className="material-symbols-outlined text-primary text-3xl animate-spin">sync</span>
         </div>
-      ) : summary.length === 0 ? (
+      ) : visibleSummary.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-slate-200">
           <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">account_balance</span>
           <p className="text-slate-700 font-bold text-lg">Sin datos</p>
@@ -126,7 +125,7 @@ export function Accounting() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {summary.map(entry => (
+                {visibleSummary.map(entry => (
                   <ClientRow key={entry.client_id} entry={entry} />
                 ))}
               </tbody>

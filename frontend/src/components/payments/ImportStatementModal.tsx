@@ -3,7 +3,7 @@ import { api } from '../../services/api'
 import { MONTHS } from '../../utils/constants'
 import type { Client } from '../../types'
 
-interface ParsedRow {
+interface ParsedTransaction {
   date: string
   concept: string
   amount: number
@@ -11,6 +11,17 @@ interface ParsedRow {
   suggested_client_name: string | null
   match_type: string
   confidence: number
+  already_imported: boolean
+}
+
+interface ParseResponse {
+  transactions: ParsedTransaction[]
+  file_hash: string
+  file_already_imported_at: string | null
+  duplicate_count: number
+}
+
+interface ParsedRow extends ParsedTransaction {
   selected_client_id: number | null
   skip: boolean
 }
@@ -60,6 +71,9 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
   const [isConfirming, setIsConfirming] = useState(false)
   const [parseError, setParseError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
+  const [fileHash, setFileHash] = useState<string | null>(null)
+  const [fileAlreadyImportedAt, setFileAlreadyImportedAt] = useState<string | null>(null)
+  const [duplicateCount, setDuplicateCount] = useState(0)
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -68,18 +82,23 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
     setParseError(null)
     setIsParsing(true)
     setRows([])
+    setFileAlreadyImportedAt(null)
+    setDuplicateCount(0)
 
     try {
       const formData = new FormData()
       formData.append('file', file)
 
-      const data = await api.postForm<ParsedRow[]>('/imports/statement', formData)
+      const data = await api.postForm<ParseResponse>('/imports/statement', formData)
 
-      setRows(data.map(r => ({
+      setFileHash(data.file_hash)
+      setFileAlreadyImportedAt(data.file_already_imported_at)
+      setDuplicateCount(data.duplicate_count)
+      setRows(data.transactions.map(r => ({
         ...r,
         selected_client_id: r.suggested_client_id,
-        // Pre-check only rows with a match; the user opts the rest in manually.
-        skip: r.match_type === 'none',
+        // Pre-check only matched rows that are NOT already imported.
+        skip: r.match_type === 'none' || r.already_imported,
       })))
     } catch (err: unknown) {
       setParseError(err instanceof Error ? err.message : 'Error desconocido')
@@ -106,6 +125,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
         filename: fileName ?? 'extracto.csv',
         month,
         year,
+        file_hash: fileHash,
       })
       onImported(month, year)
       onClose()
@@ -120,6 +140,9 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
     setRows([])
     setFileName(null)
     setParseError(null)
+    setFileHash(null)
+    setFileAlreadyImportedAt(null)
+    setDuplicateCount(0)
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -195,6 +218,20 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
             </div>
           )}
 
+          {fileAlreadyImportedAt && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+              <span className="material-symbols-outlined text-base">warning</span>
+              Este archivo ya fue importado el {new Date(fileAlreadyImportedAt).toLocaleDateString('es-ES')}.
+            </div>
+          )}
+
+          {duplicateCount > 0 && (
+            <p className="text-xs text-slate-500">
+              <strong>{duplicateCount}</strong> de {rows.length} transacciones ya estaban
+              importadas y quedaron desmarcadas.
+            </p>
+          )}
+
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
@@ -224,11 +261,18 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                     <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{row.date}</td>
                     <td className="px-4 py-3 text-slate-700 max-w-[280px]">
                       <span className="truncate block" title={row.concept}>{row.concept}</span>
-                      {row.match_type !== 'none' && (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${row.match_type === 'exact' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {row.match_type === 'exact' ? 'Exacto' : `Parcial ${Math.round(row.confidence * 100)}%`}
-                        </span>
-                      )}
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {row.match_type !== 'none' && (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${row.match_type === 'exact' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {row.match_type === 'exact' ? 'Exacto' : `Parcial ${Math.round(row.confidence * 100)}%`}
+                          </span>
+                        )}
+                        {row.already_imported && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">
+                            Ya importado
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 font-bold text-slate-900 whitespace-nowrap">€{row.amount.toFixed(2)}</td>
                     <td className="px-4 py-3">

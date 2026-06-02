@@ -13,11 +13,15 @@ Strategy for the parse endpoint:
     real `match_transaction` runs against an empty clients table (no seed
     needed) and returns match_type="none" for every transaction.
 """
+import hashlib
+from datetime import date
 from unittest.mock import patch
 
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.payment import Payment
 from app.models.statement_import import StatementImport
 from app.services.statement_parser import ParsedTransaction
 from tests.conftest import FAKE_USER
@@ -101,7 +105,7 @@ class TestParseStatementResults:
             )
 
         assert response.status_code == 200
-        body = response.json()
+        body = response.json()["transactions"]
         assert len(body) == 2
         assert body[0]["amount"] == 100.0
         assert body[1]["amount"] == 200.0
@@ -114,7 +118,7 @@ class TestParseStatementResults:
             )
 
         assert response.status_code == 200
-        tx = response.json()[0]
+        tx = response.json()["transactions"][0]
         assert "date" in tx
         assert "concept" in tx
         assert "amount" in tx
@@ -131,9 +135,74 @@ class TestParseStatementResults:
             )
 
         assert response.status_code == 200
-        tx = response.json()[0]
+        tx = response.json()["transactions"][0]
         assert tx["suggested_client_id"] is None
         assert tx["match_type"] == "none"
+
+
+# ─── POST /api/imports/statement — deduplication ─────────────────────────────
+
+class TestParseStatementDeduplication:
+    async def test_flags_already_imported_transaction(self, db: AsyncSession, app_client: AsyncClient):
+        """A parsed tx matching an existing bank_import payment is flagged."""
+        await _seed(db, Payment(
+            user_id=FAKE_USER.id,
+            client_id=None,
+            amount=150.0,
+            payment_date=date(2026, 4, 10),
+            concept="VIR RECIBIDO",
+            source="bank_import",
+            status="unmatched",
+        ))
+        tx = _fake_transaction(date="2026-04-10", concept="VIR RECIBIDO", amount=150.0)
+        with patch("app.routers.imports.parse_statement", return_value=[tx]):
+            response = await app_client.post(
+                "/api/imports/statement",
+                files={"file": ("statement.csv", SAMPLE_CSV, "text/csv")},
+            )
+
+        body = response.json()
+        assert body["transactions"][0]["already_imported"] is True
+        assert body["duplicate_count"] == 1
+
+    async def test_new_transaction_is_not_flagged(self, db: AsyncSession, app_client: AsyncClient):
+        tx = _fake_transaction(date="2026-04-10", concept="MOVIMIENTO NUEVO", amount=99.0)
+        with patch("app.routers.imports.parse_statement", return_value=[tx]):
+            response = await app_client.post(
+                "/api/imports/statement",
+                files={"file": ("statement.csv", SAMPLE_CSV, "text/csv")},
+            )
+
+        body = response.json()
+        assert body["transactions"][0]["already_imported"] is False
+        assert body["duplicate_count"] == 0
+
+    async def test_detects_already_imported_file_by_hash(self, db: AsyncSession, app_client: AsyncClient):
+        await _seed(db, StatementImport(
+            user_id=FAKE_USER.id,
+            filename="previo.csv",
+            month=4,
+            year=2026,
+            transaction_count=1,
+            total_amount=10.0,
+            file_hash=hashlib.sha256(SAMPLE_CSV).hexdigest(),
+        ))
+        with patch("app.routers.imports.parse_statement", return_value=[_fake_transaction()]):
+            response = await app_client.post(
+                "/api/imports/statement",
+                files={"file": ("statement.csv", SAMPLE_CSV, "text/csv")},
+            )
+
+        assert response.json()["file_already_imported_at"] is not None
+
+    async def test_returns_file_hash(self, db: AsyncSession, app_client: AsyncClient):
+        with patch("app.routers.imports.parse_statement", return_value=[_fake_transaction()]):
+            response = await app_client.post(
+                "/api/imports/statement",
+                files={"file": ("statement.csv", SAMPLE_CSV, "text/csv")},
+            )
+
+        assert response.json()["file_hash"] == hashlib.sha256(SAMPLE_CSV).hexdigest()
 
 
 # ─── POST /api/imports/statement/confirm ─────────────────────────────────────
@@ -184,6 +253,20 @@ class TestConfirmStatementImport:
         })
 
         assert response.status_code == 422
+
+    async def test_confirm_stores_file_hash(self, db: AsyncSession, app_client: AsyncClient):
+        await app_client.post("/api/imports/statement/confirm", json={
+            "payments": [
+                {"date": "2026-04-10", "concept": "PAGO", "amount": 10.0, "client_id": None},
+            ],
+            "filename": "extracto.csv",
+            "month": 4,
+            "year": 2026,
+            "file_hash": "deadbeef",
+        })
+
+        record = (await db.execute(select(StatementImport))).scalar_one()
+        assert record.file_hash == "deadbeef"
 
 
 # ─── GET /api/imports/history ────────────────────────────────────────────────

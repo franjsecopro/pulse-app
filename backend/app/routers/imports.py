@@ -1,3 +1,5 @@
+import hashlib
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -10,23 +12,29 @@ from app.models.statement_import import StatementImport
 from app.models.user import User
 from app.schemas.import_ import (
     ParsedTransactionResponse,
+    ParseStatementResponse,
     ConfirmImportRequest,
     StatementImportResponse,
 )
-from app.services.import_service import confirm_import
+from app.services.import_service import (
+    confirm_import,
+    get_imported_fingerprints,
+    find_imported_file,
+    fingerprint,
+)
 from app.services.statement_parser import parse_statement, SUPPORTED_EXTENSIONS
 from app.services.payment_matcher import match_transaction
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
 
-@router.post("/statement", response_model=list[ParsedTransactionResponse])
+@router.post("/statement", response_model=ParseStatementResponse)
 async def parse_statement_file(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Parse a bank statement (CSV) and return its matched income transactions."""
+    """Parse a bank statement (CSV), match clients and flag already-imported rows."""
     if not file.filename or not file.filename.lower().endswith(SUPPORTED_EXTENSIONS):
         allowed = ', '.join(SUPPORTED_EXTENSIONS)
         raise HTTPException(status_code=400, detail=f"El archivo debe ser {allowed}")
@@ -34,6 +42,8 @@ async def parse_statement_file(
     content = await file.read()
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="El archivo está vacío")
+
+    file_hash = hashlib.sha256(content).hexdigest()
 
     result = await db.execute(
         select(Client)
@@ -57,8 +67,18 @@ async def parse_statement_file(
             detail="No se encontraron transacciones en el extracto. Verifica que sea un extracto de Hello Bank.",
         )
 
-    return [
-        ParsedTransactionResponse(
+    # Deduplication: known transaction fingerprints (Nivel 2) and prior file (Nivel 1).
+    existing_fingerprints = await get_imported_fingerprints(db, current_user.id)
+    file_already_imported_at = await find_imported_file(db, current_user.id, file_hash)
+
+    items: list[ParsedTransactionResponse] = []
+    duplicate_count = 0
+    for tx in transactions:
+        match = match_transaction(tx.concept, clients)
+        already_imported = fingerprint(tx.date, tx.amount, tx.concept) in existing_fingerprints
+        if already_imported:
+            duplicate_count += 1
+        items.append(ParsedTransactionResponse(
             date=tx.date,
             concept=tx.concept,
             amount=tx.amount,
@@ -66,9 +86,15 @@ async def parse_statement_file(
             suggested_client_name=match.client_name,
             match_type=match.match_type,
             confidence=match.confidence,
-        )
-        for tx, match in ((tx, match_transaction(tx.concept, clients)) for tx in transactions)
-    ]
+            already_imported=already_imported,
+        ))
+
+    return ParseStatementResponse(
+        transactions=items,
+        file_hash=file_hash,
+        file_already_imported_at=file_already_imported_at,
+        duplicate_count=duplicate_count,
+    )
 
 
 @router.post("/statement/confirm", status_code=201)

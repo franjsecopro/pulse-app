@@ -24,3 +24,5 @@ class StatementImport(Base):
     year: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     transaction_count: Mapped[int] = mapped_column(Integer, default=0)
     total_amount: Mapped[float] = mapped_column(Float, default=0.0)
+    # SHA-256 of the uploaded file — used to detect a re-uploaded statement (Nivel 1).
+    file_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
