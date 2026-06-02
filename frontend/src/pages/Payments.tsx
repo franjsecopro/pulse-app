@@ -243,7 +243,7 @@ export function Payments() {
         onCancel={cancelDelete}
       />
 
-      <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Importar extracto bancario" size="lg">
+      <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Importar extracto bancario" size="xl">
         <ImportStatementModal
           clients={clients}
           onClose={() => setShowImportModal(false)}
