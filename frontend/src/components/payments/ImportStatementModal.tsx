@@ -1,5 +1,6 @@
 import { useState, useRef, type ChangeEvent } from 'react'
 import { api } from '../../services/api'
+import { MONTHS } from '../../utils/constants'
 import type { Client } from '../../types'
 
 interface ParsedRow {
@@ -14,10 +15,42 @@ interface ParsedRow {
   skip: boolean
 }
 
+interface DetectedPeriod {
+  month: number | null
+  year: number | null
+  spansMultiple: boolean
+}
+
+/**
+ * Detect the statement's period as the year/month that holds the MOST rows
+ * (the dominant period), so a stray transaction from an adjacent month does not
+ * mislabel the import. Dates are ISO 'YYYY-MM-DD'.
+ */
+function detectPeriod(rows: ParsedRow[]): DetectedPeriod {
+  const countByMonth = new Map<string, number>()
+  for (const row of rows) {
+    if (!row.date) continue
+    const key = row.date.slice(0, 7) // 'YYYY-MM'
+    countByMonth.set(key, (countByMonth.get(key) ?? 0) + 1)
+  }
+  if (countByMonth.size === 0) return { month: null, year: null, spansMultiple: false }
+
+  let dominantKey = ''
+  let dominantCount = -1
+  for (const [key, count] of countByMonth) {
+    if (count > dominantCount) {
+      dominantCount = count
+      dominantKey = key
+    }
+  }
+  const [year, month] = dominantKey.split('-').map(Number)
+  return { month, year, spansMultiple: countByMonth.size > 1 }
+}
+
 interface ImportStatementModalProps {
   clients: Client[]
   onClose: () => void
-  onImported: () => void
+  onImported: (month: number | null, year: number | null) => void
 }
 
 export function ImportStatementModal({ clients, onClose, onImported }: ImportStatementModalProps) {
@@ -59,13 +92,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
     const toImport = rows.filter(r => !r.skip)
     if (toImport.length === 0) return
 
-    let month: number | null = null
-    let year: number | null = null
-    if (toImport[0]?.date) {
-      const [y, m] = toImport[0].date.split('-').map(Number)
-      month = m ?? null
-      year = y ?? null
-    }
+    const { month, year } = detectPeriod(toImport)
 
     setIsConfirming(true)
     try {
@@ -76,11 +103,11 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
           amount: r.amount,
           client_id: r.selected_client_id,
         })),
-        filename: fileName ?? 'extracto.pdf',
+        filename: fileName ?? 'extracto.csv',
         month,
         year,
       })
-      onImported()
+      onImported(month, year)
       onClose()
     } catch (err: unknown) {
       setParseError(err instanceof Error ? err.message : 'Error al importar')
@@ -98,6 +125,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
 
   const toImportCount = rows.filter(r => !r.skip).length
   const totalAmount = rows.filter(r => !r.skip).reduce((s, r) => s + r.amount, 0)
+  const period = detectPeriod(rows)
 
   const allSelected = rows.length > 0 && rows.every(r => !r.skip)
   const someSelected = rows.some(r => !r.skip)
@@ -151,6 +179,21 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
               Cambiar archivo
             </button>
           </div>
+
+          {period.month && (
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15 text-sm">
+              <span className="material-symbols-outlined text-primary text-base">calendar_month</span>
+              <span className="text-slate-700">
+                Movimientos de <strong>{MONTHS[period.month - 1]} {period.year}</strong>
+                {' · '}{rows.length} transacciones
+              </span>
+              {period.spansMultiple && (
+                <span className="text-amber-600 text-xs">
+                  · El extracto abarca varios meses; se registrará en {MONTHS[period.month - 1]}
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-left text-sm">

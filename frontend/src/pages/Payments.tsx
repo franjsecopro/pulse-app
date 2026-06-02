@@ -14,7 +14,7 @@ export function Payments() {
   const now = new Date()
 
   const [activeTab, setActiveTab] = useState<'payments' | 'history'>('payments')
-  const [filterMonth, setFilterMonth] = useState<number | ''>('')
+  const [filterMonth, setFilterMonth] = useState<number | ''>(now.getMonth() + 1)
   const [filterYear, setFilterYear] = useState(now.getFullYear())
   const [filterClient, setFilterClient] = useState<number | ''>('')
   const [filterStatus, setFilterStatus] = useState('')
@@ -247,7 +247,12 @@ export function Payments() {
         <ImportStatementModal
           clients={clients}
           onClose={() => setShowImportModal(false)}
-          onImported={handleImported}
+          onImported={(month, year) => {
+            // Situate the user on the imported statement's period.
+            if (month) setFilterMonth(month)
+            if (year) setFilterYear(year)
+            handleImported()
+          }}
         />
       </Modal>
     </div>
