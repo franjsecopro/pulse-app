@@ -45,7 +45,8 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
       setRows(data.map(r => ({
         ...r,
         selected_client_id: r.suggested_client_id,
-        skip: false,
+        // Pre-check only rows with a match; the user opts the rest in manually.
+        skip: r.match_type === 'none',
       })))
     } catch (err: unknown) {
       setParseError(err instanceof Error ? err.message : 'Error desconocido')
@@ -98,6 +99,14 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
   const toImportCount = rows.filter(r => !r.skip).length
   const totalAmount = rows.filter(r => !r.skip).reduce((s, r) => s + r.amount, 0)
 
+  const allSelected = rows.length > 0 && rows.every(r => !r.skip)
+  const someSelected = rows.some(r => !r.skip)
+
+  const toggleAll = () => {
+    const selectAll = !allSelected
+    setRows(prev => prev.map(r => ({ ...r, skip: !selectAll })))
+  }
+
   return (
     <div className="space-y-5">
       {rows.length === 0 && (
@@ -118,7 +127,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
       {isParsing && (
         <div className="flex items-center justify-center gap-2 py-6">
           <span className="material-symbols-outlined animate-spin text-primary">sync</span>
-          <span className="text-sm text-slate-500">Analizando PDF...</span>
+          <span className="text-sm text-slate-500">Analizando extracto...</span>
         </div>
       )}
 
@@ -150,15 +159,27 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                   <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Fecha</th>
                   <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Concepto banco</th>
                   <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Importe</th>
-                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Cliente</th>
-                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase text-center">Importar</th>
+                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase min-w-[260px]">Cliente</th>
+                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        ref={el => { if (el) el.indeterminate = someSelected && !allSelected }}
+                        onChange={toggleAll}
+                        className="w-4 h-4 accent-primary cursor-pointer"
+                        title={allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                      />
+                      <span>Importar</span>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {rows.map((row, i) => (
                   <tr key={i} className={row.skip ? 'opacity-40' : ''}>
                     <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{row.date}</td>
-                    <td className="px-4 py-3 text-slate-700 max-w-[220px]">
+                    <td className="px-4 py-3 text-slate-700 max-w-[280px]">
                       <span className="truncate block" title={row.concept}>{row.concept}</span>
                       {row.match_type !== 'none' && (
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${row.match_type === 'exact' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
@@ -173,7 +194,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                         onChange={e => setRows(prev => prev.map((r, j) =>
                           j === i ? { ...r, selected_client_id: parseInt(e.target.value) || null } : r
                         ))}
-                        className="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:border-primary outline-none w-full"
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:border-primary outline-none w-full min-w-[240px]"
                         disabled={row.skip}
                       >
                         <option value="">Sin asignar</option>
