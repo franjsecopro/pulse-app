@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ClassSession } from '../../types'
 import { useTranslation } from '../../i18n'
+import { formatTimeRange } from '../../utils/formatters'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -162,6 +163,17 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           <p className="font-bold text-slate-200 truncate">{tooltip.class.client_name}</p>
           {tooltip.class.contract_description && (
             <p className="text-slate-400 truncate">{tooltip.class.contract_description}</p>
+          )}
+          {tooltip.class.class_time ? (
+            <p className="mt-0.5 flex items-center gap-1 font-semibold text-slate-100">
+              <span className="material-symbols-outlined text-[12px]">schedule</span>
+              {formatTimeRange(tooltip.class.class_time, tooltip.class.duration_hours)}
+            </p>
+          ) : (
+            <p className="mt-0.5 flex items-center gap-1 font-semibold text-amber-400">
+              <span className="material-symbols-outlined text-[12px]">warning</span>
+              Sin hora
+            </p>
           )}
           <div className="mt-1 pt-1 border-t border-slate-700 flex justify-between gap-2">
             <span>{tooltip.class.duration_hours}h</span>

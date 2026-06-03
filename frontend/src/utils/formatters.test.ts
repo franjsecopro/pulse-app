@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatDate, formatHours, formatCurrency, calcDuration } from './formatters'
+import { formatDate, formatHours, formatCurrency, calcDuration, formatTimeRange } from './formatters'
 
 // ─── formatDate ───────────────────────────────────────────────────────────────
 
@@ -106,5 +106,33 @@ describe('calcDuration', () => {
 
   it('calculates a 2-hour slot', () => {
     expect(calcDuration('09:00', '11:00')).toBe(2)
+  })
+})
+
+// ─── formatTimeRange ─────────────────────────────────────────────────────────
+
+describe('formatTimeRange', () => {
+  it('formats a 1.5 hour session starting at 09:00', () => {
+    expect(formatTimeRange('09:00', 1.5)).toBe('09:00–10:30')
+  })
+
+  it('accepts HH:MM:SS start time and strips seconds', () => {
+    expect(formatTimeRange('09:00:00', 1)).toBe('09:00–10:00')
+  })
+
+  it('handles non-round minutes correctly', () => {
+    expect(formatTimeRange('10:15', 0.75)).toBe('10:15–11:00')
+  })
+
+  it('wraps past midnight for late-night sessions', () => {
+    expect(formatTimeRange('23:30', 1)).toBe('23:30–00:30')
+  })
+
+  it('formats a zero-duration session as same start and end', () => {
+    expect(formatTimeRange('14:00', 0)).toBe('14:00–14:00')
+  })
+
+  it('handles a 45-minute session at the top of the hour', () => {
+    expect(formatTimeRange('08:00', 0.75)).toBe('08:00–08:45')
   })
 })

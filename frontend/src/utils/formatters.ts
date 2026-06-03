@@ -1,4 +1,22 @@
 /**
+ * Builds a "HH:MM–HH:MM" range from a start time and a decimal duration.
+ * @param start - "HH:MM" or "HH:MM:SS"
+ * @param durationHours - decimal hours (e.g. 1.5)
+ * @returns Formatted range string (e.g. "09:00–10:30")
+ */
+export function formatTimeRange(start: string, durationHours: number): string {
+  const [h, m] = start.split(':').map(Number)
+  const startMins = h * 60 + m
+  const endMins = startMins + Math.round(durationHours * 60)
+  const fmt = (mins: number) => {
+    const hh = Math.floor(mins / 60) % 24
+    const mm = mins % 60
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
+  }
+  return `${fmt(startMins)}–${fmt(endMins)}`
+}
+
+/**
  * Formats an ISO date string (YYYY-MM-DD) to a localized display format (DD/MM/YYYY).
  * @param date - ISO date string (e.g. "2026-05-01") or null/undefined
  * @param fallback - Value to return when date is null/undefined (default "—")
