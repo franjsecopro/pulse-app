@@ -35,7 +35,7 @@ async function requestFull<T>(
   const response = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers,
-    credentials: 'include',  // httpOnly cookies are sent automatically
+    credentials: 'include', // httpOnly cookies are sent automatically
   })
 
   if (response.status === 401 && retry) {
@@ -71,7 +71,7 @@ async function requestFull<T>(
 }
 
 function request<T>(path: string, options: RequestInit = {}, retry = true): Promise<T> {
-  return requestFull<T>(path, options, retry).then(r => r.data)
+  return requestFull<T>(path, options, retry).then((r) => r.data)
 }
 
 /** Fetch a binary payload (e.g. a generated .xlsx) with the same 401-refresh flow. */

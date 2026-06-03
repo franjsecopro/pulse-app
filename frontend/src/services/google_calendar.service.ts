@@ -1,5 +1,5 @@
-import { api } from './api'
 import type { GoogleCalendarStatus } from '../types'
+import { api } from './api'
 
 export const googleCalendarService = {
   getStatus: () => api.get<GoogleCalendarStatus>('/google-calendar/status'),

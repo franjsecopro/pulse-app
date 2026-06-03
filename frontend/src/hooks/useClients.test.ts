@@ -7,10 +7,10 @@
  *  - active clients sorted before archived ones in the returned array
  *  - updateClientContracts / updateClientPayers patch local state without refetching
  */
-import { renderHook, waitFor, act } from '@testing-library/react'
-import { vi, describe, it, expect, beforeEach } from 'vitest'
-import { useClients } from './useClients'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { clientService } from '../services/client.service'
+import { useClients } from './useClients'
 
 vi.mock('../context/ToastContext', () => ({
   useToast: () => ({ addToast: vi.fn() }),
@@ -18,11 +18,11 @@ vi.mock('../context/ToastContext', () => ({
 
 vi.mock('../services/client.service', () => ({
   clientService: {
-    getAll:     vi.fn(),
-    create:     vi.fn(),
-    update:     vi.fn(),
-    archive:    vi.fn(),
-    activate:   vi.fn(),
+    getAll: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    archive: vi.fn(),
+    activate: vi.fn(),
     hardDelete: vi.fn(),
   },
 }))
@@ -33,7 +33,6 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockGetAll.mockResolvedValue([])
 })
-
 
 // ─── filterActive mapping ────────────────────────────────────────────────────
 
@@ -46,7 +45,7 @@ describe('filterActive → service arguments', () => {
         search: undefined,
         is_active: true,
         deleted_filter: 'exclude',
-      })
+      }),
     )
   })
 
@@ -58,7 +57,7 @@ describe('filterActive → service arguments', () => {
         search: undefined,
         is_active: undefined,
         deleted_filter: 'only',
-      })
+      }),
     )
   })
 
@@ -70,11 +69,10 @@ describe('filterActive → service arguments', () => {
         search: undefined,
         is_active: undefined,
         deleted_filter: 'include',
-      })
+      }),
     )
   })
 })
-
 
 // ─── search ─────────────────────────────────────────────────────────────────
 
@@ -83,9 +81,7 @@ describe('search forwarding', () => {
     renderHook(() => useClients('ana', 'all'))
 
     await waitFor(() =>
-      expect(mockGetAll).toHaveBeenCalledWith(
-        expect.objectContaining({ search: 'ana' })
-      )
+      expect(mockGetAll).toHaveBeenCalledWith(expect.objectContaining({ search: 'ana' })),
     )
   })
 
@@ -93,13 +89,10 @@ describe('search forwarding', () => {
     renderHook(() => useClients('', 'all'))
 
     await waitFor(() =>
-      expect(mockGetAll).toHaveBeenCalledWith(
-        expect.objectContaining({ search: undefined })
-      )
+      expect(mockGetAll).toHaveBeenCalledWith(expect.objectContaining({ search: undefined })),
     )
   })
 })
-
 
 // ─── sorting ─────────────────────────────────────────────────────────────────
 
@@ -107,7 +100,7 @@ describe('sorting', () => {
   it('active clients appear before archived ones', async () => {
     mockGetAll.mockResolvedValue([
       { id: 1, name: 'Archivado', is_active: false } as any,
-      { id: 2, name: 'Activo',    is_active: true  } as any,
+      { id: 2, name: 'Activo', is_active: true } as any,
     ])
 
     const { result } = renderHook(() => useClients('', 'all'))
@@ -118,7 +111,6 @@ describe('sorting', () => {
     expect(result.current.clients[1].name).toBe('Archivado')
   })
 })
-
 
 // ─── loading state ───────────────────────────────────────────────────────────
 
@@ -131,7 +123,6 @@ describe('loading state', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false))
   })
 })
-
 
 // ─── local state updaters ─────────────────────────────────────────────────────
 
@@ -169,9 +160,7 @@ describe('updateClientContracts', () => {
 
 describe('updateClientPayers', () => {
   it('replaces payers for the target client without re-fetching', async () => {
-    mockGetAll.mockResolvedValue([
-      { id: 1, name: 'Cliente', is_active: true, payers: [] } as any,
-    ])
+    mockGetAll.mockResolvedValue([{ id: 1, name: 'Cliente', is_active: true, payers: [] } as any])
     const { result } = renderHook(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))

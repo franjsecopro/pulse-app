@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from '../i18n'
-import { Modal } from '../components/ui/Modal'
-import { ConfirmDialog } from '../components/ui/ConfirmDialog'
-import { PaymentForm } from '../components/payments/PaymentForm'
-import { ImportStatementModal } from '../components/payments/ImportStatementModal'
-import { StatementHistoryView } from '../components/payments/StatementHistoryView'
-import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
+import { useEffect, useState } from 'react'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
-import { usePayments } from '../hooks/usePayments'
-import { useAuth } from '../context/AuthContext'
+import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
+import { ImportStatementModal } from '../components/payments/ImportStatementModal'
+import { PaymentForm } from '../components/payments/PaymentForm'
+import { StatementHistoryView } from '../components/payments/StatementHistoryView'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
+import { useAuth } from '../context/AuthContext'
+import { usePayments } from '../hooks/usePayments'
+import { useTranslation } from '../i18n'
 import type { Payment } from '../types'
 
 export function Payments() {
@@ -29,10 +29,25 @@ export function Payments() {
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
 
   const {
-    payments, clients, statementHistory, isLoading, isStatementHistoryLoading, totalAmount,
-    pendingDeleteId, page, pageCount, totalCount, goToPage,
-    loadStatementHistory, createPayment, updatePayment,
-    requestDelete, confirmDelete, cancelDelete, handleImported, deleteStatementImport,
+    payments,
+    clients,
+    statementHistory,
+    isLoading,
+    isStatementHistoryLoading,
+    totalAmount,
+    pendingDeleteId,
+    page,
+    pageCount,
+    totalCount,
+    goToPage,
+    loadStatementHistory,
+    createPayment,
+    updatePayment,
+    requestDelete,
+    confirmDelete,
+    cancelDelete,
+    handleImported,
+    deleteStatementImport,
   } = usePayments({ filterMonth, filterYear, filterClient, filterStatus })
 
   useEffect(() => {
@@ -50,35 +65,34 @@ export function Payments() {
     setEditingPayment(null)
   }
 
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
         <div>
-          <h1 className="text-2xl font-black text-slate-900">{t('payments.title')}</h1>
-          <p className="text-slate-500 text-sm mt-1">{t('payments.subtitle')}</p>
+          <h1 className='text-2xl font-black text-slate-900'>{t('payments.title')}</h1>
+          <p className='text-slate-500 text-sm mt-1'>{t('payments.subtitle')}</p>
         </div>
-        <div className="flex gap-2">
+        <div className='flex gap-2'>
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200"
+            className='flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200'
           >
-            <span className="material-symbols-outlined text-base">upload_file</span>
+            <span className='material-symbols-outlined text-base'>upload_file</span>
             {t('payments.importStatement')}
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all"
+            className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
           >
-            <span className="material-symbols-outlined">add</span>
+            <span className='material-symbols-outlined'>add</span>
             {t('payments.newPayment')}
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-        {(['payments', 'history'] as const).map(tab => (
+      <div className='flex gap-1 bg-slate-100 rounded-xl p-1 w-fit'>
+        {(['payments', 'history'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -115,78 +129,105 @@ export function Payments() {
             onClientChange={setFilterClient}
             status={filterStatus}
             onStatusChange={setFilterStatus}
-            trailing={payments.length > 0 ? (
-              <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary">
-                {t('payments.totalAmount', { amount: totalAmount.toFixed(2) })}
-              </div>
-            ) : undefined}
+            trailing={
+              payments.length > 0 ? (
+                <div className='bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary'>
+                  {t('payments.totalAmount', { amount: totalAmount.toFixed(2) })}
+                </div>
+              ) : undefined
+            }
           />
 
           {/* Table */}
           {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <span className="material-symbols-outlined text-primary text-3xl animate-spin">sync</span>
+            <div className='flex items-center justify-center h-32'>
+              <span className='material-symbols-outlined text-primary text-3xl animate-spin'>
+                sync
+              </span>
             </div>
           ) : payments.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
-              <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">payments</span>
-              <p className="text-slate-500 font-medium">{t('payments.empty')}</p>
+            <div className='text-center py-16 bg-white rounded-xl border border-slate-200'>
+              <span className='material-symbols-outlined text-5xl text-slate-300 block mb-3'>
+                payments
+              </span>
+              <p className='text-slate-500 font-medium'>{t('payments.empty')}</p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="mt-4 text-primary text-sm font-semibold hover:underline"
+                className='mt-4 text-primary text-sm font-semibold hover:underline'
               >
                 {t('payments.registerFirst')}
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 border-b border-slate-200">
+            <div className='bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden'>
+              <div className='overflow-x-auto'>
+                <table className='w-full text-left'>
+                  <thead className='bg-slate-50 border-b border-slate-200'>
                     <tr>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.client')}</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.concept')}</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.amount')}</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.date')}</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.status')}</th>
-                      <th className="px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.actions')}</th>
+                      <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                        {t('payments.table.client')}
+                      </th>
+                      <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                        {t('payments.table.concept')}
+                      </th>
+                      <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                        {t('payments.table.amount')}
+                      </th>
+                      <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                        {t('payments.table.date')}
+                      </th>
+                      <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                        {t('payments.table.status')}
+                      </th>
+                      <th className='px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                        {t('payments.table.actions')}
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {payments.map(p => {
-                      const status = PAYMENT_STATUS_CONFIG[p.status] ?? PAYMENT_STATUS_CONFIG.pending
+                  <tbody className='divide-y divide-slate-100'>
+                    {payments.map((p) => {
+                      const status =
+                        PAYMENT_STATUS_CONFIG[p.status] ?? PAYMENT_STATUS_CONFIG.pending
                       return (
-                        <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                        <tr key={p.id} className='hover:bg-slate-50 transition-colors'>
+                          <td className='px-6 py-4'>
+                            <div className='flex items-center gap-3'>
+                              <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
                                 {(p.client_name ?? '?').slice(0, 2).toUpperCase()}
                               </div>
-                              <span className="font-medium text-slate-900">{p.client_name ?? t('payments.table.noClient')}</span>
+                              <span className='font-medium text-slate-900'>
+                                {p.client_name ?? t('payments.table.noClient')}
+                              </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-slate-600">{p.concept ?? '—'}</td>
-                          <td className="px-6 py-4 font-bold text-slate-900">€{p.amount.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-slate-500">{p.payment_date}</td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status.className}`}>
-                              <span className="material-symbols-outlined text-[12px]">{status.icon}</span>
+                          <td className='px-6 py-4 text-slate-600'>{p.concept ?? '—'}</td>
+                          <td className='px-6 py-4 font-bold text-slate-900'>
+                            €{p.amount.toFixed(2)}
+                          </td>
+                          <td className='px-6 py-4 text-slate-500'>{p.payment_date}</td>
+                          <td className='px-6 py-4'>
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status.className}`}
+                            >
+                              <span className='material-symbols-outlined text-[12px]'>
+                                {status.icon}
+                              </span>
                               {status.label}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-1">
+                          <td className='px-6 py-4 text-right'>
+                            <div className='flex items-center justify-end gap-1'>
                               <button
                                 onClick={() => setEditingPayment(p)}
-                                className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
                               >
-                                <span className="material-symbols-outlined text-base">edit</span>
+                                <span className='material-symbols-outlined text-base'>edit</span>
                               </button>
                               <button
                                 onClick={() => requestDelete(p.id)}
-                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                               >
-                                <span className="material-symbols-outlined text-base">delete</span>
+                                <span className='material-symbols-outlined text-base'>delete</span>
                               </button>
                             </div>
                           </td>
@@ -196,17 +237,34 @@ export function Payments() {
                   </tbody>
                 </table>
               </div>
-              <Pagination page={page} pageCount={pageCount} totalCount={totalCount} onPage={goToPage} />
+              <Pagination
+                page={page}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                onPage={goToPage}
+              />
             </div>
           )}
         </>
       )}
 
-      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('payments.create')}>
-        <PaymentForm clients={clients} onSave={handleCreate} onCancel={() => setShowCreateModal(false)} />
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title={t('payments.create')}
+      >
+        <PaymentForm
+          clients={clients}
+          onSave={handleCreate}
+          onCancel={() => setShowCreateModal(false)}
+        />
       </Modal>
 
-      <Modal isOpen={!!editingPayment} onClose={() => setEditingPayment(null)} title={t('payments.edit')}>
+      <Modal
+        isOpen={!!editingPayment}
+        onClose={() => setEditingPayment(null)}
+        title={t('payments.edit')}
+      >
         {editingPayment && (
           <PaymentForm
             initial={editingPayment}
@@ -240,7 +298,12 @@ export function Payments() {
         onCancel={() => setPendingStatementId(null)}
       />
 
-      <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title={t('import.importStatement')} size="xl">
+      <Modal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        title={t('import.importStatement')}
+        size='xl'
+      >
         <ImportStatementModal
           clients={clients}
           onClose={() => setShowImportModal(false)}

@@ -1,5 +1,5 @@
-import type { Client } from '../../types'
 import { useTranslation } from '../../i18n'
+import type { Client } from '../../types'
 
 interface ClientCardProps {
   client: Client
@@ -32,103 +32,101 @@ export function ClientCard({
             : 'border-slate-200'
       }`}
     >
-      <div className="flex items-center gap-4 flex-1">
+      <div className='flex items-center gap-4 flex-1'>
         <div
           className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-            client.is_active && !isArchived ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400'
+            client.is_active && !isArchived
+              ? 'bg-primary/10 text-primary'
+              : 'bg-slate-100 text-slate-400'
           }`}
         >
-          <span className="material-symbols-outlined text-2xl">person</span>
+          <span className='material-symbols-outlined text-2xl'>person</span>
         </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-bold text-slate-900 truncate">{client.name}</h3>
+        <div className='min-w-0'>
+          <div className='flex items-center gap-2 flex-wrap'>
+            <h3 className='font-bold text-slate-900 truncate'>{client.name}</h3>
             {isArchived ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200">
+              <span className='px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200'>
                 {t('clients.status.archived')}
               </span>
             ) : client.is_active ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+              <span className='px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200'>
                 {t('clients.status.active')}
               </span>
             ) : (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+              <span className='px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200'>
                 {t('clients.status.inactive')}
               </span>
             )}
           </div>
-          {client.email && (
-            <p className="text-sm text-slate-500 truncate">{client.email}</p>
-          )}
-          {client.phone && (
-            <p className="text-sm text-slate-400">{client.phone}</p>
-          )}
+          {client.email && <p className='text-sm text-slate-500 truncate'>{client.email}</p>}
+          {client.phone && <p className='text-sm text-slate-400'>{client.phone}</p>}
         </div>
       </div>
 
-      <div className="flex-1 lg:border-x border-slate-100 px-0 lg:px-6">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+      <div className='flex-1 lg:border-x border-slate-100 px-0 lg:px-6'>
+        <p className='text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2'>
           {t('clients.contractsLabel')}
         </p>
         {activeContracts.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
+          <div className='flex flex-wrap gap-2'>
             {activeContracts.map((c) => (
               <span
                 key={c.id}
-                className="bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs border border-slate-200"
+                className='bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs border border-slate-200'
               >
                 {c.description} — €{c.hourly_rate}/h
               </span>
             ))}
           </div>
         ) : (
-          <span className="text-slate-400 text-xs italic">{t('clients.noActiveContracts')}</span>
+          <span className='text-slate-400 text-xs italic'>{t('clients.noActiveContracts')}</span>
         )}
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      <div className='flex items-center gap-2 shrink-0'>
         {!isArchived && (
           <button
             onClick={onManageContracts}
-            className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+            className='p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
             title={t('clients.manageContracts')}
           >
-            <span className="material-symbols-outlined">description</span>
+            <span className='material-symbols-outlined'>description</span>
           </button>
         )}
         <button
           onClick={onEdit}
-          className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+          className='p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
           title={isArchived ? t('clients.viewData') : t('clients.edit')}
         >
-          <span className="material-symbols-outlined">edit</span>
+          <span className='material-symbols-outlined'>edit</span>
         </button>
         {isArchived ? (
           <>
             <button
               onClick={onActivate}
-              className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              className='p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors'
               title={t('clients.activateTooltip')}
             >
-              <span className="material-symbols-outlined">restore</span>
+              <span className='material-symbols-outlined'>restore</span>
             </button>
             {onHardDelete && (
               <button
                 onClick={onHardDelete}
-                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className='p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                 title={t('clients.hardDeleteTooltip')}
               >
-                <span className="material-symbols-outlined">delete_forever</span>
+                <span className='material-symbols-outlined'>delete_forever</span>
               </button>
             )}
           </>
         ) : (
           <button
             onClick={onDelete}
-            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+            className='p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors'
             title={t('clients.archiveTooltip')}
           >
-            <span className="material-symbols-outlined">archive</span>
+            <span className='material-symbols-outlined'>archive</span>
           </button>
         )}
       </div>

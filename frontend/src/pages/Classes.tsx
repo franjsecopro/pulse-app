@@ -1,14 +1,13 @@
 import { useState } from 'react'
-import i18n, { useTranslation } from '../i18n'
-import { Modal } from '../components/ui/Modal'
-import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { CalendarView } from '../components/classes/CalendarView'
-import { DayView } from '../components/classes/DayView'
 import { ClassForm } from '../components/classes/ClassForm'
 import { CLASS_STATUS_CONFIG } from '../components/classes/constants'
-import { useClasses } from '../hooks/useClasses'
+import { DayView } from '../components/classes/DayView'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
+import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
-import { useAuth } from '../context/AuthContext'
+import { useClasses } from '../hooks/useClasses'
+import i18n, { useTranslation } from '../i18n'
 import type { ClassSession } from '../types'
 
 type ViewMode = 'list' | 'calendar'
@@ -17,7 +16,6 @@ export function Classes() {
   const { t } = useTranslation()
   const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
   const now = new Date()
-  const { user } = useAuth()
 
   const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1)
   const [filterYear, setFilterYear] = useState(now.getFullYear())
@@ -31,14 +29,26 @@ export function Classes() {
   const [dayDetailDate, setDayDetailDate] = useState<string | null>(null)
 
   const {
-    classes, clients, isLoading, isSyncing,
-    pendingDeleteId, totalRevenue,
-    page, pageCount, totalCount, goToPage,
-    createClass, updateClass, requestDelete, confirmDelete, cancelDelete, syncGCal,
+    classes,
+    clients,
+    isLoading,
+    isSyncing,
+    pendingDeleteId,
+    totalRevenue,
+    page,
+    pageCount,
+    totalCount,
+    goToPage,
+    createClass,
+    updateClass,
+    requestDelete,
+    confirmDelete,
+    cancelDelete,
+    syncGCal,
   } = useClasses({ filterMonth, filterYear, filterClient })
 
   const dayDetailClasses = dayDetailDate
-    ? classes.filter(c => c.class_date === dayDetailDate)
+    ? classes.filter((c) => c.class_date === dayDetailDate)
     : []
 
   const handleViewMode = (mode: ViewMode) => {
@@ -64,28 +74,31 @@ export function Classes() {
   }
 
   function formatDayTitle(dateStr: string): string {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString(i18n.language, {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    return new Date(`${dateStr}T00:00:00`).toLocaleDateString(i18n.language, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     })
   }
 
   const years = Array.from({ length: 3 }, (_, i) => now.getFullYear() - i)
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
         <div>
-          <h1 className="text-2xl font-black text-slate-900">{t('classes.title')}</h1>
-          <p className="text-slate-500 text-sm mt-1">{t('classes.subtitle')}</p>
+          <h1 className='text-2xl font-black text-slate-900'>{t('classes.title')}</h1>
+          <p className='text-slate-500 text-sm mt-1'>{t('classes.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+        <div className='flex items-center gap-3'>
+          <div className='flex items-center bg-slate-100 rounded-xl p-1 gap-1'>
             <button
               onClick={() => handleViewMode('list')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all
                 ${viewMode === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              <span className="material-symbols-outlined text-base">view_list</span>
+              <span className='material-symbols-outlined text-base'>view_list</span>
               {t('classes.view.list')}
             </button>
             <button
@@ -93,7 +106,7 @@ export function Classes() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all
                 ${viewMode === 'calendar' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              <span className="material-symbols-outlined text-base">calendar_month</span>
+              <span className='material-symbols-outlined text-base'>calendar_month</span>
               {t('classes.view.calendar')}
             </button>
           </div>
@@ -101,49 +114,66 @@ export function Classes() {
             onClick={() => syncGCal()}
             disabled={isSyncing}
             title={t('classes.gcalSynced')}
-            className="flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
+            className='flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50'
           >
-            <span className={`material-symbols-outlined text-base ${isSyncing ? 'animate-spin' : ''}`}>
+            <span
+              className={`material-symbols-outlined text-base ${isSyncing ? 'animate-spin' : ''}`}
+            >
               {isSyncing ? 'refresh' : 'calendar_month'}
             </span>
             {isSyncing ? t('classes.syncing') : t('classes.syncGCal')}
           </button>
           <button
-            onClick={() => { setNewClassDate(null); setShowCreateModal(true) }}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all"
+            onClick={() => {
+              setNewClassDate(null)
+              setShowCreateModal(true)
+            }}
+            className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
           >
-            <span className="material-symbols-outlined">add</span>
+            <span className='material-symbols-outlined'>add</span>
             {t('classes.newClass')}
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap items-center gap-3">
+      <div className='bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap items-center gap-3'>
         <select
           value={filterMonth}
-          onChange={(e) => setFilterMonth(parseInt(e.target.value))}
-          className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
+          onChange={(e) => setFilterMonth(parseInt(e.target.value, 10))}
+          className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
         >
-          {months.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+          {months.map((m, i) => (
+            <option key={i} value={i + 1}>
+              {m}
+            </option>
+          ))}
         </select>
         <select
           value={filterYear}
-          onChange={(e) => setFilterYear(parseInt(e.target.value))}
-          className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
+          onChange={(e) => setFilterYear(parseInt(e.target.value, 10))}
+          className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
         >
-          {years.map((y) => <option key={y} value={y}>{y}</option>)}
+          {years.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
         </select>
         <select
           value={filterClient}
-          onChange={(e) => setFilterClient(parseInt(e.target.value) || '')}
-          className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
+          onChange={(e) => setFilterClient(parseInt(e.target.value, 10) || '')}
+          className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
         >
-          <option value="">{t('classes.filter.allClients')}</option>
-          {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          <option value=''>{t('classes.filter.allClients')}</option>
+          {clients.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
         </select>
         {classes.length > 0 && (
-          <div className="ml-auto bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary">
+          <div className='ml-auto bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary'>
             {t('classes.totalRevenue', { amount: totalRevenue.toFixed(2) })}
           </div>
         )}
@@ -163,94 +193,143 @@ export function Classes() {
 
       {/* List view */}
       {viewMode === 'list' && isLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <span className="material-symbols-outlined text-primary text-3xl animate-spin">sync</span>
+        <div className='flex items-center justify-center h-32'>
+          <span className='material-symbols-outlined text-primary text-3xl animate-spin'>sync</span>
         </div>
       ) : viewMode === 'list' && classes.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
-          <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">event</span>
-          <p className="text-slate-500 font-medium">{t('classes.empty.list')}</p>
+        <div className='text-center py-16 bg-white rounded-xl border border-slate-200'>
+          <span className='material-symbols-outlined text-5xl text-slate-300 block mb-3'>
+            event
+          </span>
+          <p className='text-slate-500 font-medium'>{t('classes.empty.list')}</p>
           <button
-            onClick={() => { setNewClassDate(null); setShowCreateModal(true) }}
-            className="mt-4 text-primary text-sm font-semibold hover:underline"
+            onClick={() => {
+              setNewClassDate(null)
+              setShowCreateModal(true)
+            }}
+            className='mt-4 text-primary text-sm font-semibold hover:underline'
           >
             {t('classes.registerFirst')}
           </button>
         </div>
-      ) : viewMode === 'list' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left" id="classes-table">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.date')}</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.client')}</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.duration')}</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.rate')}</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.total')}</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.status')}</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.notes')}</th>
-                  <th className="px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {classes.map((c) => {
-                  const cfg = CLASS_STATUS_CONFIG[c.status] ?? CLASS_STATUS_CONFIG.normal
-                  return (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="font-medium text-slate-900">{c.class_date}</p>
-                        {c.class_time && <p className="text-xs text-slate-400">{c.class_time.slice(0, 5)}</p>}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                            {(c.client_name ?? '?').slice(0, 2).toUpperCase()}
+      ) : (
+        viewMode === 'list' && (
+          <div className='bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden'>
+            <div className='overflow-x-auto'>
+              <table className='w-full text-left' id='classes-table'>
+                <thead className='bg-slate-50 border-b border-slate-200'>
+                  <tr>
+                    <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.date')}
+                    </th>
+                    <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.client')}
+                    </th>
+                    <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.duration')}
+                    </th>
+                    <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.rate')}
+                    </th>
+                    <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.total')}
+                    </th>
+                    <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.status')}
+                    </th>
+                    <th className='px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.notes')}
+                    </th>
+                    <th className='px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider'>
+                      {t('classes.table.actions')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-slate-100'>
+                  {classes.map((c) => {
+                    const cfg = CLASS_STATUS_CONFIG[c.status] ?? CLASS_STATUS_CONFIG.normal
+                    return (
+                      <tr key={c.id} className='hover:bg-slate-50 transition-colors'>
+                        <td className='px-6 py-4'>
+                          <p className='font-medium text-slate-900'>{c.class_date}</p>
+                          {c.class_time && (
+                            <p className='text-xs text-slate-400'>{c.class_time.slice(0, 5)}</p>
+                          )}
+                        </td>
+                        <td className='px-6 py-4'>
+                          <div className='flex items-center gap-2'>
+                            <div className='w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
+                              {(c.client_name ?? '?').slice(0, 2).toUpperCase()}
+                            </div>
+                            <span className='font-medium text-slate-900'>
+                              {c.client_name ?? '—'}
+                            </span>
                           </div>
-                          <span className="font-medium text-slate-900">{c.client_name ?? '—'}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-700">{c.duration_hours}{t('common.units.hoursShort')}</td>
-                      <td className="px-6 py-4 text-slate-700">€{c.hourly_rate}/{t('common.units.hoursShort')}</td>
-                      <td className="px-6 py-4 font-bold text-slate-900">€{(c.total_amount ?? 0).toFixed(2)}</td>
-                      <td className="px-6 py-4">
-                        {c.status !== 'normal' ? (
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${cfg.className}`}>
-                            {t(cfg.label)}
-                          </span>
-                        ) : <span className="text-slate-300 text-xs">—</span>}
-                      </td>
-                      <td className="px-6 py-4 text-slate-500 text-sm max-w-[160px] truncate">{c.notes ?? '—'}</td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <span
-                            title={c.google_calendar_id ? t('classes.gcalSynced') : t('classes.gcalNotSynced')}
-                            className={`material-symbols-outlined text-base ${c.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
-                          >
-                            {c.google_calendar_id ? 'event_available' : 'calendar_month'}
-                          </span>
-                          <button
-                            onClick={() => setEditingClass(c)}
-                            className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-base">edit</span>
-                          </button>
-                          <button
-                            onClick={() => requestDelete(c.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-base">delete</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td className='px-6 py-4 text-slate-700'>
+                          {c.duration_hours}
+                          {t('common.units.hoursShort')}
+                        </td>
+                        <td className='px-6 py-4 text-slate-700'>
+                          €{c.hourly_rate}/{t('common.units.hoursShort')}
+                        </td>
+                        <td className='px-6 py-4 font-bold text-slate-900'>
+                          €{(c.total_amount ?? 0).toFixed(2)}
+                        </td>
+                        <td className='px-6 py-4'>
+                          {c.status !== 'normal' ? (
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${cfg.className}`}
+                            >
+                              {t(cfg.label)}
+                            </span>
+                          ) : (
+                            <span className='text-slate-300 text-xs'>—</span>
+                          )}
+                        </td>
+                        <td className='px-6 py-4 text-slate-500 text-sm max-w-[160px] truncate'>
+                          {c.notes ?? '—'}
+                        </td>
+                        <td className='px-6 py-4 text-right'>
+                          <div className='flex items-center justify-end gap-1'>
+                            <span
+                              title={
+                                c.google_calendar_id
+                                  ? t('classes.gcalSynced')
+                                  : t('classes.gcalNotSynced')
+                              }
+                              className={`material-symbols-outlined text-base ${c.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
+                            >
+                              {c.google_calendar_id ? 'event_available' : 'calendar_month'}
+                            </span>
+                            <button
+                              onClick={() => setEditingClass(c)}
+                              className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
+                            >
+                              <span className='material-symbols-outlined text-base'>edit</span>
+                            </button>
+                            <button
+                              onClick={() => requestDelete(c.id)}
+                              className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+                            >
+                              <span className='material-symbols-outlined text-base'>delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              page={page}
+              pageCount={pageCount}
+              totalCount={totalCount}
+              onPage={goToPage}
+            />
           </div>
-          <Pagination page={page} pageCount={pageCount} totalCount={totalCount} onPage={goToPage} />
-        </div>
+        )
       )}
 
       {/* Day detail modal */}
@@ -258,7 +337,7 @@ export function Classes() {
         isOpen={!!dayDetailDate}
         onClose={() => setDayDetailDate(null)}
         title={dayDetailDate ? formatDayTitle(dayDetailDate) : ''}
-        size="lg"
+        size='lg'
       >
         {dayDetailDate && (
           <DayView
@@ -266,22 +345,30 @@ export function Classes() {
             classes={dayDetailClasses}
             onEdit={(c) => setEditingClass(c)}
             onNewClass={handleNewClassFromCalendar}
-            onDelete={async (id) => { requestDelete(id) }}
+            onDelete={async (id) => {
+              requestDelete(id)
+            }}
           />
         )}
       </Modal>
 
       <Modal
         isOpen={showCreateModal}
-        onClose={() => { setShowCreateModal(false); setNewClassDate(null) }}
+        onClose={() => {
+          setShowCreateModal(false)
+          setNewClassDate(null)
+        }}
         title={t('classes.newClass')}
-        size="lg"
+        size='lg'
       >
         <ClassForm
           clients={clients}
           initial={newClassDate ? { class_date: newClassDate } : undefined}
           onSave={handleCreate}
-          onCancel={() => { setShowCreateModal(false); setNewClassDate(null) }}
+          onCancel={() => {
+            setShowCreateModal(false)
+            setNewClassDate(null)
+          }}
         />
       </Modal>
 
@@ -289,7 +376,7 @@ export function Classes() {
         isOpen={!!editingClass}
         onClose={() => setEditingClass(null)}
         title={t('classes.editClass')}
-        size="lg"
+        size='lg'
       >
         {editingClass && (
           <ClassForm
@@ -297,7 +384,9 @@ export function Classes() {
             clients={clients}
             onSave={handleUpdate}
             onCancel={() => setEditingClass(null)}
-            onDelete={async () => { requestDelete(editingClass.id) }}
+            onDelete={async () => {
+              requestDelete(editingClass.id)
+            }}
           />
         )}
       </Modal>
@@ -305,7 +394,10 @@ export function Classes() {
       <ConfirmModal
         isOpen={pendingDeleteId !== null}
         message={t('classes.deleteConfirm')}
-        onConfirm={async () => { await confirmDelete(); setEditingClass(null) }}
+        onConfirm={async () => {
+          await confirmDelete()
+          setEditingClass(null)
+        }}
         onCancel={cancelDelete}
       />
     </div>

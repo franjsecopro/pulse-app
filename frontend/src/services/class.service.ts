@@ -1,8 +1,14 @@
-import { api } from './api'
 import type { ClassSession } from '../types'
+import { api } from './api'
 
 export const classService = {
-  getAll: (params?: { client_id?: number; month?: number; year?: number; limit?: number; offset?: number }) => {
+  getAll: (params?: {
+    client_id?: number
+    month?: number
+    year?: number
+    limit?: number
+    offset?: number
+  }) => {
     const query = new URLSearchParams()
     if (params?.client_id) query.set('client_id', String(params.client_id))
     if (params?.month) query.set('month', String(params.month))
@@ -28,6 +34,5 @@ export const classService = {
 
   delete: (id: number) => api.delete(`/classes/${id}`),
 
-  syncGCal: () =>
-    api.post<{ scheduled: number }>('/classes/sync-gcal', {}),
+  syncGCal: () => api.post<{ scheduled: number }>('/classes/sync-gcal', {}),
 }

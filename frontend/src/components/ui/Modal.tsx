@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 interface ModalProps {
@@ -29,24 +29,27 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   const sizeClass = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' }[size]
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+    <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
+      <button
+        className='absolute inset-0 bg-black/50 backdrop-blur-sm border-0 cursor-default w-full'
         onClick={onClose}
+        aria-label='Close'
       />
-      <div className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClass} max-h-[90vh] overflow-y-auto`}>
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+      <div
+        className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClass} max-h-[90vh] overflow-y-auto`}
+      >
+        <div className='flex items-center justify-between p-6 border-b border-slate-200'>
+          <h2 className='text-lg font-bold text-slate-900'>{title}</h2>
           <button
             onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+            className='p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors'
           >
-            <span className="material-symbols-outlined">close</span>
+            <span className='material-symbols-outlined'>close</span>
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className='p-6'>{children}</div>
       </div>
     </div>,
-    document.body
+    document.body,
   )
 }

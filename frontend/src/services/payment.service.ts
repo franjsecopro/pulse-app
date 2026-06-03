@@ -1,8 +1,15 @@
-import { api } from './api'
 import type { Payment } from '../types'
+import { api } from './api'
 
 export const paymentService = {
-  getAll: (params?: { client_id?: number; month?: number; year?: number; status?: string; limit?: number; offset?: number }) => {
+  getAll: (params?: {
+    client_id?: number
+    month?: number
+    year?: number
+    status?: string
+    limit?: number
+    offset?: number
+  }) => {
     const query = new URLSearchParams()
     if (params?.client_id) query.set('client_id', String(params.client_id))
     if (params?.month) query.set('month', String(params.month))
@@ -24,8 +31,7 @@ export const paymentService = {
     notes?: string | null
   }) => api.post<Payment>('/payments', data),
 
-  update: (id: number, data: Partial<Payment>) =>
-    api.put<Payment>(`/payments/${id}`, data),
+  update: (id: number, data: Partial<Payment>) => api.put<Payment>(`/payments/${id}`, data),
 
   delete: (id: number) => api.delete(`/payments/${id}`),
 }

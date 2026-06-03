@@ -1,10 +1,10 @@
+import type { Alert, DashboardSummary, UpcomingClasses } from '../types'
 import { api } from './api'
-import type { DashboardSummary, Alert, UpcomingClasses } from '../types'
 
 function buildQuery(params: Record<string, number | undefined>): string {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined)
   if (entries.length === 0) return ''
-  return '?' + entries.map(([k, v]) => `${k}=${v}`).join('&')
+  return `?${entries.map(([k, v]) => `${k}=${v}`).join('&')}`
 }
 
 export const dashboardService = {
@@ -14,6 +14,5 @@ export const dashboardService = {
   getAlerts: (month?: number, year?: number) =>
     api.get<Alert[]>(`/dashboard/alerts${buildQuery({ month, year })}`),
 
-  getUpcoming: () =>
-    api.get<UpcomingClasses>('/dashboard/upcoming'),
+  getUpcoming: () => api.get<UpcomingClasses>('/dashboard/upcoming'),
 }

@@ -8,12 +8,11 @@
  *  - requestDelete / cancelDelete / confirmDelete manage pendingDeleteId
  *    (same pattern as useClasses — no window.confirm)
  */
-import { renderHook, waitFor, act } from '@testing-library/react'
-import { vi, describe, it, expect, beforeEach } from 'vitest'
-import { usePayments } from './usePayments'
-import { paymentService } from '../services/payment.service'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { clientService } from '../services/client.service'
-import { accountingService } from '../services/accounting.service'
+import { paymentService } from '../services/payment.service'
+import { usePayments } from './usePayments'
 
 vi.mock('../context/ToastContext', () => ({
   useToast: () => ({ addToast: vi.fn() }),
@@ -21,10 +20,10 @@ vi.mock('../context/ToastContext', () => ({
 
 vi.mock('../services/payment.service', () => ({
   paymentService: {
-    getAll:  vi.fn(),
-    create:  vi.fn(),
-    update:  vi.fn(),
-    delete:  vi.fn(),
+    getAll: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
@@ -41,11 +40,11 @@ vi.mock('../services/accounting.service', () => ({
 }))
 
 const mockGetAllPayments = vi.mocked(paymentService.getAll)
-const mockGetAllClients  = vi.mocked(clientService.getAll)
+const mockGetAllClients = vi.mocked(clientService.getAll)
 
 const defaults = {
-  filterMonth:  '' as const,
-  filterYear:   2026,
+  filterMonth: '' as const,
+  filterYear: 2026,
   filterClient: '' as const,
   filterStatus: '',
 }
@@ -56,7 +55,6 @@ beforeEach(() => {
   mockGetAllClients.mockResolvedValue([])
 })
 
-
 // ─── month / year coupling ───────────────────────────────────────────────────
 
 describe('month/year filter coupling', () => {
@@ -65,8 +63,8 @@ describe('month/year filter coupling', () => {
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
-        expect.objectContaining({ month: undefined, year: undefined })
-      )
+        expect.objectContaining({ month: undefined, year: undefined }),
+      ),
     )
   })
 
@@ -75,12 +73,11 @@ describe('month/year filter coupling', () => {
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
-        expect.objectContaining({ month: 4, year: 2026 })
-      )
+        expect.objectContaining({ month: 4, year: 2026 }),
+      ),
     )
   })
 })
-
 
 // ─── optional filter forwarding ──────────────────────────────────────────────
 
@@ -89,9 +86,7 @@ describe('optional filter forwarding', () => {
     renderHook(() => usePayments({ ...defaults, filterClient: 10 }))
 
     await waitFor(() =>
-      expect(mockGetAllPayments).toHaveBeenCalledWith(
-        expect.objectContaining({ client_id: 10 })
-      )
+      expect(mockGetAllPayments).toHaveBeenCalledWith(expect.objectContaining({ client_id: 10 })),
     )
   })
 
@@ -100,8 +95,8 @@ describe('optional filter forwarding', () => {
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
-        expect.objectContaining({ client_id: undefined })
-      )
+        expect.objectContaining({ client_id: undefined }),
+      ),
     )
   })
 
@@ -110,8 +105,8 @@ describe('optional filter forwarding', () => {
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'confirmed' })
-      )
+        expect.objectContaining({ status: 'confirmed' }),
+      ),
     )
   })
 
@@ -120,12 +115,11 @@ describe('optional filter forwarding', () => {
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
-        expect.objectContaining({ status: undefined })
-      )
+        expect.objectContaining({ status: undefined }),
+      ),
     )
   })
 })
-
 
 // ─── pendingDeleteId ─────────────────────────────────────────────────────────
 
@@ -158,16 +152,12 @@ describe('requestDelete / cancelDelete', () => {
   })
 })
 
-
 // ─── totalAmount ─────────────────────────────────────────────────────────────
 
 describe('totalAmount', () => {
   it('sums all payment amounts', async () => {
     mockGetAllPayments.mockResolvedValue({
-      data: [
-        { id: 1, amount: 100.0 } as any,
-        { id: 2, amount:  50.0 } as any,
-      ],
+      data: [{ id: 1, amount: 100.0 } as any, { id: 2, amount: 50.0 } as any],
       total: 2,
     })
 

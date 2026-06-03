@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
-import { clientService } from '../services/client.service'
+import { useCallback, useEffect, useState } from 'react'
 import { useToast } from '../context/ToastContext'
+import { clientService } from '../services/client.service'
 import type { Client, Contract, PaymentIdentifier } from '../types'
 
 type FilterActive = 'all' | 'active' | 'archived'
@@ -43,7 +43,9 @@ export function useClients(search: string, filterActive: FilterActive) {
     loadClients()
   }, [loadClients])
 
-  const createClient = async (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>) => {
+  const createClient = async (
+    data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>,
+  ) => {
     try {
       await clientService.create(data)
       addToast('toasts.clientCreated', 'success')
@@ -94,11 +96,11 @@ export function useClients(search: string, filterActive: FilterActive) {
   }
 
   const updateClientContracts = (clientId: number, contracts: Contract[]) => {
-    setClients(prev => prev.map(c => c.id === clientId ? { ...c, contracts } : c))
+    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, contracts } : c)))
   }
 
   const updateClientPayers = (clientId: number, payers: PaymentIdentifier[]) => {
-    setClients(prev => prev.map(c => c.id === clientId ? { ...c, payers } : c))
+    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, payers } : c)))
   }
 
   return {

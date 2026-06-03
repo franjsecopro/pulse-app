@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest'
-import { formatDate, formatHours, formatCurrency, calcDuration, formatTimeRange } from './formatters'
+import { describe, expect, it } from 'vitest'
+import {
+  calcDuration,
+  formatCurrency,
+  formatDate,
+  formatHours,
+  formatTimeRange,
+} from './formatters'
 
 // ─── formatDate ───────────────────────────────────────────────────────────────
 

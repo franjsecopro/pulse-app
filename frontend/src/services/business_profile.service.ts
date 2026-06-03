@@ -1,5 +1,5 @@
-import { api } from './api'
 import type { BusinessProfile } from '../types'
+import { api } from './api'
 
 export const businessProfileService = {
   get: () => api.get<BusinessProfile>('/business-profile'),

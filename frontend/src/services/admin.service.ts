@@ -1,5 +1,5 @@
+import type { AdminClient, User } from '../types'
 import { api } from './api'
-import type { User, AdminClient } from '../types'
 
 interface AdminUser {
   id: number

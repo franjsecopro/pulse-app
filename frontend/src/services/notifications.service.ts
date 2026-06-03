@@ -1,5 +1,5 @@
-import { api } from './api'
 import type { AppNotification, NotificationSettings } from '../types'
+import { api } from './api'
 
 export const notificationsService = {
   getPending(): Promise<AppNotification[]> {

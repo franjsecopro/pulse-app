@@ -1,13 +1,12 @@
-import { api } from './api'
-import type { User } from '../types'
 import type { Locale } from '../i18n'
+import type { User } from '../types'
+import { api } from './api'
 
 export const authService = {
   register: (email: string, password: string) =>
     api.post<User>('/auth/register', { email, password }),
 
-  login: (email: string, password: string) =>
-    api.post<User>('/auth/login', { email, password }),
+  login: (email: string, password: string) => api.post<User>('/auth/login', { email, password }),
 
   getMe: () => api.get<User>('/auth/me'),
 

@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { useTranslation } from '../i18n'
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react'
+import { type Locale, STORAGE_KEY, useTranslation } from '../i18n'
 import { authService } from '../services/auth.service'
-import { type Locale, STORAGE_KEY } from '../i18n'
 import type { User } from '../types'
 
 interface AuthContextValue {
@@ -75,7 +74,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const realEmail = user?.real_email ?? null
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isDemoActive, realEmail, login, register, logout, reloadUser: loadCurrentUser, setLocale }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isDemoActive,
+        realEmail,
+        login,
+        register,
+        logout,
+        reloadUser: loadCurrentUser,
+        setLocale,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

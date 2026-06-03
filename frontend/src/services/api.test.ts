@@ -10,8 +10,8 @@
  *  - post (JSON) still sets application/json — regression guard for the
  *    isFormData branch added to requestFull
  */
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { api, ApiError } from './api'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ApiError, api } from './api'
 
 const fetchMock = vi.fn()
 
@@ -33,7 +33,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals()
 })
-
 
 // ─── FormData content-type handling ──────────────────────────────────────────
 
@@ -62,15 +61,14 @@ describe('postForm', () => {
   })
 })
 
-
 // ─── 401 refresh flow on uploads ─────────────────────────────────────────────
 
 describe('postForm session refresh', () => {
   it('refreshes the session and retries once on 401', async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ detail: 'unauthorized' }, 401)) // upload #1
-      .mockResolvedValueOnce({ ok: true } as Response)                       // refresh
-      .mockResolvedValueOnce(jsonResponse([{ ok: true }]))                   // upload retry
+      .mockResolvedValueOnce({ ok: true } as Response) // refresh
+      .mockResolvedValueOnce(jsonResponse([{ ok: true }])) // upload retry
 
     const result = await api.postForm('/imports/statement', new FormData())
 
@@ -82,18 +80,19 @@ describe('postForm session refresh', () => {
   it('dispatches session-expired and throws ApiError when refresh fails', async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ detail: 'unauthorized' }, 401)) // upload
-      .mockResolvedValueOnce({ ok: false } as Response)                      // refresh fails
+      .mockResolvedValueOnce({ ok: false } as Response) // refresh fails
 
     const onExpired = vi.fn()
     window.addEventListener('session-expired', onExpired)
 
-    await expect(api.postForm('/imports/statement', new FormData())).rejects.toBeInstanceOf(ApiError)
+    await expect(api.postForm('/imports/statement', new FormData())).rejects.toBeInstanceOf(
+      ApiError,
+    )
     expect(onExpired).toHaveBeenCalledOnce()
 
     window.removeEventListener('session-expired', onExpired)
   })
 })
-
 
 // ─── JSON requests unaffected by the isFormData branch ───────────────────────
 

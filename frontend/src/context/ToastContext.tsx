@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react'
 import { useTranslation } from '../i18n'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -32,9 +32,9 @@ const TOAST_DURATION_MS = 4000
 
 const CONFIG: Record<ToastType, { icon: string; bar: string; text: string }> = {
   success: { icon: 'check_circle', bar: 'bg-emerald-500', text: 'text-emerald-600' },
-  error:   { icon: 'error',        bar: 'bg-red-500',     text: 'text-red-600'     },
-  warning: { icon: 'warning',      bar: 'bg-amber-500',   text: 'text-amber-600'   },
-  info:    { icon: 'info',         bar: 'bg-primary',     text: 'text-primary'     },
+  error: { icon: 'error', bar: 'bg-red-500', text: 'text-red-600' },
+  warning: { icon: 'warning', bar: 'bg-amber-500', text: 'text-amber-600' },
+  info: { icon: 'info', bar: 'bg-primary', text: 'text-primary' },
 }
 
 // ─── Single toast item ────────────────────────────────────────────────────────
@@ -49,24 +49,22 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
   }, [toast.id, onDismiss])
 
   return (
-    <div className="relative flex items-start gap-3 bg-white border border-slate-200 rounded-xl shadow-lg px-4 py-3 min-w-[280px] max-w-sm overflow-hidden">
+    <div className='relative flex items-start gap-3 bg-white border border-slate-200 rounded-xl shadow-lg px-4 py-3 min-w-[280px] max-w-sm overflow-hidden'>
       {/* Colored left bar */}
       <div className={`absolute left-0 inset-y-0 w-1 rounded-l-xl ${bar}`} />
 
-      <span className={`material-symbols-outlined text-xl shrink-0 mt-0.5 ${text}`}>
-        {icon}
-      </span>
+      <span className={`material-symbols-outlined text-xl shrink-0 mt-0.5 ${text}`}>{icon}</span>
 
-      <p className="text-sm font-medium text-slate-800 flex-1 leading-snug pt-0.5">
+      <p className='text-sm font-medium text-slate-800 flex-1 leading-snug pt-0.5'>
         {t(toast.message, { count: toast.count })}
       </p>
 
       <button
         onClick={() => onDismiss(toast.id)}
-        className="shrink-0 text-slate-400 hover:text-slate-600 transition-colors mt-0.5"
+        className='shrink-0 text-slate-400 hover:text-slate-600 transition-colors mt-0.5'
         aria-label={t('actions.close')}
       >
-        <span className="material-symbols-outlined text-base">close</span>
+        <span className='material-symbols-outlined text-base'>close</span>
       </button>
     </div>
   )
@@ -79,11 +77,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const addToast = useCallback((message: string, type: ToastType = 'info', count?: number) => {
     const id = `${Date.now()}-${Math.random()}`
-    setToasts(prev => [...prev, { id, type, message, count }])
+    setToasts((prev) => [...prev, { id, type, message, count }])
   }, [])
 
   const dismiss = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id))
+    setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
   return (
@@ -92,12 +90,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
       {/* Toast container — top-right, above everything */}
       <div
-        className="fixed top-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none"
-        aria-live="polite"
-        aria-atomic="false"
+        className='fixed top-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none'
+        aria-live='polite'
+        aria-atomic='false'
       >
-        {toasts.map(toast => (
-          <div key={toast.id} className="pointer-events-auto">
+        {toasts.map((toast) => (
+          <div key={toast.id} className='pointer-events-auto'>
             <ToastItem toast={toast} onDismiss={dismiss} />
           </div>
         ))}

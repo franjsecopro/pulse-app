@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
-import { paymentService } from '../services/payment.service'
-import { clientService } from '../services/client.service'
-import { accountingService } from '../services/accounting.service'
+import { useCallback, useEffect, useState } from 'react'
 import { useToast } from '../context/ToastContext'
-import type { Payment, Client, StatementImportRecord } from '../types'
+import { accountingService } from '../services/accounting.service'
+import { clientService } from '../services/client.service'
+import { paymentService } from '../services/payment.service'
+import type { Client, Payment, StatementImportRecord } from '../types'
 
 const PAGE_LIMIT = 100
 
@@ -14,7 +14,12 @@ interface UsePaymentsFilters {
   filterStatus: string
 }
 
-export function usePayments({ filterMonth, filterYear, filterClient, filterStatus }: UsePaymentsFilters) {
+export function usePayments({
+  filterMonth,
+  filterYear,
+  filterClient,
+  filterStatus,
+}: UsePaymentsFilters) {
   const { addToast } = useToast()
 
   const [payments, setPayments] = useState<Payment[]>([])
@@ -26,21 +31,24 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   const [page, setPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
 
-  const loadPayments = useCallback(async (targetPage = 1) => {
-    setIsLoading(true)
-    const { data, total } = await paymentService.getAll({
-      month: filterMonth || undefined,
-      year: filterMonth ? filterYear : undefined,
-      client_id: filterClient || undefined,
-      status: filterStatus || undefined,
-      limit: PAGE_LIMIT,
-      offset: (targetPage - 1) * PAGE_LIMIT,
-    })
-    setPayments(data)
-    setTotalCount(total)
-    setPage(targetPage)
-    setIsLoading(false)
-  }, [filterMonth, filterYear, filterClient, filterStatus])
+  const loadPayments = useCallback(
+    async (targetPage = 1) => {
+      setIsLoading(true)
+      const { data, total } = await paymentService.getAll({
+        month: filterMonth || undefined,
+        year: filterMonth ? filterYear : undefined,
+        client_id: filterClient || undefined,
+        status: filterStatus || undefined,
+        limit: PAGE_LIMIT,
+        offset: (targetPage - 1) * PAGE_LIMIT,
+      })
+      setPayments(data)
+      setTotalCount(total)
+      setPage(targetPage)
+      setIsLoading(false)
+    },
+    [filterMonth, filterYear, filterClient, filterStatus],
+  )
 
   useEffect(() => {
     clientService.getAll().then(setClients)
@@ -54,7 +62,8 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
 
   const loadStatementHistory = useCallback(() => {
     setIsStatementHistoryLoading(true)
-    accountingService.getStatementHistory()
+    accountingService
+      .getStatementHistory()
       .then(setStatementHistory)
       .finally(() => setIsStatementHistoryLoading(false))
   }, [])

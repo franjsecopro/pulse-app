@@ -6,11 +6,11 @@
  *  - totalRevenue sums class total_amounts (null treated as 0)
  *  - filters (month, year, client) are forwarded to classService.getAll
  */
-import { renderHook, waitFor, act } from '@testing-library/react'
-import { vi, describe, it, expect, beforeEach } from 'vitest'
-import { useClasses } from './useClasses'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
+import { useClasses } from './useClasses'
 
 vi.mock('../context/ToastContext', () => ({
   useToast: () => ({ addToast: vi.fn() }),
@@ -18,11 +18,11 @@ vi.mock('../context/ToastContext', () => ({
 
 vi.mock('../services/class.service', () => ({
   classService: {
-    getAll:    vi.fn(),
-    create:    vi.fn(),
-    update:    vi.fn(),
-    delete:    vi.fn(),
-    syncGCal:  vi.fn(),
+    getAll: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    syncGCal: vi.fn(),
   },
 }))
 
@@ -32,8 +32,8 @@ vi.mock('../services/client.service', () => ({
   },
 }))
 
-const mockGetAllClasses  = vi.mocked(classService.getAll)
-const mockGetAllClients  = vi.mocked(clientService.getAll)
+const mockGetAllClasses = vi.mocked(classService.getAll)
+const mockGetAllClients = vi.mocked(clientService.getAll)
 
 const defaultFilters = { filterMonth: 4, filterYear: 2026, filterClient: '' as const }
 
@@ -42,7 +42,6 @@ beforeEach(() => {
   mockGetAllClasses.mockResolvedValue({ data: [], total: 0 })
   mockGetAllClients.mockResolvedValue([])
 })
-
 
 // ─── pendingDeleteId ─────────────────────────────────────────────────────────
 
@@ -75,16 +74,12 @@ describe('requestDelete / cancelDelete', () => {
   })
 })
 
-
 // ─── totalRevenue ─────────────────────────────────────────────────────────────
 
 describe('totalRevenue', () => {
   it('sums total_amount across all loaded classes', async () => {
     mockGetAllClasses.mockResolvedValue({
-      data: [
-        { id: 1, total_amount: 40.0 } as any,
-        { id: 2, total_amount: 20.0 } as any,
-      ],
+      data: [{ id: 1, total_amount: 40.0 } as any, { id: 2, total_amount: 20.0 } as any],
       total: 2,
     })
 
@@ -97,10 +92,7 @@ describe('totalRevenue', () => {
 
   it('treats null total_amount as 0', async () => {
     mockGetAllClasses.mockResolvedValue({
-      data: [
-        { id: 1, total_amount: null  } as any,
-        { id: 2, total_amount: 30.0 } as any,
-      ],
+      data: [{ id: 1, total_amount: null } as any, { id: 2, total_amount: 30.0 } as any],
       total: 2,
     })
 
@@ -120,7 +112,6 @@ describe('totalRevenue', () => {
   })
 })
 
-
 // ─── filter forwarding ───────────────────────────────────────────────────────
 
 describe('filter forwarding to classService.getAll', () => {
@@ -129,8 +120,8 @@ describe('filter forwarding to classService.getAll', () => {
 
     await waitFor(() =>
       expect(mockGetAllClasses).toHaveBeenCalledWith(
-        expect.objectContaining({ month: 5, year: 2026, client_id: 10 })
-      )
+        expect.objectContaining({ month: 5, year: 2026, client_id: 10 }),
+      ),
     )
   })
 
@@ -139,8 +130,8 @@ describe('filter forwarding to classService.getAll', () => {
 
     await waitFor(() =>
       expect(mockGetAllClasses).toHaveBeenCalledWith(
-        expect.objectContaining({ client_id: undefined })
-      )
+        expect.objectContaining({ client_id: undefined }),
+      ),
     )
   })
 })

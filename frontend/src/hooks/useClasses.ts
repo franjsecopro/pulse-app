@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useToast } from '../context/ToastContext'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
-import { useToast } from '../context/ToastContext'
 import type { ClassSession, Client } from '../types'
 
 const PAGE_LIMIT = 100
@@ -23,20 +23,23 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
   const [page, setPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
 
-  const loadClasses = useCallback(async (targetPage = 1) => {
-    setIsLoading(true)
-    const { data, total } = await classService.getAll({
-      month: filterMonth,
-      year: filterYear,
-      client_id: filterClient || undefined,
-      limit: PAGE_LIMIT,
-      offset: (targetPage - 1) * PAGE_LIMIT,
-    })
-    setClasses(data)
-    setTotalCount(total)
-    setPage(targetPage)
-    setIsLoading(false)
-  }, [filterMonth, filterYear, filterClient])
+  const loadClasses = useCallback(
+    async (targetPage = 1) => {
+      setIsLoading(true)
+      const { data, total } = await classService.getAll({
+        month: filterMonth,
+        year: filterYear,
+        client_id: filterClient || undefined,
+        limit: PAGE_LIMIT,
+        offset: (targetPage - 1) * PAGE_LIMIT,
+      })
+      setClasses(data)
+      setTotalCount(total)
+      setPage(targetPage)
+      setIsLoading(false)
+    },
+    [filterMonth, filterYear, filterClient],
+  )
 
   useEffect(() => {
     clientService.getAll().then(setClients)

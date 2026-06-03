@@ -27,8 +27,8 @@ export interface PaymentIdentifier {
 }
 
 export interface DaySchedule {
-  start: string  // "HH:MM"
-  end: string    // "HH:MM"
+  start: string // "HH:MM"
+  end: string // "HH:MM"
 }
 
 export interface Contract {

@@ -1,11 +1,11 @@
-import { useState, useCallback } from 'react'
-import type { Client, Contract } from '../../types'
-import { clientService } from '../../services/client.service'
-import { formatDate, calcDuration, formatHours } from '../../utils/formatters'
+import { useCallback, useState } from 'react'
 import { useTranslation } from '../../i18n'
-import { ContractForm } from './ContractForm'
-import { ContractDetail } from './ContractDetail'
+import { clientService } from '../../services/client.service'
+import type { Client, Contract } from '../../types'
+import { calcDuration, formatDate, formatHours } from '../../utils/formatters'
 import { ConfirmModal } from '../ui/ConfirmModal'
+import { ContractDetail } from './ContractDetail'
+import { ContractForm } from './ContractForm'
 
 interface ContractsManagerProps {
   client: Client
@@ -21,18 +21,20 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
   const [isEditMode, setIsEditMode] = useState(false)
   const [pendingDeleteContractId, setPendingDeleteContractId] = useState<number | null>(null)
 
-  const viewingContract = contracts.find(c => c.id === viewingContractId) ?? null
+  const viewingContract = contracts.find((c) => c.id === viewingContractId) ?? null
 
-  const weekdays = (t('common.weekdays.short', { returnObjects: true }) as string[]).map((label, i) => ({
-    index: String(i),
-    label,
-  }))
+  const weekdays = (t('common.weekdays.short', { returnObjects: true }) as string[]).map(
+    (label, i) => ({
+      index: String(i),
+      label,
+    }),
+  )
 
   const reload = useCallback(async () => {
     const updated = await clientService.getContracts(client.id)
     setContracts(updated)
     onContractsChanged(client.id, updated)
-  }, [client.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [client.id, onContractsChanged]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const openDetail = (contractId: number) => {
     setViewingContractId(contractId)
@@ -70,36 +72,38 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-slate-500 text-sm">
+    <div className='space-y-4'>
+      <div className='flex items-center justify-between'>
+        <p className='text-slate-500 text-sm'>
           {t('contracts.manager.title', { name: client.name })}
         </p>
         <button
-          onClick={() => { setShowNewForm(true); closeDetail() }}
-          className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-hover transition-colors"
+          onClick={() => {
+            setShowNewForm(true)
+            closeDetail()
+          }}
+          className='flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-hover transition-colors'
         >
-          <span className="material-symbols-outlined text-base">add</span> {t('actions.new')}
+          <span className='material-symbols-outlined text-base'>add</span> {t('actions.new')}
         </button>
       </div>
 
       {showNewForm && (
-        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">{t('contracts.new')}</p>
-          <ContractForm
-            onSave={handleCreate}
-            onCancel={() => setShowNewForm(false)}
-          />
+        <div className='bg-slate-50 rounded-xl border border-slate-200 p-4'>
+          <p className='text-xs font-bold text-slate-500 uppercase tracking-wide mb-3'>
+            {t('contracts.new')}
+          </p>
+          <ContractForm onSave={handleCreate} onCancel={() => setShowNewForm(false)} />
         </div>
       )}
 
       {contracts.length === 0 && !showNewForm ? (
-        <div className="text-center py-8 text-slate-400">
-          <span className="material-symbols-outlined text-3xl block mb-2">description</span>
+        <div className='text-center py-8 text-slate-400'>
+          <span className='material-symbols-outlined text-3xl block mb-2'>description</span>
           {t('contracts.manager.empty')}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className='space-y-2'>
           {contracts.map((c) => (
             <div key={c.id}>
               <div
@@ -111,27 +115,44 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                       : 'rounded-xl border-slate-100 bg-slate-50 opacity-60'
                 }`}
               >
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-slate-900 text-sm">{c.description}</p>
-                  <p className="text-xs text-slate-500">
-                    €{c.hourly_rate}/h · {t('contracts.manager.since', { date: formatDate(c.start_date) })}
-                    {c.end_date ? ` ${t('contracts.manager.until', { date: formatDate(c.end_date) })}` : ''}
+                <div className='min-w-0 flex-1'>
+                  <p className='font-semibold text-slate-900 text-sm'>{c.description}</p>
+                  <p className='text-xs text-slate-500'>
+                    €{c.hourly_rate}/h ·{' '}
+                    {t('contracts.manager.since', { date: formatDate(c.start_date) })}
+                    {c.end_date
+                      ? ` ${t('contracts.manager.until', { date: formatDate(c.end_date) })}`
+                      : ''}
                   </p>
                   {c.schedule_days && Object.keys(c.schedule_days).length > 0 && (
-                    <p className="text-xs text-primary/70 mt-0.5">
-                      {weekdays.filter(d => d.index in c.schedule_days!).map(d => d.label).join(', ')}
+                    <p className='text-xs text-primary/70 mt-0.5'>
+                      {weekdays
+                        .filter((d) => d.index in c.schedule_days!)
+                        .map((d) => d.label)
+                        .join(', ')}
                       {' · '}
-                      {formatHours(Object.values(c.schedule_days).reduce((s, d) => s + calcDuration(d.start, d.end), 0))}/semana
+                      {formatHours(
+                        Object.values(c.schedule_days).reduce(
+                          (s, d) => s + calcDuration(d.start, d.end),
+                          0,
+                        ),
+                      )}
+                      /semana
                     </p>
                   )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {c.is_active
-                    ? <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">{t('contracts.status.active')}</span>
-                    : <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{t('contracts.status.inactive')}</span>
-                  }
+                <div className='flex items-center gap-2 shrink-0'>
+                  {c.is_active ? (
+                    <span className='text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full'>
+                      {t('contracts.status.active')}
+                    </span>
+                  ) : (
+                    <span className='text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full'>
+                      {t('contracts.status.inactive')}
+                    </span>
+                  )}
                   <button
-                    onClick={() => viewingContractId === c.id ? closeDetail() : openDetail(c.id)}
+                    onClick={() => (viewingContractId === c.id ? closeDetail() : openDetail(c.id))}
                     className={`p-1.5 rounded-lg transition-colors ${
                       viewingContractId === c.id
                         ? 'text-primary bg-primary/10'
@@ -139,22 +160,22 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                     }`}
                     title={t('contracts.viewDetail')}
                   >
-                    <span className="material-symbols-outlined text-base">
+                    <span className='material-symbols-outlined text-base'>
                       {viewingContractId === c.id ? 'expand_less' : 'expand_more'}
                     </span>
                   </button>
                   <button
                     onClick={() => setPendingDeleteContractId(c.id)}
-                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                     title={t('contracts.deleteTooltip')}
                   >
-                    <span className="material-symbols-outlined text-base">delete</span>
+                    <span className='material-symbols-outlined text-base'>delete</span>
                   </button>
                 </div>
               </div>
 
               {viewingContractId === c.id && viewingContract && (
-                <div className="bg-slate-50 rounded-b-xl border-x border-b border-primary/30 p-4">
+                <div className='bg-slate-50 rounded-b-xl border-x border-b border-primary/30 p-4'>
                   <ContractDetail
                     contract={viewingContract}
                     clientId={client.id}
@@ -171,10 +192,10 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
         </div>
       )}
 
-      <div className="flex justify-end pt-2">
+      <div className='flex justify-end pt-2'>
         <button
           onClick={onClose}
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+          className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
         >
           {t('actions.close')}
         </button>

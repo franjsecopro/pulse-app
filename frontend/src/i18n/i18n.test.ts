@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import i18n, { SUPPORTED_LOCALES, isSupportedLocale, DEFAULT_LOCALE } from './index'
+import { beforeEach, describe, expect, it } from 'vitest'
+import i18n, { DEFAULT_LOCALE, isSupportedLocale, SUPPORTED_LOCALES } from './index'
 
 describe('i18n config', () => {
   beforeEach(async () => {

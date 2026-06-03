@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { ClassSession } from '../../types'
 import { useTranslation } from '../../i18n'
+import type { ClassSession } from '../../types'
 import { formatTimeRange } from '../../utils/formatters'
 
 const CLIENT_COLORS = [
@@ -73,19 +73,22 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
   const weekdays: string[] = t('common.weekdays.short', { returnObjects: true }) as string[]
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
-        {weekdays.map(d => (
-          <div key={d} className="py-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+    <div className='bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden'>
+      <div className='grid grid-cols-7 border-b border-slate-200 bg-slate-50'>
+        {weekdays.map((d) => (
+          <div
+            key={d}
+            className='py-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider'
+          >
             {d}
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 divide-x divide-y divide-slate-100">
+      <div className='grid grid-cols-7 divide-x divide-y divide-slate-100'>
         {cells.map((day, i) => {
           if (!day) {
-            return <div key={`empty-${i}`} className="h-[110px] bg-slate-50/40" />
+            return <div key={`empty-${i}`} className='h-[110px] bg-slate-50/40' />
           }
           const key = dateStr(day)
           const dayClasses = byDate[key] ?? []
@@ -96,25 +99,27 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           return (
             <div
               key={key}
-              className="h-[110px] p-1.5 flex flex-col gap-1 hover:bg-slate-50/60 transition-colors group relative"
+              className='h-[110px] p-1.5 flex flex-col gap-1 hover:bg-slate-50/60 transition-colors group relative'
             >
-              <div className="flex items-center justify-between">
-                <span
+              <div className='flex items-center justify-between'>
+                <button
                   onClick={() => onDayDetail(key)}
-                  className={`w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full cursor-pointer transition-colors
-                    ${isToday(day)
-                      ? 'bg-primary text-white'
-                      : 'text-slate-600 hover:bg-primary/10 hover:text-primary'}`}
+                  className={`w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full cursor-pointer transition-colors border-0
+                    ${
+                      isToday(day)
+                        ? 'bg-primary text-white'
+                        : 'text-slate-600 hover:bg-primary/10 hover:text-primary'
+                    }`}
                 >
                   {day}
-                </span>
+                </button>
                 {total > 0 && (
-                  <span className="text-[10px] font-bold text-primary">€{total.toFixed(0)}</span>
+                  <span className='text-[10px] font-bold text-primary'>€{total.toFixed(0)}</span>
                 )}
               </div>
 
-              <div className="flex flex-col gap-0.5">
-                {visibleClasses.map(c => (
+              <div className='flex flex-col gap-0.5'>
+                {visibleClasses.map((c) => (
                   <button
                     key={c.id}
                     onClick={() => onEdit(c)}
@@ -128,21 +133,21 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
                 ))}
 
                 {hiddenCount > 0 && (
-                  <span
+                  <button
                     onClick={() => onDayDetail(key)}
-                    className="text-[10px] font-semibold text-slate-400 hover:text-primary cursor-pointer pl-1.5"
+                    className='text-[10px] font-semibold text-slate-400 hover:text-primary cursor-pointer pl-1.5 border-0 bg-transparent'
                   >
                     {t('calendar.moreClasses', { count: hiddenCount })}
-                  </span>
+                  </button>
                 )}
               </div>
 
               <button
                 onClick={() => onNewClass(key)}
-                className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-primary"
+                className='absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-primary'
                 title={t('classes.addOnDay')}
               >
-                <span className="material-symbols-outlined text-sm">add</span>
+                <span className='material-symbols-outlined text-sm'>add</span>
               </button>
             </div>
           )
@@ -158,27 +163,27 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
             transform: 'translateY(-100%)',
             zIndex: 9999,
           }}
-          className="w-48 bg-slate-800 text-white text-[10px] rounded-lg p-2 shadow-xl pointer-events-none"
+          className='w-48 bg-slate-800 text-white text-[10px] rounded-lg p-2 shadow-xl pointer-events-none'
         >
-          <p className="font-bold text-slate-200 truncate">{tooltip.class.client_name}</p>
+          <p className='font-bold text-slate-200 truncate'>{tooltip.class.client_name}</p>
           {tooltip.class.contract_description && (
-            <p className="text-slate-400 truncate">{tooltip.class.contract_description}</p>
+            <p className='text-slate-400 truncate'>{tooltip.class.contract_description}</p>
           )}
           {tooltip.class.class_time ? (
-            <p className="mt-0.5 flex items-center gap-1 font-semibold text-slate-100">
-              <span className="material-symbols-outlined text-[12px]">schedule</span>
+            <p className='mt-0.5 flex items-center gap-1 font-semibold text-slate-100'>
+              <span className='material-symbols-outlined text-[12px]'>schedule</span>
               {formatTimeRange(tooltip.class.class_time, tooltip.class.duration_hours)}
             </p>
           ) : (
-            <p className="mt-0.5 flex items-center gap-1 font-semibold text-amber-400">
-              <span className="material-symbols-outlined text-[12px]">warning</span>
+            <p className='mt-0.5 flex items-center gap-1 font-semibold text-amber-400'>
+              <span className='material-symbols-outlined text-[12px]'>warning</span>
               Sin hora
             </p>
           )}
-          <div className="mt-1 pt-1 border-t border-slate-700 flex justify-between gap-2">
+          <div className='mt-1 pt-1 border-t border-slate-700 flex justify-between gap-2'>
             <span>{tooltip.class.duration_hours}h</span>
             <span>€{tooltip.class.hourly_rate}/h</span>
-            <span className="font-bold text-emerald-400">
+            <span className='font-bold text-emerald-400'>
               €{(tooltip.class.total_amount ?? 0).toFixed(0)}
             </span>
           </div>

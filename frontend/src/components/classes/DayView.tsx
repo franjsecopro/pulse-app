@@ -1,5 +1,5 @@
-import type { ClassSession } from '../../types'
 import { useTranslation } from '../../i18n'
+import type { ClassSession } from '../../types'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -45,7 +45,7 @@ function assignColumns(classes: ClassSession[]): ColumnedClass[] {
     const start = h + m / 60
     const end = start + c.duration_hours
 
-    let col = columnEnds.findIndex(endTime => endTime <= start)
+    let col = columnEnds.findIndex((endTime) => endTime <= start)
     if (col === -1) {
       col = columnEnds.length
     }
@@ -62,7 +62,7 @@ function assignColumns(classes: ClassSession[]): ColumnedClass[] {
 
   for (const item of result) {
     const overlapping = result.filter(
-      other => other.startFrac < item.endFrac && other.endFrac > item.startFrac
+      (other) => other.startFrac < item.endFrac && other.endFrac > item.startFrac,
     )
     item.totalColumns = overlapping.reduce((max, o) => Math.max(max, o.columnIndex + 1), 1)
   }
@@ -80,21 +80,18 @@ interface DayViewProps {
 
 export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayViewProps) {
   const { t } = useTranslation()
-  const timedClasses = classes.filter(c => c.class_time)
-  const untimedClasses = classes.filter(c => !c.class_time)
+  const timedClasses = classes.filter((c) => c.class_time)
+  const untimedClasses = classes.filter((c) => !c.class_time)
 
-  const startHours = timedClasses.map(c => parseInt(c.class_time!.split(':')[0]))
-  const endHours = timedClasses.map(c => {
+  const startHours = timedClasses.map((c) => parseInt(c.class_time!.split(':')[0]))
+  const endHours = timedClasses.map((c) => {
     const [h, m] = c.class_time!.split(':').map(Number)
     return Math.ceil(h + m / 60 + c.duration_hours)
   })
 
-  const START_HOUR = timedClasses.length > 0
-    ? Math.min(DEFAULT_START, ...startHours)
-    : DEFAULT_START
-  const END_HOUR = timedClasses.length > 0
-    ? Math.max(DEFAULT_END, ...endHours)
-    : DEFAULT_END
+  const START_HOUR =
+    timedClasses.length > 0 ? Math.min(DEFAULT_START, ...startHours) : DEFAULT_START
+  const END_HOUR = timedClasses.length > 0 ? Math.max(DEFAULT_END, ...endHours) : DEFAULT_END
 
   const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => i + START_HOUR)
   const totalHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
@@ -111,33 +108,37 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
   const columnedClasses = assignColumns(timedClasses)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className='flex flex-col gap-4'>
       {untimedClasses.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('dayView.untimed')}</p>
-          {untimedClasses.map(c => (
+        <div className='space-y-1.5'>
+          <p className='text-xs font-bold text-slate-400 uppercase tracking-wider'>
+            {t('dayView.untimed')}
+          </p>
+          {untimedClasses.map((c) => (
             <div
               key={c.id}
               className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${clientColor(c.client_id)}`}
             >
               <div>
-                <span className="font-semibold">{c.contract_description ?? c.client_name}</span>
-                <span className="ml-2 opacity-60 text-xs">{c.duration_hours}h · €{(c.total_amount ?? 0).toFixed(0)}</span>
+                <span className='font-semibold'>{c.contract_description ?? c.client_name}</span>
+                <span className='ml-2 opacity-60 text-xs'>
+                  {c.duration_hours}h · €{(c.total_amount ?? 0).toFixed(0)}
+                </span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className='flex items-center gap-1'>
                 <button
                   onClick={() => onEdit(c)}
-                  className="p-1 rounded hover:bg-black/10 transition-colors text-slate-500 hover:text-slate-800"
+                  className='p-1 rounded hover:bg-black/10 transition-colors text-slate-500 hover:text-slate-800'
                   title={t('classes.edit')}
                 >
-                  <span className="material-symbols-outlined text-sm">edit</span>
+                  <span className='material-symbols-outlined text-sm'>edit</span>
                 </button>
                 <button
                   onClick={() => onDelete(c.id)}
-                  className="p-1 rounded hover:bg-black/10 transition-colors text-red-400 hover:text-red-600"
+                  className='p-1 rounded hover:bg-black/10 transition-colors text-red-400 hover:text-red-600'
                   title={t('classes.delete')}
                 >
-                  <span className="material-symbols-outlined text-sm">delete</span>
+                  <span className='material-symbols-outlined text-sm'>delete</span>
                 </button>
               </div>
             </div>
@@ -145,26 +146,26 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
         </div>
       )}
 
-      <div className="flex gap-2">
-        <div className="flex flex-col shrink-0 w-12" style={{ height: totalHeight }}>
-          {HOURS.map(h => (
+      <div className='flex gap-2'>
+        <div className='flex flex-col shrink-0 w-12' style={{ height: totalHeight }}>
+          {HOURS.map((h) => (
             <div
               key={h}
-              className="shrink-0 flex items-start justify-end pr-2"
+              className='shrink-0 flex items-start justify-end pr-2'
               style={{ height: HOUR_HEIGHT }}
             >
-              <span className="text-[10px] font-medium text-slate-400 -mt-2">
+              <span className='text-[10px] font-medium text-slate-400 -mt-2'>
                 {String(h).padStart(2, '0')}:00
               </span>
             </div>
           ))}
         </div>
 
-        <div className="relative flex-1 border-l border-slate-200" style={{ height: totalHeight }}>
-          {HOURS.map(h => (
+        <div className='relative flex-1 border-l border-slate-200' style={{ height: totalHeight }}>
+          {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute left-0 right-0 border-t border-slate-100"
+              className='absolute left-0 right-0 border-t border-slate-100'
               style={{ top: (h - START_HOUR) * HOUR_HEIGHT }}
             />
           ))}
@@ -186,34 +187,35 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                   width: `calc(${widthPct}% - 4px)`,
                 }}
               >
-                <div
+                <button
                   onClick={() => onEdit(c)}
-                  className="cursor-pointer h-full pr-10"
+                  className='cursor-pointer h-full pr-10 border-0 bg-transparent w-full text-left'
                 >
-                  <p className="text-[11px] font-bold truncate leading-tight">
+                  <p className='text-[11px] font-bold truncate leading-tight'>
                     {c.contract_description ?? c.client_name}
                   </p>
                   {height >= 40 && (
-                    <p className="text-[10px] opacity-70 truncate">
-                      {c.class_time?.slice(0, 5)} · {c.duration_hours}h · €{(c.total_amount ?? 0).toFixed(0)}
+                    <p className='text-[10px] opacity-70 truncate'>
+                      {c.class_time?.slice(0, 5)} · {c.duration_hours}h · €
+                      {(c.total_amount ?? 0).toFixed(0)}
                     </p>
                   )}
-                </div>
+                </button>
 
-                <div className="absolute top-0.5 right-0.5 flex items-center gap-0.5 opacity-0 group-hover/block:opacity-100 transition-opacity">
+                <div className='absolute top-0.5 right-0.5 flex items-center gap-0.5 opacity-0 group-hover/block:opacity-100 transition-opacity'>
                   <button
                     onClick={() => onEdit(c)}
                     title={t('classes.edit')}
-                    className="p-0.5 rounded text-slate-500 hover:text-slate-800 hover:bg-black/10 transition-colors"
+                    className='p-0.5 rounded text-slate-500 hover:text-slate-800 hover:bg-black/10 transition-colors'
                   >
-                    <span className="material-symbols-outlined text-[13px]">edit</span>
+                    <span className='material-symbols-outlined text-[13px]'>edit</span>
                   </button>
                   <button
                     onClick={() => onDelete(c.id)}
                     title={t('classes.delete')}
-                    className="p-0.5 rounded text-red-400 hover:text-red-600 hover:bg-black/10 transition-colors"
+                    className='p-0.5 rounded text-red-400 hover:text-red-600 hover:bg-black/10 transition-colors'
                   >
-                    <span className="material-symbols-outlined text-[13px]">delete</span>
+                    <span className='material-symbols-outlined text-[13px]'>delete</span>
                   </button>
                 </div>
               </div>
@@ -221,8 +223,8 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
           })}
 
           {timedClasses.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-sm text-slate-400">{t('dayView.emptyTimed')}</p>
+            <div className='absolute inset-0 flex items-center justify-center'>
+              <p className='text-sm text-slate-400'>{t('dayView.emptyTimed')}</p>
             </div>
           )}
         </div>
@@ -230,9 +232,9 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
 
       <button
         onClick={() => onNewClass(date)}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-primary/30 text-primary text-sm font-semibold hover:bg-primary/5 transition-colors"
+        className='w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-primary/30 text-primary text-sm font-semibold hover:bg-primary/5 transition-colors'
       >
-        <span className="material-symbols-outlined text-base">add</span>
+        <span className='material-symbols-outlined text-base'>add</span>
         {t('classes.newOnDay')}
       </button>
     </div>

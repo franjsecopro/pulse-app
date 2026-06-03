@@ -1,8 +1,8 @@
-import { Outlet, Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTranslation } from '../../i18n'
-import { Header } from './Header'
 import { DemoSidebar } from './DemoSidebar'
+import { Header } from './Header'
 
 export function AppLayout() {
   const { user, isLoading, isDemoActive } = useAuth()
@@ -10,23 +10,25 @@ export function AppLayout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-light">
-        <span className="material-symbols-outlined text-primary text-4xl animate-spin">sync</span>
+      <div className='min-h-screen flex items-center justify-center bg-background-light'>
+        <span className='material-symbols-outlined text-primary text-4xl animate-spin'>sync</span>
       </div>
     )
   }
 
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to='/login' replace />
 
   return (
-    <div className={`min-h-screen bg-background-light flex flex-col ${isDemoActive ? 'pl-[25px]' : ''}`}>
+    <div
+      className={`min-h-screen bg-background-light flex flex-col ${isDemoActive ? 'pl-[25px]' : ''}`}
+    >
       {isDemoActive && <DemoSidebar />}
       <Header />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+      <main className='flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8'>
         <Outlet />
       </main>
-      <footer className="border-t border-slate-200 bg-white py-4">
-        <p className="text-center text-slate-400 text-xs">
+      <footer className='border-t border-slate-200 bg-white py-4'>
+        <p className='text-center text-slate-400 text-xs'>
           &copy; {new Date().getFullYear()} {t('layout.footer.tagline')}
         </p>
       </footer>
