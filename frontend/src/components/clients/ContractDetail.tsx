@@ -35,7 +35,10 @@ export function ContractDetail({
 
   const hasSchedule = !!(contract.schedule_days && Object.keys(contract.schedule_days).length > 0)
   const weeklyHours = hasSchedule
-    ? Object.values(contract.schedule_days!).reduce((s, d) => s + calcDuration(d.start, d.end), 0)
+    ? Object.values(contract.schedule_days ?? {}).reduce(
+        (s, d) => s + calcDuration(d.start, d.end),
+        0,
+      )
     : 0
 
   const weekdays = (t('common.weekdays.short', { returnObjects: true }) as string[]).map(
@@ -127,9 +130,9 @@ export function ContractDetail({
               </p>
               <div className='flex gap-1.5 flex-wrap mb-1'>
                 {weekdays
-                  .filter((d) => d.index in contract.schedule_days!)
+                  .filter((d) => d.index in (contract.schedule_days ?? {}))
                   .map(({ index, label }) => {
-                    const day = contract.schedule_days![index]
+                    const day = contract.schedule_days?.[index]
                     const duration = calcDuration(day.start, day.end)
                     return (
                       <span

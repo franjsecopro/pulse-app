@@ -205,7 +205,10 @@ export function Settings() {
 
         <div className='px-6 py-5 space-y-4'>
           <div>
-            <label htmlFor='business-name' className='block text-sm font-semibold text-slate-700 mb-1'>
+            <label
+              htmlFor='business-name'
+              className='block text-sm font-semibold text-slate-700 mb-1'
+            >
               {t('settings.fiscal.businessName')}
             </label>
             <input
@@ -228,7 +231,10 @@ export function Settings() {
             />
           </div>
           <div>
-            <label htmlFor='fiscal-address' className='block text-sm font-semibold text-slate-700 mb-1'>
+            <label
+              htmlFor='fiscal-address'
+              className='block text-sm font-semibold text-slate-700 mb-1'
+            >
               {t('settings.fiscal.address')}
             </label>
             <input

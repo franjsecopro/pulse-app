@@ -93,7 +93,10 @@ export function Login() {
               </div>
 
               <div>
-                <label htmlFor='password' className='block text-sm font-semibold text-slate-700 mb-2'>
+                <label
+                  htmlFor='password'
+                  className='block text-sm font-semibold text-slate-700 mb-2'
+                >
                   {t('auth.fields.password')}
                 </label>
                 <div className='relative'>

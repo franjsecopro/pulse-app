@@ -34,14 +34,14 @@ function assignColumns(classes: ClassSession[]): ColumnedClass[] {
       const [h, m] = t.split(':').map(Number)
       return h + m / 60
     }
-    return toFrac(a.class_time!) - toFrac(b.class_time!)
+    return toFrac(a.class_time ?? '') - toFrac(b.class_time ?? '')
   })
 
   const result: ColumnedClass[] = []
   const columnEnds: number[] = []
 
   for (const c of sorted) {
-    const [h, m] = c.class_time!.split(':').map(Number)
+    const [h, m] = (c.class_time ?? '').split(':').map(Number)
     const start = h + m / 60
     const end = start + c.duration_hours
 
@@ -83,9 +83,9 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
   const timedClasses = classes.filter((c) => c.class_time)
   const untimedClasses = classes.filter((c) => !c.class_time)
 
-  const startHours = timedClasses.map((c) => parseInt(c.class_time!.split(':')[0]))
+  const startHours = timedClasses.map((c) => parseInt((c.class_time ?? '').split(':')[0], 10))
   const endHours = timedClasses.map((c) => {
-    const [h, m] = c.class_time!.split(':').map(Number)
+    const [h, m] = (c.class_time ?? '').split(':').map(Number)
     return Math.ceil(h + m / 60 + c.duration_hours)
   })
 
@@ -173,7 +173,7 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
           ))}
 
           {columnedClasses.map(({ class: c, columnIndex, totalColumns }) => {
-            const top = getTop(c.class_time!)
+            const top = getTop(c.class_time ?? '')
             const height = getHeight(c.duration_hours)
             const widthPct = 100 / totalColumns
             const leftPct = columnIndex * widthPct

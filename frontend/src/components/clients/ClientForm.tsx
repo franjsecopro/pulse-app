@@ -92,7 +92,10 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           />
         </div>
         <div>
-          <label htmlFor='client-whatsapp' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='client-whatsapp'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('clients.form.whatsapp')}
           </label>
           <input
@@ -105,7 +108,10 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.whatsappHint')}</p>
         </div>
         <div>
-          <label htmlFor='client-address' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='client-address'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('clients.form.address')}
           </label>
           <input
@@ -116,7 +122,10 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           />
         </div>
         <div>
-          <label htmlFor='client-tax-id' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='client-tax-id'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('clients.form.taxId')}
           </label>
           <input
@@ -129,7 +138,10 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.taxIdHint')}</p>
         </div>
         <div className='sm:col-span-2'>
-          <label htmlFor='client-payment-timing' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='client-payment-timing'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('clients.form.paymentTimingLabel')}
           </label>
           <select

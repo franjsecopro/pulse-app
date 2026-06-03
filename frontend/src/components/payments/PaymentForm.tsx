@@ -45,7 +45,10 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
       )}
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
         <div className='sm:col-span-2'>
-          <label htmlFor='payment-client' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='payment-client'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('payments.form.client')}
           </label>
           <select
@@ -65,7 +68,10 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           </select>
         </div>
         <div>
-          <label htmlFor='payment-amount' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='payment-amount'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('payments.form.amount')} *
           </label>
           <div className='relative'>
@@ -97,7 +103,10 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           />
         </div>
         <div>
-          <label htmlFor='payment-concept' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='payment-concept'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('payments.form.concept')}
           </label>
           <input
@@ -109,7 +118,10 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           />
         </div>
         <div>
-          <label htmlFor='payment-status' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='payment-status'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('payments.form.status')}
           </label>
           <select
@@ -124,7 +136,10 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           </select>
         </div>
         <div className='sm:col-span-2'>
-          <label htmlFor='payment-notes' className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label
+            htmlFor='payment-notes'
+            className='block text-sm font-semibold text-slate-700 mb-1'
+          >
             {t('payments.form.notes')}
           </label>
           <input

@@ -125,7 +125,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             </label>
             <select
               required
-              id='contract' 
+              id='contract'
               value={form.contract_id ?? ''}
               onChange={(e) => handleContractChange(e.target.value)}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'

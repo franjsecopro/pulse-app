@@ -128,7 +128,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                   {c.schedule_days && Object.keys(c.schedule_days).length > 0 && (
                     <p className='text-xs text-primary/70 mt-0.5'>
                       {weekdays
-                        .filter((d) => d.index in c.schedule_days!)
+                        .filter((d) => d.index in (c.schedule_days ?? {}))
                         .map((d) => d.label)
                         .join(', ')}
                       {' · '}

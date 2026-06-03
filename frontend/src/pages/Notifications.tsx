@@ -371,7 +371,11 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
         </h3>
         <div className='flex gap-4'>
           {(['whatsapp', 'email'] as const).map((channel) => (
-            <label htmlFor={`channel-${channel}`} key={channel} className='flex items-center gap-2 cursor-pointer'>
+            <label
+              htmlFor={`channel-${channel}`}
+              key={channel}
+              className='flex items-center gap-2 cursor-pointer'
+            >
               <input
                 type='radio'
                 id={`channel-${channel}`}
