@@ -114,7 +114,13 @@ async def update_me(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    """Update the current user's UI locale preference (BCP 47, e.g. es-ES / fr-FR)."""
+    # Re-load into the active session: get_current_user may hand back an instance
+    # that isn't attached to this request's session (e.g. demo impersonation),
+    # so we fetch the row we are going to mutate.
     user = await db.get(User, current_user.id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     user.locale = data.locale
     await db.commit()
     await db.refresh(user)

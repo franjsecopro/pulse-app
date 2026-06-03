@@ -37,3 +37,10 @@ class TestAuthLocale:
         response = await app_client.patch("/api/auth/me", json={"locale": "de-DE"})
 
         assert response.status_code == 422
+
+    async def test_patch_returns_404_when_user_row_missing(self, app_client: AsyncClient):
+        # No user row seeded: the authenticated identity has no persisted row
+        # (e.g. deleted between token issuance and the request).
+        response = await app_client.patch("/api/auth/me", json={"locale": "fr-FR"})
+
+        assert response.status_code == 404
