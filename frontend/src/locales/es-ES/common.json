@@ -1,0 +1,41 @@
+{
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "status": {
+    "loading": "Cargando…",
+    "empty": "Sin resultados"
+  },
+  "auth": {
+    "login": {
+      "welcome": "Bienvenido",
+      "subtitle": "Gestiona tu contabilidad con confianza",
+      "submit": "Entrar al Dashboard"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "Comienza a gestionar tus clases y pagos",
+      "submit": "Crear cuenta"
+    },
+    "fields": {
+      "email": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "password": "Contraseña"
+    },
+    "passwordHint": "Mínimo 8 caracteres, una mayúscula y un número.",
+    "errorUnexpected": "Error inesperado. Intenta de nuevo.",
+    "toggleToRegister": "¿No tienes cuenta? Regístrate",
+    "toggleToLogin": "¿Ya tienes cuenta? Entra aquí"
+  },
+  "settings": {
+    "language": {
+      "label": "Idioma",
+      "options": {
+        "es-ES": "Español",
+        "fr-FR": "Français"
+      }
+    }
+  }
+}

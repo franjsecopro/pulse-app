@@ -1,0 +1,41 @@
+{
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
+  },
+  "status": {
+    "loading": "Chargement…",
+    "empty": "Aucun résultat"
+  },
+  "auth": {
+    "login": {
+      "welcome": "Bienvenue",
+      "subtitle": "Gérez votre comptabilité en toute confiance",
+      "submit": "Accéder au tableau de bord"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Commencez à gérer vos cours et paiements",
+      "submit": "Créer un compte"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailPlaceholder": "vous@email.com",
+      "password": "Mot de passe"
+    },
+    "passwordHint": "Minimum 8 caractères, une majuscule et un chiffre.",
+    "errorUnexpected": "Erreur inattendue. Réessayez.",
+    "toggleToRegister": "Vous n'avez pas de compte ? Inscrivez-vous",
+    "toggleToLogin": "Vous avez déjà un compte ? Connectez-vous"
+  },
+  "settings": {
+    "language": {
+      "label": "Langue",
+      "options": {
+        "es-ES": "Español",
+        "fr-FR": "Français"
+      }
+    }
+  }
+}
