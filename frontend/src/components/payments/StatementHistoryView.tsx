@@ -97,6 +97,7 @@ export function StatementHistoryView({
               {isAdmin && (
                 <td className='px-4 py-4 text-right'>
                   <button
+                    type='button'
                     onClick={() => onDelete?.(record.id)}
                     title={t('statements.deleteTooltip')}
                     className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'

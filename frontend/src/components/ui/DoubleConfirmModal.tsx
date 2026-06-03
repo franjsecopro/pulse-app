@@ -59,12 +59,14 @@ export function DoubleConfirmModal({
             </div>
             <div className='flex justify-end gap-2 pt-2'>
               <button
+                type='button'
                 onClick={handleCancel}
                 className='px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors'
               >
                 {t('actions.cancel')}
               </button>
               <button
+                type='button'
                 onClick={handleFirstConfirm}
                 className='px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors'
               >
@@ -99,12 +101,14 @@ export function DoubleConfirmModal({
             />
             <div className='flex justify-end gap-2'>
               <button
+                type='button'
                 onClick={handleCancel}
                 className='px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors'
               >
                 {t('actions.cancel')}
               </button>
               <button
+                type='button'
                 onClick={handleFinalConfirm}
                 disabled={typed !== entityName}
                 className='px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors'

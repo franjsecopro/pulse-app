@@ -141,6 +141,7 @@ export function Login() {
 
             <div className='mt-6 text-center'>
               <button
+                type='button'
                 onClick={() => {
                   setMode(mode === 'login' ? 'register' : 'login')
                   setError(null)

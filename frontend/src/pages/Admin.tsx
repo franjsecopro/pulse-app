@@ -135,6 +135,7 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
                       <span className='text-xs text-emerald-600'>{syncResult[user.id]}</span>
                     )}
                     <button
+                      type='button'
                       onClick={() => handleSyncGCal(user)}
                       disabled={syncingId === user.id}
                       title={t('admin.users.syncTooltip')}
@@ -146,6 +147,7 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
                       {syncingId === user.id ? t('admin.users.syncing') : t('admin.users.syncGCal')}
                     </button>
                     <button
+                      type='button'
                       onClick={() => setDeleteTarget(user)}
                       title={t('admin.users.deleteTooltip')}
                       className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors'
@@ -317,6 +319,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                     <div className='flex items-center justify-end gap-2'>
                       {showDemoOnly ? (
                         <button
+                          type='button'
                           onClick={() => handleMoveFromDemo(client)}
                           disabled={movingFromDemo === client.id}
                           className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-indigo-200 rounded-lg text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 transition-colors'
@@ -328,6 +331,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                         </button>
                       ) : (
                         <button
+                          type='button'
                           onClick={() => handleMoveToDemo(client)}
                           disabled={movingToDemo === client.id}
                           className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-orange-200 rounded-lg text-xs font-medium text-orange-600 hover:bg-orange-50 disabled:opacity-50 transition-colors'
@@ -339,6 +343,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                         </button>
                       )}
                       <button
+                        type='button'
                         onClick={() => setDeleteTarget(client)}
                         className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors'
                       >
@@ -434,6 +439,7 @@ function DemoTab({ t }: { t: (key: string, options?: Record<string, unknown>) =>
         <div className='flex flex-wrap gap-2'>
           {isDemoActive ? (
             <button
+              type='button'
               onClick={handleExit}
               disabled={isWorking}
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white text-sm font-medium transition-colors'
@@ -443,6 +449,7 @@ function DemoTab({ t }: { t: (key: string, options?: Record<string, unknown>) =>
             </button>
           ) : (
             <button
+              type='button'
               onClick={handleEnter}
               disabled={isWorking}
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-medium transition-colors'
@@ -453,6 +460,7 @@ function DemoTab({ t }: { t: (key: string, options?: Record<string, unknown>) =>
           )}
 
           <button
+            type='button'
             onClick={() => setConfirmReset(true)}
             disabled={isWorking}
             className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 hover:bg-red-50 disabled:opacity-50 text-red-600 text-sm font-medium transition-colors'
@@ -499,6 +507,7 @@ export function Admin() {
       <div className='flex gap-1 border-b border-slate-200'>
         {tabs.map((t) => (
           <button
+            type='button'
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${

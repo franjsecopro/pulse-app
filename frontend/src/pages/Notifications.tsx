@@ -125,6 +125,7 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
           {t('notifications.classesForDate', { date: formatDateEs(tomorrowDate) })}
         </p>
         <button
+          type='button'
           onClick={handleGenerate}
           disabled={isGenerating}
           className='inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors'
@@ -189,6 +190,7 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                     <td className='px-4 py-3 text-right'>
                       {!isSent && n.status === 'pending' && n.whatsapp_url && (
                         <button
+                          type='button'
                           onClick={() => handleSend(n)}
                           className='inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors'
                         >
@@ -416,6 +418,7 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
       </div>
 
       <button
+        type='button'
         onClick={handleSave}
         disabled={isSaving}
         className='inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors'
@@ -454,6 +457,7 @@ export function Notifications() {
       <div className='flex gap-1 bg-slate-100 p-1 rounded-lg w-fit'>
         {tabs.map((tab) => (
           <button
+            type='button'
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${

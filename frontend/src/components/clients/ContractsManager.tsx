@@ -78,6 +78,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
           {t('contracts.manager.title', { name: client.name })}
         </p>
         <button
+          type='button'
           onClick={() => {
             setShowNewForm(true)
             closeDetail()
@@ -152,6 +153,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                     </span>
                   )}
                   <button
+                    type='button'
                     onClick={() => (viewingContractId === c.id ? closeDetail() : openDetail(c.id))}
                     className={`p-1.5 rounded-lg transition-colors ${
                       viewingContractId === c.id
@@ -165,6 +167,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                     </span>
                   </button>
                   <button
+                    type='button'
                     onClick={() => setPendingDeleteContractId(c.id)}
                     className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                     title={t('contracts.deleteTooltip')}
@@ -194,6 +197,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
 
       <div className='flex justify-end pt-2'>
         <button
+          type='button'
           onClick={onClose}
           className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
         >

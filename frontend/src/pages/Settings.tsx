@@ -145,6 +145,7 @@ export function Settings() {
                 ))}
               </ul>
               <button
+                type='button'
                 onClick={handleDisconnect}
                 disabled={isDisconnecting}
                 className='flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50'
@@ -173,6 +174,7 @@ export function Settings() {
                 ))}
               </ul>
               <button
+                type='button'
                 onClick={handleConnect}
                 disabled={isConnecting}
                 className='flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20'
@@ -234,6 +236,7 @@ export function Settings() {
             />
           </div>
           <button
+            type='button'
             onClick={handleSaveFiscal}
             disabled={isSavingFiscal}
             className='flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20'

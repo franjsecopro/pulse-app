@@ -33,6 +33,7 @@ export function DemoSidebar() {
 
       {/* Exit button */}
       <button
+        type='button'
         onClick={handleExit}
         title={t('demoSidebar.exitTooltip', { email: realEmail ?? '' })}
         className='text-white hover:bg-orange-600 rounded p-0.5 transition-colors'

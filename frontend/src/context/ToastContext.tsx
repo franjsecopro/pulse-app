@@ -60,6 +60,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       </p>
 
       <button
+        type='button'
         onClick={() => onDismiss(toast.id)}
         className='shrink-0 text-slate-400 hover:text-slate-600 transition-colors mt-0.5'
         aria-label={t('actions.close')}

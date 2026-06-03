@@ -87,6 +87,7 @@ export function ClientCard({
       <div className='flex items-center gap-2 shrink-0'>
         {!isArchived && (
           <button
+            type='button'
             onClick={onManageContracts}
             className='p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
             title={t('clients.manageContracts')}
@@ -95,6 +96,7 @@ export function ClientCard({
           </button>
         )}
         <button
+          type='button'
           onClick={onEdit}
           className='p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
           title={isArchived ? t('clients.viewData') : t('clients.edit')}
@@ -104,6 +106,7 @@ export function ClientCard({
         {isArchived ? (
           <>
             <button
+              type='button'
               onClick={onActivate}
               className='p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors'
               title={t('clients.activateTooltip')}
@@ -112,6 +115,7 @@ export function ClientCard({
             </button>
             {onHardDelete && (
               <button
+                type='button'
                 onClick={onHardDelete}
                 className='p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                 title={t('clients.hardDeleteTooltip')}
@@ -122,6 +126,7 @@ export function ClientCard({
           </>
         ) : (
           <button
+            type='button'
             onClick={onDelete}
             className='p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors'
             title={t('clients.archiveTooltip')}

@@ -95,6 +95,7 @@ export function Clients() {
           <p className='text-slate-500 text-sm mt-1'>{t('clients.subtitle')}</p>
         </div>
         <button
+          type='button'
           onClick={() => setShowCreateModal(true)}
           className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
         >
@@ -137,6 +138,7 @@ export function Clients() {
           </span>
           <p className='text-slate-500 font-medium'>{t('clients.empty')}</p>
           <button
+            type='button'
             onClick={() => setShowCreateModal(true)}
             className='mt-4 text-primary text-sm font-semibold hover:underline'
           >

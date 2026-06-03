@@ -23,6 +23,7 @@ export function Pagination({ page, pageCount, totalCount, onPage }: PaginationPr
       </p>
       <div className='flex items-center gap-1'>
         <button
+          type='button'
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
           className='flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
@@ -31,6 +32,7 @@ export function Pagination({ page, pageCount, totalCount, onPage }: PaginationPr
           {t('pagination.previous')}
         </button>
         <button
+          type='button'
           onClick={() => onPage(page + 1)}
           disabled={page >= pageCount}
           className='flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'

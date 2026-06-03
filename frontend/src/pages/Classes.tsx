@@ -94,6 +94,7 @@ export function Classes() {
         <div className='flex items-center gap-3'>
           <div className='flex items-center bg-slate-100 rounded-xl p-1 gap-1'>
             <button
+              type='button'
               onClick={() => handleViewMode('list')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all
                 ${viewMode === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
@@ -102,6 +103,7 @@ export function Classes() {
               {t('classes.view.list')}
             </button>
             <button
+              type='button'
               onClick={() => handleViewMode('calendar')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all
                 ${viewMode === 'calendar' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
@@ -111,6 +113,7 @@ export function Classes() {
             </button>
           </div>
           <button
+            type='button'
             onClick={() => syncGCal()}
             disabled={isSyncing}
             title={t('classes.gcalSynced')}
@@ -124,6 +127,7 @@ export function Classes() {
             {isSyncing ? t('classes.syncing') : t('classes.syncGCal')}
           </button>
           <button
+            type='button'
             onClick={() => {
               setNewClassDate(null)
               setShowCreateModal(true)
@@ -203,6 +207,7 @@ export function Classes() {
           </span>
           <p className='text-slate-500 font-medium'>{t('classes.empty.list')}</p>
           <button
+            type='button'
             onClick={() => {
               setNewClassDate(null)
               setShowCreateModal(true)
@@ -303,12 +308,14 @@ export function Classes() {
                               {c.google_calendar_id ? 'event_available' : 'calendar_month'}
                             </span>
                             <button
+                              type='button'
                               onClick={() => setEditingClass(c)}
                               className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
                             >
                               <span className='material-symbols-outlined text-base'>edit</span>
                             </button>
                             <button
+                              type='button'
                               onClick={() => requestDelete(c.id)}
                               className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                             >

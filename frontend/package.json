@@ -12,7 +12,8 @@
     "test:coverage": "vitest --coverage",
     "format": "biome format --write .",
     "lint": "biome check .",
-    "lint:fix": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "fix": "biome check --write --unsafe .",
     "check": "biome ci ."
   },
   "dependencies": {

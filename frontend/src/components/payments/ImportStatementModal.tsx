@@ -166,6 +166,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
     <div className='space-y-5'>
       {rows.length === 0 && (
         <button
+          type='button'
           onClick={() => fileRef.current?.click()}
           className='border-2 border-dashed border-slate-200 rounded-xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors w-full'
         >
@@ -197,7 +198,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
       {parseError && (
         <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm'>
           {parseError}
-          <button onClick={resetFile} className='ml-2 text-red-500 underline text-xs'>
+          <button type='button' onClick={resetFile} className='ml-2 text-red-500 underline text-xs'>
             {t('actions.retry')}
           </button>
         </div>
@@ -211,6 +212,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
               {t('import.transactionsFound', { count: rows.length, filename: fileName ?? '' })}
             </p>
             <button
+              type='button'
               onClick={resetFile}
               className='text-xs text-slate-400 hover:text-slate-600 underline'
             >
@@ -368,12 +370,14 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
             </div>
             <div className='flex gap-2'>
               <button
+                type='button'
                 onClick={onClose}
                 className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
               >
                 {t('actions.cancel')}
               </button>
               <button
+                type='button'
                 onClick={handleConfirm}
                 disabled={isConfirming || toImportCount === 0}
                 className='px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 flex items-center gap-2'

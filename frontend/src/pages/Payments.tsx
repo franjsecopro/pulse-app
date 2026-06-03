@@ -74,6 +74,7 @@ export function Payments() {
         </div>
         <div className='flex gap-2'>
           <button
+            type='button'
             onClick={() => setShowImportModal(true)}
             className='flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200'
           >
@@ -81,6 +82,7 @@ export function Payments() {
             {t('payments.importStatement')}
           </button>
           <button
+            type='button'
             onClick={() => setShowCreateModal(true)}
             className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
           >
@@ -94,6 +96,7 @@ export function Payments() {
       <div className='flex gap-1 bg-slate-100 rounded-xl p-1 w-fit'>
         {(['payments', 'history'] as const).map((tab) => (
           <button
+            type='button'
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
@@ -152,6 +155,7 @@ export function Payments() {
               </span>
               <p className='text-slate-500 font-medium'>{t('payments.empty')}</p>
               <button
+                type='button'
                 onClick={() => setShowCreateModal(true)}
                 className='mt-4 text-primary text-sm font-semibold hover:underline'
               >
@@ -218,12 +222,14 @@ export function Payments() {
                           <td className='px-6 py-4 text-right'>
                             <div className='flex items-center justify-end gap-1'>
                               <button
+                                type='button'
                                 onClick={() => setEditingPayment(p)}
                                 className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
                               >
                                 <span className='material-symbols-outlined text-base'>edit</span>
                               </button>
                               <button
+                                type='button'
                                 onClick={() => requestDelete(p.id)}
                                 className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                               >

@@ -67,6 +67,7 @@ export function Accounting() {
           <p className='text-slate-500 text-sm mt-1'>{t('accounting.subtitle')}</p>
         </div>
         <button
+          type='button'
           onClick={exportExcel}
           disabled={visibleSummary.length === 0 || isExporting}
           className='flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary/90 transition-colors'

@@ -103,6 +103,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
             >
               <div className='flex items-center justify-between'>
                 <button
+                  type='button'
                   onClick={() => onDayDetail(key)}
                   className={`w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full cursor-pointer transition-colors border-0
                     ${
@@ -121,6 +122,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
               <div className='flex flex-col gap-0.5'>
                 {visibleClasses.map((c) => (
                   <button
+                    type='button'
                     key={c.id}
                     onClick={() => onEdit(c)}
                     onMouseEnter={(e) => handleChipEnter(e, c)}
@@ -134,6 +136,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
 
                 {hiddenCount > 0 && (
                   <button
+                    type='button'
                     onClick={() => onDayDetail(key)}
                     className='text-[10px] font-semibold text-slate-400 hover:text-primary cursor-pointer pl-1.5 border-0 bg-transparent'
                   >
@@ -143,6 +146,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
               </div>
 
               <button
+                type='button'
                 onClick={() => onNewClass(key)}
                 className='absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-primary'
                 title={t('classes.addOnDay')}
