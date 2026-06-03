@@ -14,6 +14,12 @@ class Payment(Base):
     client_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("clients.id"), nullable=True
     )
+    # The statement import this payment came from (NULL for manual payments and for
+    # bank imports created before this column existed). Deleting that import removes
+    # the payments it created; ON DELETE SET NULL guards against orphan FK errors.
+    statement_import_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("statement_imports.id", ondelete="SET NULL"), nullable=True
+    )
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     payment_date: Mapped[date] = mapped_column(Date, nullable=False)
     concept: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)

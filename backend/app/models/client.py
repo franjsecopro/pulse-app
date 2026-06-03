@@ -17,6 +17,14 @@ class Client(Base):
     phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     whatsapp_phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     address: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    # Fiscal id (NIF/CIF) — groundwork for invoicing.
+    tax_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    # When this client's payments apply: "same_month" (pays the current month's classes)
+    # or "next_month" (pays in arrears — a payment received this month covers last month).
+    # Drives the billing-period offset in AccountingService.
+    payment_timing: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default="same_month", default="same_month"
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

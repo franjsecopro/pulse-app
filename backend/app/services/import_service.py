@@ -63,21 +63,13 @@ async def confirm_import(
     """
     created = 0
     total_amount = 0.0
-
     for item in data.payments:
-        db.add(Payment(
-            user_id=user_id,
-            client_id=item.client_id,
-            amount=item.amount,
-            payment_date=date.fromisoformat(item.date),
-            concept=item.concept,
-            source="bank_import",
-            status="confirmed" if item.client_id else "unmatched",
-        ))
         created += 1
         total_amount += item.amount
 
-    db.add(StatementImport(
+    # Create the import record first and flush to obtain its id, so every payment
+    # can be linked to it (enables deleting an import together with its payments).
+    statement = StatementImport(
         user_id=user_id,
         filename=data.filename or "extracto.csv",
         imported_at=datetime.now(timezone.utc),
@@ -86,7 +78,21 @@ async def confirm_import(
         transaction_count=created,
         total_amount=round(total_amount, 2),
         file_hash=data.file_hash,
-    ))
+    )
+    db.add(statement)
+    await db.flush()
+
+    for item in data.payments:
+        db.add(Payment(
+            user_id=user_id,
+            client_id=item.client_id,
+            statement_import_id=statement.id,
+            amount=item.amount,
+            payment_date=date.fromisoformat(item.date),
+            concept=item.concept,
+            source="bank_import",
+            status="confirmed" if item.client_id else "unmatched",
+        ))
 
     await db.commit()
     return {"created": created}

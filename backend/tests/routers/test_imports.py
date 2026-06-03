@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.payment import Payment
 from app.models.statement_import import StatementImport
 from app.services.statement_parser import ParsedTransaction
-from tests.conftest import FAKE_USER
+from tests.conftest import FAKE_USER, FAKE_ADMIN
 
 # A minimal CSV body — enough to pass the "not empty" guard.
 SAMPLE_CSV = b"Date;Date de valeur;Debit;Credit;Libelle\r\n"
@@ -339,3 +339,69 @@ class TestGetStatementHistory:
 
         assert response.status_code == 200
         assert response.json() == []
+
+
+# ─── DELETE /api/imports/{import_id} — admin-only undo ────────────────────────
+
+class TestDeleteStatementImport:
+    async def _seed_import_with_payments(self, db: AsyncSession) -> StatementImport:
+        (record,) = await _seed(db, StatementImport(
+            user_id=FAKE_ADMIN.id,
+            filename="duplicado.csv",
+            month=4,
+            year=2026,
+            transaction_count=2,
+            total_amount=50.0,
+        ))
+        await _seed(
+            db,
+            Payment(
+                user_id=FAKE_ADMIN.id, client_id=None, statement_import_id=record.id,
+                amount=30.0, payment_date=date(2026, 4, 1), concept="A",
+                source="bank_import", status="unmatched",
+            ),
+            Payment(
+                user_id=FAKE_ADMIN.id, client_id=None, statement_import_id=record.id,
+                amount=20.0, payment_date=date(2026, 4, 2), concept="B",
+                source="bank_import", status="unmatched",
+            ),
+        )
+        return record
+
+    async def test_deletes_import_and_its_payments(self, db: AsyncSession, admin_client: AsyncClient):
+        record = await self._seed_import_with_payments(db)
+
+        response = await admin_client.delete(f"/api/imports/{record.id}")
+
+        assert response.status_code == 200
+        assert response.json()["payments_deleted"] == 2
+        assert (await db.execute(select(StatementImport))).scalar_one_or_none() is None
+        assert (await db.execute(select(Payment))).scalars().all() == []
+
+    async def test_keeps_unrelated_payments(self, db: AsyncSession, admin_client: AsyncClient):
+        record = await self._seed_import_with_payments(db)
+        await _seed(db, Payment(
+            user_id=FAKE_ADMIN.id, client_id=None, statement_import_id=None,
+            amount=99.0, payment_date=date(2026, 4, 9), concept="MANUAL",
+            source="manual", status="confirmed",
+        ))
+
+        await admin_client.delete(f"/api/imports/{record.id}")
+
+        remaining = (await db.execute(select(Payment))).scalars().all()
+        assert len(remaining) == 1
+        assert remaining[0].concept == "MANUAL"
+
+    async def test_returns_404_for_missing_import(self, admin_client: AsyncClient):
+        response = await admin_client.delete("/api/imports/999999")
+
+        assert response.status_code == 404
+
+    async def test_non_admin_is_blocked(self, db: AsyncSession, app_client: AsyncClient):
+        """A non-admin client (require_admin not overridden) cannot delete."""
+        record = await self._seed_import_with_payments(db)
+
+        response = await app_client.delete(f"/api/imports/{record.id}")
+
+        assert response.status_code != 200
+        assert (await db.execute(select(StatementImport))).scalar_one_or_none() is not None

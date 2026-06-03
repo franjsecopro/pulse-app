@@ -74,8 +74,27 @@ function request<T>(path: string, options: RequestInit = {}, retry = true): Prom
   return requestFull<T>(path, options, retry).then(r => r.data)
 }
 
+/** Fetch a binary payload (e.g. a generated .xlsx) with the same 401-refresh flow. */
+async function requestBlob(path: string, retry = true): Promise<Blob> {
+  const response = await fetch(`${BASE_URL}${path}`, { credentials: 'include' })
+
+  if (response.status === 401 && retry) {
+    const refreshed = await refreshSession()
+    if (refreshed) return requestBlob(path, false)
+    window.dispatchEvent(new CustomEvent('session-expired'))
+    throw new ApiError(401, 'Session expired')
+  }
+
+  if (!response.ok) {
+    throw new ApiError(response.status, 'No se pudo generar el archivo')
+  }
+
+  return response.blob()
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
+  getBlob: (path: string) => requestBlob(path),
   getPageable: <T>(path: string) =>
     requestFull<T>(path).then(({ data, headers }) => ({
       data,

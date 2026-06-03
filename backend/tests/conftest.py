@@ -22,6 +22,7 @@ import app.models.contract      # noqa: F401
 import app.models.class_        # noqa: F401
 import app.models.payment       # noqa: F401
 import app.models.statement_import  # noqa: F401
+import app.models.business_profile  # noqa: F401
 import app.models.notification  # noqa: F401
 import app.models.notification_settings  # noqa: F401
 import app.models.payment_identifier     # noqa: F401

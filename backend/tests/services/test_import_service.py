@@ -120,6 +120,20 @@ class TestConfirmImport:
         record = (await db.execute(select(StatementImport))).scalar_one()
         assert record.filename == "extracto.csv"
 
+    async def test_payments_are_linked_to_the_statement_import(self, db: AsyncSession):
+        """Every created payment points to the StatementImport that produced it."""
+        request = make_request([
+            {"date": "2024-04-01", "concept": "A", "amount": 100.0, "client_id": 1},
+            {"date": "2024-04-02", "concept": "B", "amount": 200.0},
+        ])
+
+        await confirm_import(db, user_id=1, data=request)
+
+        record = (await db.execute(select(StatementImport))).scalar_one()
+        payments = (await db.execute(select(Payment))).scalars().all()
+        assert len(payments) == 2
+        assert all(p.statement_import_id == record.id for p in payments)
+
     async def test_payment_date_is_parsed_correctly(self, db: AsyncSession):
         """ISO date strings are parsed to Python date objects."""
         from datetime import date

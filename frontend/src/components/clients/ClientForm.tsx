@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import type { Client } from '../../types'
+import type { Client, PaymentTiming } from '../../types'
 
 interface ClientFormProps {
   initial?: Partial<Client>
@@ -14,6 +14,8 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
     phone: initial?.phone ?? '',
     whatsapp_phone: initial?.whatsapp_phone ?? '',
     address: initial?.address ?? '',
+    tax_id: initial?.tax_id ?? '',
+    payment_timing: (initial?.payment_timing ?? 'same_month') as PaymentTiming,
     is_active: initial?.is_active ?? true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -26,6 +28,8 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
     form.phone          !== (initial?.phone          ?? '') ||
     form.whatsapp_phone !== (initial?.whatsapp_phone ?? '') ||
     form.address        !== (initial?.address        ?? '') ||
+    form.tax_id         !== (initial?.tax_id          ?? '') ||
+    form.payment_timing !== (initial?.payment_timing  ?? 'same_month') ||
     form.is_active !== (initial?.is_active ?? true)
   )
 
@@ -103,6 +107,34 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            NIF / CIF
+          </label>
+          <input
+            placeholder="12345678Z"
+            value={form.tax_id}
+            onChange={(e) => setForm((f) => ({ ...f, tax_id: e.target.value }))}
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+          />
+          <p className="text-xs text-slate-400 mt-1">Para facturación (opcional)</p>
+        </div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            ¿Cuándo paga las clases?
+          </label>
+          <select
+            value={form.payment_timing}
+            onChange={(e) => setForm((f) => ({ ...f, payment_timing: e.target.value as PaymentTiming }))}
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white"
+          >
+            <option value="same_month">El mismo mes</option>
+            <option value="next_month">El mes siguiente (mes vencido)</option>
+          </select>
+          <p className="text-xs text-slate-400 mt-1">
+            "Mes vencido": un pago recibido en mayo cubre las clases de abril.
+          </p>
         </div>
         <div className="flex items-center gap-3 mt-2">
           <input

@@ -1,9 +1,12 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, EmailStr
 
 from app.schemas.contract import ContractResponse
 from app.schemas.payment_identifier import PayerResponse
+
+# When a client pays relative to the month being billed.
+PaymentTiming = Literal["same_month", "next_month"]
 
 
 class ClientCreateRequest(BaseModel):
@@ -13,6 +16,8 @@ class ClientCreateRequest(BaseModel):
     phone: Optional[str] = None
     whatsapp_phone: Optional[str] = None
     address: Optional[str] = None
+    tax_id: Optional[str] = None
+    payment_timing: PaymentTiming = "same_month"
     is_active: bool = True
 
 
@@ -23,6 +28,8 @@ class ClientUpdateRequest(BaseModel):
     phone: Optional[str] = None
     whatsapp_phone: Optional[str] = None
     address: Optional[str] = None
+    tax_id: Optional[str] = None
+    payment_timing: Optional[PaymentTiming] = None
     is_active: Optional[bool] = None
 
 
@@ -34,6 +41,8 @@ class ClientResponse(BaseModel):
     phone: Optional[str]
     whatsapp_phone: Optional[str]
     address: Optional[str]
+    tax_id: Optional[str]
+    payment_timing: PaymentTiming
     is_active: bool
     created_at: datetime
     updated_at: datetime

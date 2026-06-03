@@ -4,14 +4,14 @@ Stores the SHA-256 of an imported statement file so a re-upload of the same file
 can be detected (Nivel 1 deduplication).
 
 Revision ID: 0015
-Revises: 0014
+Revises: 0014b
 Create Date: 2026-06-02
 """
 from alembic import op
 import sqlalchemy as sa
 
 revision = '0015'
-down_revision = '0014'
+down_revision = '0014b'
 branch_labels = None
 depends_on = None
 

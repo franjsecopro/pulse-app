@@ -11,7 +11,10 @@ class Notification(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
-    class_id: Mapped[int] = mapped_column(Integer, ForeignKey("classes.id"), nullable=False)
+    # A notification is meaningless without its class: deleting the class removes it.
+    class_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False
+    )
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=False)
     channel: Mapped[str] = mapped_column(String(20), nullable=False, default="whatsapp")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")

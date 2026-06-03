@@ -46,6 +46,8 @@ export interface Contract {
   created_at: string
 }
 
+export type PaymentTiming = 'same_month' | 'next_month'
+
 export interface Client {
   id: number
   name: string
@@ -54,12 +56,20 @@ export interface Client {
   phone: string | null
   whatsapp_phone: string | null
   address: string | null
+  tax_id: string | null
+  payment_timing: PaymentTiming
   is_active: boolean
   created_at: string
   updated_at?: string
   archived_at?: string | null
   contracts: Contract[]
   payers: PaymentIdentifier[]
+}
+
+export interface BusinessProfile {
+  business_name: string | null
+  tax_id: string | null
+  fiscal_address: string | null
 }
 
 export type ClassStatus = 'normal' | 'cancelled_with_payment' | 'cancelled_without_payment'

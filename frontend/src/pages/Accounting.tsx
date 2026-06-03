@@ -20,6 +20,7 @@ export function Accounting() {
   const [clients, setClients] = useState<Client[]>([])
   const [summary, setSummary] = useState<AccountingSummaryEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     clientService.getAll().then(setClients)
@@ -38,23 +39,19 @@ export function Accounting() {
   const totalPaid = visibleSummary.reduce((s, e) => s + e.paid, 0)
   const totalBalance = visibleSummary.reduce((s, e) => s + e.balance, 0)
 
-  function exportCSV() {
-    const header = ['Cliente', 'Esperado (€)', 'Pagado (€)', 'Crédito previo (€)', 'Balance (€)']
-    const rows = visibleSummary.map(e => [
-      e.client_name,
-      e.expected.toFixed(2),
-      e.paid.toFixed(2),
-      e.previous_credit.toFixed(2),
-      e.balance.toFixed(2),
-    ])
-    const csv = [header, ...rows].map(r => r.join(';')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `contabilidad_${MONTHS[month - 1].toLowerCase()}_${year}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+  async function exportExcel() {
+    setIsExporting(true)
+    try {
+      const blob = await accountingService.getReport(month, year, client)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `contabilidad_${MONTHS[month - 1].toLowerCase()}_${year}.xlsx`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -68,12 +65,14 @@ export function Accounting() {
           </p>
         </div>
         <button
-          onClick={exportCSV}
-          disabled={visibleSummary.length === 0}
+          onClick={exportExcel}
+          disabled={visibleSummary.length === 0 || isExporting}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary/90 transition-colors"
         >
-          <span className="material-symbols-outlined text-sm">download</span>
-          Exportar CSV
+          <span className={`material-symbols-outlined text-sm ${isExporting ? 'animate-spin' : ''}`}>
+            {isExporting ? 'sync' : 'download'}
+          </span>
+          {isExporting ? 'Generando...' : 'Exportar Excel'}
         </button>
       </div>
 

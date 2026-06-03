@@ -3,11 +3,12 @@ import hashlib
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select
+from sqlalchemy import select, delete as sql_delete
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_admin
 from app.models.client import Client
+from app.models.payment import Payment
 from app.models.statement_import import StatementImport
 from app.models.user import User
 from app.schemas.import_ import (
@@ -119,3 +120,31 @@ async def get_statement_history(
         .order_by(StatementImport.imported_at.desc())
     )
     return list(result.scalars().all())
+
+
+@router.delete("/{import_id}")
+async def delete_statement_import(
+    import_id: int,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Undo a statement import: delete the record AND the payments it created.
+
+    Admin-only. Payments are deleted first so the ON DELETE SET NULL FK never
+    orphans them. Imports created before payment linking existed have no linked
+    payments — for those this only removes the history record.
+    """
+    result = await db.execute(
+        select(StatementImport).where(StatementImport.id == import_id)
+    )
+    record = result.scalar_one_or_none()
+    if record is None:
+        raise HTTPException(status_code=404, detail="Extracto no encontrado")
+
+    payments_result = await db.execute(
+        sql_delete(Payment).where(Payment.statement_import_id == import_id)
+    )
+    await db.execute(sql_delete(StatementImport).where(StatementImport.id == import_id))
+    await db.commit()
+
+    return {"deleted": import_id, "payments_deleted": payments_result.rowcount}

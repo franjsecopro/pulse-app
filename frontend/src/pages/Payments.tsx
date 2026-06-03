@@ -7,13 +7,17 @@ import { StatementHistoryView } from '../components/payments/StatementHistoryVie
 import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { usePayments } from '../hooks/usePayments'
+import { useAuth } from '../context/AuthContext'
 import { Pagination } from '../components/ui/Pagination'
 import type { Payment } from '../types'
 
 export function Payments() {
   const now = new Date()
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'admin'
 
   const [activeTab, setActiveTab] = useState<'payments' | 'history'>('payments')
+  const [pendingStatementId, setPendingStatementId] = useState<number | null>(null)
   const [filterMonth, setFilterMonth] = useState<number | ''>(now.getMonth() + 1)
   const [filterYear, setFilterYear] = useState(now.getFullYear())
   const [filterClient, setFilterClient] = useState<number | ''>('')
@@ -26,7 +30,7 @@ export function Payments() {
     payments, clients, statementHistory, isLoading, isStatementHistoryLoading, totalAmount,
     pendingDeleteId, page, pageCount, totalCount, goToPage,
     loadStatementHistory, createPayment, updatePayment,
-    requestDelete, confirmDelete, cancelDelete, handleImported,
+    requestDelete, confirmDelete, cancelDelete, handleImported, deleteStatementImport,
   } = usePayments({ filterMonth, filterYear, filterClient, filterStatus })
 
   useEffect(() => {
@@ -88,7 +92,12 @@ export function Payments() {
       </div>
 
       {activeTab === 'history' && (
-        <StatementHistoryView records={statementHistory} isLoading={isStatementHistoryLoading} />
+        <StatementHistoryView
+          records={statementHistory}
+          isLoading={isStatementHistoryLoading}
+          isAdmin={isAdmin}
+          onDelete={setPendingStatementId}
+        />
       )}
 
       {activeTab === 'payments' && (
@@ -214,6 +223,19 @@ export function Payments() {
         isDangerous
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingStatementId !== null}
+        title="Eliminar extracto"
+        message="Se eliminará el extracto y TODOS los pagos que generó. Esta acción no se puede deshacer."
+        confirmText="Eliminar extracto y pagos"
+        isDangerous
+        onConfirm={async () => {
+          if (pendingStatementId !== null) await deleteStatementImport(pendingStatementId)
+          setPendingStatementId(null)
+        }}
+        onCancel={() => setPendingStatementId(null)}
       />
 
       <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Importar extracto bancario" size="xl">

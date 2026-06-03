@@ -4,9 +4,12 @@ import type { StatementImportRecord } from '../../types'
 interface StatementHistoryViewProps {
   records: StatementImportRecord[]
   isLoading: boolean
+  /** Only admins can delete imports; the trash column is hidden otherwise. */
+  isAdmin?: boolean
+  onDelete?: (id: number) => void
 }
 
-export function StatementHistoryView({ records, isLoading }: StatementHistoryViewProps) {
+export function StatementHistoryView({ records, isLoading, isAdmin = false, onDelete }: StatementHistoryViewProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -35,6 +38,7 @@ export function StatementHistoryView({ records, isLoading }: StatementHistoryVie
             <th className="text-left px-4 py-3 font-semibold text-slate-600">Fecha de importación</th>
             <th className="text-right px-4 py-3 font-semibold text-slate-600">Transacciones</th>
             <th className="text-right px-5 py-3 font-semibold text-slate-600">Total importado</th>
+            {isAdmin && <th className="px-4 py-3 w-12" aria-label="Acciones"></th>}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -56,6 +60,17 @@ export function StatementHistoryView({ records, isLoading }: StatementHistoryVie
               </td>
               <td className="px-4 py-4 text-right text-slate-700 font-medium">{record.transaction_count}</td>
               <td className="px-5 py-4 text-right font-bold text-slate-900">€{record.total_amount.toFixed(2)}</td>
+              {isAdmin && (
+                <td className="px-4 py-4 text-right">
+                  <button
+                    onClick={() => onDelete?.(record.id)}
+                    title="Eliminar extracto y sus pagos"
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">delete</span>
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

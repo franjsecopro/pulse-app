@@ -101,6 +101,17 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
     setStatementHistory([])
   }
 
+  const deleteStatementImport = async (id: number) => {
+    try {
+      const { payments_deleted } = await accountingService.deleteStatementImport(id)
+      addToast(`Extracto eliminado (${payments_deleted} pagos)`, 'success')
+      loadStatementHistory()
+      loadPayments(page)
+    } catch {
+      addToast('Error al eliminar el extracto', 'error')
+    }
+  }
+
   const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0)
   const pageCount = Math.ceil(totalCount / PAGE_LIMIT)
 
@@ -124,5 +135,6 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
     confirmDelete,
     cancelDelete,
     handleImported,
+    deleteStatementImport,
   }
 }

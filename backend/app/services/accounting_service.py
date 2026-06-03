@@ -4,10 +4,11 @@ Computes financial summaries per client and contract, applying historical credit
 The credit carry-over is derived from the all-time difference between confirmed payments and
 billable classes — no separate credit table is needed.
 """
-from sqlalchemy import select, func, extract
+from sqlalchemy import select, func, extract, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.class_ import Class
+from app.models.client import Client
 from app.models.contract import Contract
 from app.models.payment import Payment
 from app.repositories.client_repository import ClientRepository
@@ -17,6 +18,22 @@ MONTH_NAMES = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ]
+
+
+def _payment_billing_period():
+    """The continuous month index (year*12 + month) a payment APPLIES to.
+
+    For a "next_month" client (pays in arrears) a payment received in May covers
+    April, so its billing period is shifted back by one. Uses a continuous index
+    (not year*100+month) so January minus the offset rolls back to the prior
+    December correctly. Requires the query to join `Client`.
+    """
+    offset = case((Client.payment_timing == "next_month", 1), else_=0)
+    return (
+        extract("year", Payment.payment_date) * 12
+        + extract("month", Payment.payment_date)
+        - offset
+    )
 
 
 class AccountingService:
@@ -45,15 +62,16 @@ class AccountingService:
         )
         monthly_expected: dict[int, float] = {row[0]: row[1] for row in class_result.all()}
 
-        # Monthly confirmed payments
+        # Monthly confirmed payments, bucketed by the period each payment APPLIES to
+        # (shifted for clients who pay in arrears — see _payment_billing_period).
         payment_result = await self._db.execute(
             select(Payment.client_id, func.sum(Payment.amount))
+            .join(Client, Payment.client_id == Client.id)
             .where(
                 Payment.user_id == user_id,
                 Payment.client_id.is_not(None),
                 Payment.status == "confirmed",
-                extract("month", Payment.payment_date) == month,
-                extract("year", Payment.payment_date) == year,
+                _payment_billing_period() == year * 12 + month,
             )
             .group_by(Payment.client_id)
         )
@@ -214,15 +232,16 @@ class AccountingService:
     ) -> dict[int, float]:
         """Calculate each client's accumulated surplus BEFORE the given month.
         A positive value means the client has pre-paid credit to apply this month."""
-        # Total paid before this month
+        # Total paid before this month — same arrears-aware bucketing as the monthly
+        # query, so a "next_month" client's surplus lands in the right period.
         paid_result = await self._db.execute(
             select(Payment.client_id, func.sum(Payment.amount))
+            .join(Client, Payment.client_id == Client.id)
             .where(
                 Payment.user_id == user_id,
                 Payment.client_id.in_(client_ids),
                 Payment.status == "confirmed",
-                (extract("year", Payment.payment_date) * 100 + extract("month", Payment.payment_date))
-                < (year * 100 + month),
+                _payment_billing_period() < (year * 12 + month),
             )
             .group_by(Payment.client_id)
         )

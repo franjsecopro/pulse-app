@@ -6,7 +6,8 @@ from app.models.payment import Payment
 from app.models.payment_identifier import PaymentIdentifier
 from app.models.google_auth import UserGoogleAuth
 from app.models.statement_import import StatementImport
+from app.models.business_profile import BusinessProfile
 from app.models.notification import Notification
 from app.models.notification_settings import NotificationSettings
 
-__all__ = ["User", "Client", "Contract", "Class", "Payment", "PaymentIdentifier", "UserGoogleAuth", "StatementImport", "Notification", "NotificationSettings"]
+__all__ = ["User", "Client", "Contract", "Class", "Payment", "PaymentIdentifier", "UserGoogleAuth", "StatementImport", "BusinessProfile", "Notification", "NotificationSettings"]

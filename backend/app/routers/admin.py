@@ -14,6 +14,7 @@ from app.models.class_ import Class
 from app.models.client import Client
 from app.models.payment import Payment
 from app.models.statement_import import StatementImport
+from app.models.business_profile import BusinessProfile
 from app.models.contract import Contract
 from app.models.notification import Notification
 from app.models.notification_settings import NotificationSettings
@@ -126,6 +127,7 @@ async def delete_user(
         Notification,
         NotificationSettings,
         StatementImport,
+        BusinessProfile,
         Payment,
         Class,
         Client,
