@@ -46,7 +46,21 @@
       "style": {
         "useImportType": "error",
         "useConst": "error",
-        "noUnusedTemplateLiteral": "error"
+        "noUnusedTemplateLiteral": "error",
+        "useNamingConvention": {
+          "level": "warn",
+          "options": {
+            "strictCase": false,
+            "requireAscii": true,
+            "conventions": [
+              {
+                "selector": { "kind": "variable" },
+                "match": "hh|mm|sh|sm|eh|em|id|db|qs|[ijethmkvd]|(.{3,})"
+              },
+              { "match": ".*" }
+            ]
+          }
+        }
       },
       "correctness": {
         "noUnusedVariables": "warn",
