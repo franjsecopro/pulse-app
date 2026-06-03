@@ -31,8 +31,8 @@ import app.models.google_auth            # noqa: F401
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 # Fake users reused across router tests — mirror the User model fields
-FAKE_USER  = User(id=1, email="test@pulse.dev",  role="user",  password_hash="x")
-FAKE_ADMIN = User(id=1, email="admin@pulse.dev", role="admin", password_hash="x")
+FAKE_USER  = User(id=1, email="test@pulse.dev",  role="user",  password_hash="x", locale="es-ES")
+FAKE_ADMIN = User(id=1, email="admin@pulse.dev", role="admin", password_hash="x", locale="es-ES")
 
 
 @pytest_asyncio.fixture

@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from app.schemas.auth import UserRegisterRequest, UserLoginRequest, UserResponse
+from app.schemas.auth import UserRegisterRequest, UserLoginRequest, UserResponse, UserUpdateRequest
 from app.services.auth_service import AuthService
 
 def _token_from_request(request: Request) -> str | None:
@@ -101,6 +101,37 @@ async def get_me(request: Request, current_user: User = Depends(get_current_user
         id=current_user.id,
         email=current_user.email,
         role=current_user.role,
+        locale=current_user.locale,
+        is_demo_active=is_demo_active,
+        real_email=real_email,
+    )
+
+
+@router.patch("/me", response_model=UserResponse)
+async def update_me(
+    request: Request,
+    data: UserUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update the current user's UI locale preference (BCP 47, e.g. es-ES / fr-FR)."""
+    # Re-load into the active session: get_current_user may hand back an instance
+    # that isn't attached to this request's session (e.g. demo impersonation),
+    # so we fetch the row we are going to mutate.
+    user = await db.get(User, current_user.id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    user.locale = data.locale
+    await db.commit()
+    await db.refresh(user)
+
+    token = _token_from_request(request)
+    is_demo_active, real_email = AuthService.decode_demo_claims(token) if token else (False, None)
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        role=user.role,
+        locale=user.locale,
         is_demo_active=is_demo_active,
         real_email=real_email,
     )

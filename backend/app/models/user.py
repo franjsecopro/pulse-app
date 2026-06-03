@@ -13,6 +13,7 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="user")
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    locale: Mapped[str] = mapped_column(String(5), nullable=False, default="es-ES", server_default="es-ES")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

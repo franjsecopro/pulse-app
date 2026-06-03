@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { googleCalendarService } from '../services/google_calendar.service'
 import { businessProfileService } from '../services/business_profile.service'
+import { LanguageSelector } from '../components/settings/LanguageSelector'
 import type { GoogleCalendarStatus } from '../types'
 
 export function Settings() {
@@ -113,6 +114,22 @@ export function Settings() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Ajustes</h1>
         <p className="text-slate-500 text-sm mt-1">Configura las integraciones de la app.</p>
+      </div>
+
+      {/* Language section */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100">
+          <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-violet-500 text-xl">language</span>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 text-sm">Idioma</p>
+            <p className="text-xs text-slate-500">Elige el idioma de la interfaz.</p>
+          </div>
+        </div>
+        <div className="px-6 py-5">
+          <LanguageSelector />
+        </div>
       </div>
 
       {/* Google Calendar section */}

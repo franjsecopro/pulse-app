@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { authService } from '../services/auth.service'
+import i18n, { type Locale, STORAGE_KEY } from '../i18n'
 import type { User } from '../types'
 
 interface AuthContextValue {
@@ -11,6 +12,7 @@ interface AuthContextValue {
   register: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   reloadUser: () => Promise<void>
+  setLocale: (locale: Locale) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -21,7 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadCurrentUser = useCallback(async () => {
     try {
-      // Cookie is sent automatically — if valid, returns the user
       const currentUser = await authService.getMe()
       setUser(currentUser)
     } catch {
@@ -34,6 +35,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     loadCurrentUser()
   }, [loadCurrentUser])
+
+  // Keep i18n + localStorage in sync with the user's stored preference.
+  useEffect(() => {
+    if (user?.locale && i18n.language !== user.locale) {
+      void i18n.changeLanguage(user.locale)
+      localStorage.setItem(STORAGE_KEY, user.locale)
+    }
+  }, [user?.locale])
 
   useEffect(() => {
     const handleSessionExpired = () => setUser(null)
@@ -52,15 +61,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
-    await authService.logout()  // server clears httpOnly cookies
+    await authService.logout()
     setUser(null)
+  }
+
+  const setLocale = async (locale: Locale) => {
+    const updated = await authService.updateLocale(locale)
+    setUser(updated)
   }
 
   const isDemoActive = user?.is_demo_active ?? false
   const realEmail = user?.real_email ?? null
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isDemoActive, realEmail, login, register, logout, reloadUser: loadCurrentUser }}>
+    <AuthContext.Provider value={{ user, isLoading, isDemoActive, realEmail, login, register, logout, reloadUser: loadCurrentUser, setLocale }}>
       {children}
     </AuthContext.Provider>
   )

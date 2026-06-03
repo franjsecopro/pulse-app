@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../services/api'
 
@@ -8,6 +9,7 @@ type Mode = 'login' | 'register'
 export function Login() {
   const { user, isLoading, login, register } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
@@ -33,7 +35,7 @@ export function Login() {
       if (err instanceof ApiError) {
         setError(err.message)
       } else {
-        setError('Error inesperado. Intenta de nuevo.')
+        setError(t('auth.errorUnexpected'))
       }
     } finally {
       setIsSubmitting(false)
@@ -56,12 +58,12 @@ export function Login() {
           <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-8">
             <div className="mb-8">
               <h2 className="text-3xl font-black text-slate-900 mb-2">
-                {mode === 'login' ? 'Bienvenido' : 'Crear cuenta'}
+                {mode === 'login' ? t('auth.login.welcome') : t('auth.register.title')}
               </h2>
               <p className="text-slate-500">
                 {mode === 'login'
-                  ? 'Gestiona tu contabilidad con confianza'
-                  : 'Comienza a gestionar tus clases y pagos'}
+                  ? t('auth.login.subtitle')
+                  : t('auth.register.subtitle')}
               </p>
             </div>
 
@@ -75,7 +77,7 @@ export function Login() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Email
+                  {t('auth.fields.email')}
                 </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
@@ -86,7 +88,7 @@ export function Login() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu@email.com"
+                    placeholder={t('auth.fields.emailPlaceholder')}
                     className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
                   />
                 </div>
@@ -94,7 +96,7 @@ export function Login() {
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Contraseña
+                  {t('auth.fields.password')}
                 </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
@@ -120,7 +122,7 @@ export function Login() {
                 </div>
                 {mode === 'register' && (
                   <p className="mt-2 text-xs text-slate-500">
-                    Mínimo 8 caracteres, una mayúscula y un número.
+                    {t('auth.passwordHint')}
                   </p>
                 )}
               </div>
@@ -134,7 +136,7 @@ export function Login() {
                   <span className="material-symbols-outlined animate-spin text-lg">sync</span>
                 ) : (
                   <>
-                    {mode === 'login' ? 'Entrar al Dashboard' : 'Crear cuenta'}
+                    {mode === 'login' ? t('auth.login.submit') : t('auth.register.submit')}
                     <span className="material-symbols-outlined">arrow_forward</span>
                   </>
                 )}
@@ -147,8 +149,8 @@ export function Login() {
                 className="text-sm text-primary hover:underline font-medium"
               >
                 {mode === 'login'
-                  ? '¿No tienes cuenta? Regístrate'
-                  : '¿Ya tienes cuenta? Entra aquí'}
+                  ? t('auth.toggleToRegister')
+                  : t('auth.toggleToLogin')}
               </button>
             </div>
           </div>

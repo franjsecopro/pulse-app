@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr, field_validator
 import re
 
@@ -30,7 +32,12 @@ class UserResponse(BaseModel):
     id: int
     email: str
     role: str = "user"
+    locale: str = "es-ES"
     is_demo_active: bool = False
     real_email: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class UserUpdateRequest(BaseModel):
+    locale: Literal["es-ES", "fr-FR"]
