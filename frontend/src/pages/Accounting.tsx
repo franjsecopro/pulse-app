@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from '../i18n'
 import { accountingService } from '../services/accounting.service'
 import { clientService } from '../services/client.service'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import type { AccountingSummaryEntry, ContractBreakdown, Client } from '../types'
-
-const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
 function getCurrentMonthYear() {
   const now = new Date()
@@ -13,6 +11,9 @@ function getCurrentMonthYear() {
 }
 
 export function Accounting() {
+  const { t } = useTranslation()
+  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
+  const monthsLower: string[] = t('common.months.lowercase', { returnObjects: true }) as unknown as string[]
   const { month: currentMonth, year: currentYear } = getCurrentMonthYear()
   const [month, setMonth] = useState(currentMonth)
   const [year, setYear] = useState(currentYear)
@@ -46,7 +47,7 @@ export function Accounting() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `contabilidad_${MONTHS[month - 1].toLowerCase()}_${year}.xlsx`
+      a.download = `contabilidad_${monthsLower[month - 1]}_${year}.xlsx`
       a.click()
       URL.revokeObjectURL(url)
     } finally {
@@ -59,9 +60,9 @@ export function Accounting() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Contabilidad</h1>
+          <h1 className="text-2xl font-black text-slate-900">{t('accounting.title')}</h1>
           <p className="text-slate-500 text-sm mt-1">
-            Balance mensual por cliente con crédito acumulado aplicado.
+            {t('accounting.subtitle')}
           </p>
         </div>
         <button
@@ -72,7 +73,7 @@ export function Accounting() {
           <span className={`material-symbols-outlined text-sm ${isExporting ? 'animate-spin' : ''}`}>
             {isExporting ? 'sync' : 'download'}
           </span>
-          {isExporting ? 'Generando...' : 'Exportar Excel'}
+          {isExporting ? t('accounting.exporting') : t('accounting.exportExcel')}
         </button>
       </div>
 
@@ -95,17 +96,17 @@ export function Accounting() {
       ) : visibleSummary.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-slate-200">
           <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">account_balance</span>
-          <p className="text-slate-700 font-bold text-lg">Sin datos</p>
-          <p className="text-slate-500 text-sm mt-1">No hay clases ni pagos registrados para {MONTHS[month - 1]} {year}.</p>
+          <p className="text-slate-700 font-bold text-lg">{t('accounting.empty.title')}</p>
+          <p className="text-slate-500 text-sm mt-1">{t('accounting.empty.description', { month: months[month - 1], year })}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {/* Totals summary */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <SummaryCard label="Total esperado" value={totalExpected} color="slate" />
-            <SummaryCard label="Total pagado" value={totalPaid} color="emerald" />
+            <SummaryCard label={t('accounting.summary.expected')} value={totalExpected} color="slate" />
+            <SummaryCard label={t('accounting.summary.paid')} value={totalPaid} color="emerald" />
             <SummaryCard
-              label="Balance final"
+              label={t('accounting.summary.balance')}
               value={totalBalance}
               color={totalBalance < 0 ? 'red' : totalBalance > 0 ? 'blue' : 'slate'}
             />
@@ -116,16 +117,16 @@ export function Accounting() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="text-left px-5 py-3 font-semibold text-slate-600">Cliente</th>
-                  <th className="text-right px-4 py-3 font-semibold text-slate-600">Esperado</th>
-                  <th className="text-right px-4 py-3 font-semibold text-slate-600">Pagado</th>
-                  <th className="text-right px-4 py-3 font-semibold text-slate-600">Crédito previo</th>
-                  <th className="text-right px-5 py-3 font-semibold text-slate-600">Balance</th>
+                  <th className="text-left px-5 py-3 font-semibold text-slate-600">{t('accounting.table.client')}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-slate-600">{t('accounting.table.expected')}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-slate-600">{t('accounting.table.paid')}</th>
+                  <th className="text-right px-4 py-3 font-semibold text-slate-600">{t('accounting.table.previousCredit')}</th>
+                  <th className="text-right px-5 py-3 font-semibold text-slate-600">{t('accounting.table.balance')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {visibleSummary.map(entry => (
-                  <ClientRow key={entry.client_id} entry={entry} />
+                  <ClientRow key={entry.client_id} entry={entry} t={t} />
                 ))}
               </tbody>
             </table>
@@ -153,7 +154,7 @@ function SummaryCard({ label, value, color }: { label: string; value: number; co
   )
 }
 
-function ClientRow({ entry }: { entry: AccountingSummaryEntry }) {
+function ClientRow({ entry, t }: { entry: AccountingSummaryEntry; t: (key: string, options?: Record<string, unknown>) => string }) {
   const [expanded, setExpanded] = useState(false)
   const isDebt = entry.balance < 0
   const isCredit = entry.balance > 0
@@ -197,38 +198,38 @@ function ClientRow({ entry }: { entry: AccountingSummaryEntry }) {
       </tr>
 
       {expanded && entry.contracts.map((contract, i) => (
-        <ContractRow key={contract.contract_id ?? i} contract={contract} />
+        <ContractRow key={contract.contract_id ?? i} contract={contract} t={t} />
       ))}
     </>
   )
 }
 
-function ContractRow({ contract }: { contract: ContractBreakdown }) {
+function ContractRow({ contract, t }: { contract: ContractBreakdown; t: (key: string, options?: Record<string, unknown>) => string }) {
   return (
     <tr className="bg-slate-50/70 border-t border-slate-100">
       <td className="pl-16 pr-4 py-3" colSpan={1}>
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-sm text-slate-400">description</span>
           <span className="text-sm font-medium text-slate-700">{contract.contract_description}</span>
-          <span className="text-xs text-slate-400">· €{contract.hourly_rate}/h</span>
+          <span className="text-xs text-slate-400">· €{contract.hourly_rate}/{t('common.units.hoursShort')}</span>
         </div>
         <div className="flex items-center gap-3 mt-1.5 pl-6 flex-wrap">
           {contract.normal_count > 0 && (
             <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-              {contract.normal_count} normal{contract.normal_count !== 1 ? 'es' : ''}
+              {t('accounting.contract.normal', { count: contract.normal_count })}
             </span>
           )}
           {contract.cancelled_with_payment_count > 0 && (
             <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
-              {contract.cancelled_with_payment_count} cancelada{contract.cancelled_with_payment_count !== 1 ? 's' : ''} con pago
+              {t('accounting.contract.cancelledWithPayment', { count: contract.cancelled_with_payment_count })}
             </span>
           )}
           {contract.cancelled_without_payment_count > 0 && (
             <span className="inline-flex items-center gap-1 text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block" />
-              {contract.cancelled_without_payment_count} cancelada{contract.cancelled_without_payment_count !== 1 ? 's' : ''} sin pago
+              {t('accounting.contract.cancelledWithoutPayment', { count: contract.cancelled_without_payment_count })}
             </span>
           )}
         </div>

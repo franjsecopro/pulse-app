@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { useTranslation } from '../i18n'
 import { authService } from '../services/auth.service'
-import i18n, { type Locale, STORAGE_KEY } from '../i18n'
+import { type Locale, STORAGE_KEY } from '../i18n'
 import type { User } from '../types'
 
 interface AuthContextValue {
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const { i18n } = useTranslation()
 
   const loadCurrentUser = useCallback(async () => {
     try {
@@ -36,13 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadCurrentUser()
   }, [loadCurrentUser])
 
-  // Keep i18n + localStorage in sync with the user's stored preference.
   useEffect(() => {
     if (user?.locale && i18n.language !== user.locale) {
       void i18n.changeLanguage(user.locale)
       localStorage.setItem(STORAGE_KEY, user.locale)
     }
-  }, [user?.locale])
+  }, [user?.locale, i18n])
 
   useEffect(() => {
     const handleSessionExpired = () => setUser(null)

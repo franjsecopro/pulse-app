@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from '../../i18n'
 
 interface ConfirmModalProps {
   isOpen: boolean
@@ -13,13 +14,19 @@ interface ConfirmModalProps {
 
 export function ConfirmModal({
   isOpen,
-  title = 'Confirmar eliminación',
+  title,
   message,
-  confirmLabel = 'Eliminar',
-  cancelLabel = 'Cancelar',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const { t } = useTranslation()
+
+  const resolvedTitle = title ?? t('actions.confirmDelete')
+  const resolvedConfirmLabel = confirmLabel ?? t('actions.delete')
+  const resolvedCancelLabel = cancelLabel ?? t('actions.cancel')
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel()
@@ -42,7 +49,7 @@ export function ConfirmModal({
             <span className="material-symbols-outlined text-red-500 text-xl">delete</span>
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-sm">{title}</p>
+            <p className="font-bold text-slate-900 text-sm">{resolvedTitle}</p>
             <p className="text-slate-500 text-sm mt-1">{message}</p>
           </div>
         </div>
@@ -51,13 +58,13 @@ export function ConfirmModal({
             onClick={onCancel}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             onClick={onConfirm}
             className="px-5 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition-colors shadow-md shadow-red-200"
           >
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from '../i18n'
 import { dashboardService } from '../services/dashboard.service'
 import type { Alert } from '../types'
-
-const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
 const now = new Date()
 const CURRENT_YEAR = now.getFullYear()
 const YEARS = [CURRENT_YEAR - 1, CURRENT_YEAR]
 
 export function Alerts() {
+  const { t } = useTranslation()
+  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
   const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1)
   const [filterYear, setFilterYear] = useState(CURRENT_YEAR)
   const [alerts, setAlerts] = useState<Alert[]>([])
@@ -30,9 +30,9 @@ export function Alerts() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Centro de Alertas</h1>
+          <h1 className="text-2xl font-black text-slate-900">{t('alerts.title')}</h1>
           <p className="text-slate-500 text-sm mt-1">
-            Discrepancias entre clases impartidas y pagos recibidos.
+            {t('alerts.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -41,7 +41,7 @@ export function Alerts() {
             onChange={(e) => setFilterMonth(parseInt(e.target.value))}
             className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           >
-            {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+            {months.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
           <select
             value={filterYear}
@@ -60,8 +60,8 @@ export function Alerts() {
       ) : alerts.filter(a => a.type !== 'pdf_missing').length === 0 && systemAlerts.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-slate-200">
           <span className="material-symbols-outlined text-5xl text-emerald-400 block mb-3">check_circle</span>
-          <p className="text-slate-700 font-bold text-lg">Todo al día</p>
-          <p className="text-slate-500 text-sm mt-1">No hay discrepancias entre clases y pagos este mes.</p>
+          <p className="text-slate-700 font-bold text-lg">{t('alerts.allOk.title')}</p>
+          <p className="text-slate-500 text-sm mt-1">{t('alerts.allOk.description')}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -70,7 +70,7 @@ export function Alerts() {
             <div>
               <h2 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
                 <span className="inline-block w-3 h-3 rounded-full bg-amber-500"></span>
-                Avisos del sistema
+                {t('alerts.section.systemAlerts')}
               </h2>
               <div className="space-y-3">
                 {systemAlerts.map((alert, i) => (
@@ -86,15 +86,15 @@ export function Alerts() {
           {/* Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-slate-200 p-5 text-center shadow-sm">
-              <p className="text-slate-500 text-sm font-medium">Total alertas</p>
+              <p className="text-slate-500 text-sm font-medium">{t('alerts.summary.totalAlerts')}</p>
               <p className="text-3xl font-black text-slate-900 mt-1">{alerts.length}</p>
             </div>
             <div className="bg-red-50 rounded-xl border border-red-200 p-5 text-center shadow-sm">
-              <p className="text-red-700 text-sm font-medium">🔴 Deudas</p>
+              <p className="text-red-700 text-sm font-medium">{t('alerts.summary.debts')}</p>
               <p className="text-3xl font-black text-red-900 mt-1">{debtAlerts.length}</p>
             </div>
             <div className="bg-blue-50 rounded-xl border border-blue-200 p-5 text-center shadow-sm">
-              <p className="text-blue-700 text-sm font-medium">🔵 Créditos</p>
+              <p className="text-blue-700 text-sm font-medium">{t('alerts.summary.credits')}</p>
               <p className="text-3xl font-black text-blue-900 mt-1">{creditAlerts.length}</p>
             </div>
           </div>
@@ -104,11 +104,11 @@ export function Alerts() {
             <div>
               <h2 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
                 <span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>
-                Clientes con deuda
+                {t('alerts.section.debtClients')}
               </h2>
               <div className="space-y-3">
                 {debtAlerts.map(alert => (
-                  <AlertCard key={alert.client_id} alert={alert} />
+                  <AlertCard key={alert.client_id} alert={alert} months={months} t={t} />
                 ))}
               </div>
             </div>
@@ -119,14 +119,14 @@ export function Alerts() {
             <div>
               <h2 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
                 <span className="inline-block w-3 h-3 rounded-full bg-blue-500"></span>
-                Clientes con crédito a favor
+                {t('alerts.section.creditClients')}
               </h2>
               <p className="text-xs text-slate-500 mb-3">
-                Estos clientes han pagado más de lo esperado. El exceso se aplicará automáticamente el próximo mes en Contabilidad.
+                {t('alerts.section.creditExplanation')}
               </p>
               <div className="space-y-3">
                 {creditAlerts.map(alert => (
-                  <AlertCard key={alert.client_id} alert={alert} />
+                  <AlertCard key={alert.client_id} alert={alert} months={months} t={t} />
                 ))}
               </div>
             </div>
@@ -137,9 +137,9 @@ export function Alerts() {
   )
 }
 
-function AlertCard({ alert }: { alert: Alert }) {
+function AlertCard({ alert, months, t }: { alert: Alert; months: string[]; t: (key: string, options?: Record<string, unknown>) => string }) {
   const isDebt = alert.type === 'debt'
-  const monthName = MONTHS[alert.month - 1]
+  const monthName = months[alert.month - 1]
 
   return (
     <div className={`rounded-xl border p-5 ${isDebt ? 'border-red-200 bg-red-50' : 'border-blue-200 bg-blue-50'}`}>
@@ -159,15 +159,15 @@ function AlertCard({ alert }: { alert: Alert }) {
         </div>
         <div className="grid grid-cols-3 gap-4 sm:gap-6 text-center shrink-0">
           <div>
-            <p className="text-xs text-slate-500 font-medium">Esperado</p>
+            <p className="text-xs text-slate-500 font-medium">{t('alerts.card.expected')}</p>
             <p className="font-bold text-slate-900">€{alert.expected.toFixed(2)}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-medium">Pagado</p>
+            <p className="text-xs text-slate-500 font-medium">{t('alerts.card.paid')}</p>
             <p className="font-bold text-slate-900">€{alert.paid.toFixed(2)}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-medium">Diferencia</p>
+            <p className="text-xs text-slate-500 font-medium">{t('alerts.card.difference')}</p>
             <p className={`font-black ${isDebt ? 'text-red-700' : 'text-blue-700'}`}>
               {isDebt ? '-' : '+'}€{Math.abs(alert.diff).toFixed(2)}
             </p>

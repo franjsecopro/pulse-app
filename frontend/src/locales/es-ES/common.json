@@ -2,7 +2,44 @@
   "actions": {
     "save": "Guardar",
     "cancel": "Cancelar",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "retry": "Intentar de nuevo",
+    "reset": "Resetear",
+    "add": "Añadir",
+    "continue": "Continuar",
+    "new": "Nuevo",
+    "noChanges": "Sin cambios",
+    "confirmDelete": "Confirmar eliminación",
+    "deletePermanently": "Eliminar permanentemente"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "empty": "Sin resultados",
+    "errors": {
+      "save": "Error al guardar",
+      "add": "Error al añadir",
+      "delete": "Error al eliminar",
+      "unknown": "Error desconocido"
+    },
+    "units": {
+      "hoursShort": "h",
+      "minutesShort": "min"
+    },
+    "weekdays": {
+      "short": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+      "full": ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+    },
+    "months": {
+      "full": ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+      "lowercase": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+    }
+  },
+  "errors": {
+    "sessionExpired": "Sesión expirada",
+    "requestFailed": "Error en la solicitud",
+    "blobGeneration": "No se pudo generar el archivo"
   },
   "status": {
     "loading": "Cargando…",
@@ -29,13 +66,653 @@
     "toggleToRegister": "¿No tienes cuenta? Regístrate",
     "toggleToLogin": "¿Ya tienes cuenta? Entra aquí"
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Clientes",
+    "classes": "Clases",
+    "payments": "Pagos",
+    "accounting": "Contabilidad",
+    "alerts": "Alertas",
+    "notifications": "Notificaciones",
+    "settings": "Ajustes",
+    "admin": "Admin",
+    "logoutTooltip": "Cerrar sesión"
+  },
+  "layout": {
+    "footer": {
+      "tagline": "Pulse — Gestor de Contabilidad"
+    }
+  },
+  "demoSidebar": {
+    "label": "MODO DEMO",
+    "activeTooltip": "Modo demo activo — sesión real: {{email}}",
+    "exitTooltip": "Salir del modo demo (sesión real: {{email}})"
+  },
+  "pagination": {
+    "page": "Página",
+    "of": "de",
+    "records": "{{count}} registros",
+    "records_plural": "{{count}} registros",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "doubleConfirm": {
+    "step1": {
+      "title": "¿Eliminar permanentemente?"
+    },
+    "step2": {
+      "title": "Confirmar eliminación",
+      "instruction": "Para confirmar, escribí exactamente el nombre:"
+    }
+  },
   "settings": {
+    "title": "Ajustes",
+    "subtitle": "Configura las integraciones de la app.",
     "language": {
       "label": "Idioma",
       "options": {
         "es-ES": "Español",
         "fr-FR": "Français"
       }
+    },
+    "sections": {
+      "language": "Idioma",
+      "languageHint": "Elige el idioma de la interfaz.",
+      "googleCalendar": "Google Calendar",
+      "gcalHint": "Sincroniza las clases automáticamente con tu calendario de Google.",
+      "fiscal": "Datos fiscales",
+      "fiscalHint": "Tus datos como emisor. Se usarán en las facturas."
+    },
+    "gcal": {
+      "loadingStatus": "Cargando estado...",
+      "connectedAs": "Conectado como {{email}}",
+      "notConnected": "No conectado",
+      "connect": "Conectar Google Calendar",
+      "disconnect": "Desconectar cuenta",
+      "featuresConnected": [
+        "Las clases nuevas se añaden automáticamente a tu Google Calendar",
+        "Los cambios de hora y fecha se sincronizan al guardar",
+        "Al eliminar una clase, se elimina también del calendario",
+        "Los alumnos con email reciben invitación y recordatorios automáticos"
+      ],
+      "featuresNotConnected": [
+        "Conecta tu cuenta de Google para sincronizar las clases automáticamente",
+        "Tus alumnos recibirán invitaciones y recordatorios por email",
+        "Puedes incluir links de tareas en la descripción de cada contrato"
+      ]
+    },
+    "fiscal": {
+      "businessName": "Nombre / Razón social",
+      "taxId": "NIF / CIF",
+      "taxIdPlaceholder": "B12345678",
+      "address": "Dirección fiscal",
+      "save": "Guardar datos fiscales"
+    },
+    "toast": {
+      "gcalConnected": "Google Calendar conectado correctamente.",
+      "gcalConnectError": "Error al conectar con Google Calendar. Inténtalo de nuevo.",
+      "gcalDisconnected": "Google Calendar desconectado.",
+      "gcalDisconnectError": "Error al desconectar. Inténtalo de nuevo.",
+      "fiscalSaved": "Datos fiscales guardados.",
+      "fiscalSaveError": "Error al guardar los datos fiscales."
+    },
+    "errors": {
+      "connectUrl": "No se pudo obtener la URL de conexión. Verifica la configuración del servidor."
     }
+  },
+  "clients": {
+    "title": "Clientes",
+    "subtitle": "Administra tu cartera de clientes y contratos.",
+    "newClient": "Nuevo cliente",
+    "editClient": "Editar cliente",
+    "searchPlaceholder": "Buscar por nombre...",
+    "addFirst": "Añade tu primer cliente",
+    "contracts": "Contratos",
+    "contractsLabel": "Contratos",
+    "manageContracts": "Gestionar contratos",
+    "viewData": "Ver datos",
+    "edit": "Editar",
+    "archive": "Archivar",
+    "archiveTitle": "Archivar a {{name}}",
+    "archiveMessage": "El cliente quedará inactivo y se ocultará de la lista de activos. Podrás recuperarlo en la sección de Archivados.",
+    "activate": "Activar",
+    "activateTitle": "Activar a {{name}}",
+    "activateMessage": "El cliente volverá a estar activo y visible en tu cartera principal.",
+    "activateTooltip": "Activar",
+    "archiveTooltip": "Archivar",
+    "hardDeleteTitle": "Eliminar a {{name}}",
+    "hardDeleteMessage": "¿Eliminar permanentemente a {{name}} y todos sus datos (contratos, clases, pagos)? Esta acción no se puede deshacer.",
+    "hardDeleteTooltip": "Eliminar permanentemente",
+    "deleteConfirmMessage": "¿Eliminar este contrato? Esta acción no se puede deshacer.",
+    "noActiveContracts": "Sin contratos activos",
+    "empty": "No hay clientes",
+    "filter": {
+      "active": "Activos",
+      "archived": "Archivados",
+      "all": "Todos"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "archived": "Archivado"
+    },
+    "form": {
+      "name": "Nombre",
+      "email": "Email",
+      "phone": "Teléfono",
+      "whatsapp": "WhatsApp",
+      "whatsappPlaceholder": "+34 600 000 000",
+      "whatsappHint": "Número para recordatorios automáticos",
+      "address": "Dirección",
+      "taxId": "NIF / CIF",
+      "taxIdPlaceholder": "12345678Z",
+      "taxIdHint": "Para facturación (opcional)",
+      "paymentTimingLabel": "¿Cuándo paga las clases?",
+      "isActive": "Cliente activo"
+    },
+    "paymentTiming": {
+      "sameMonth": "El mismo mes",
+      "nextMonth": "El mes siguiente (mes vencido)",
+      "nextMonthHint": "\"Mes vencido\": un pago recibido en mayo cubre las clases de abril."
+    }
+  },
+  "contracts": {
+    "new": "Nuevo contrato",
+    "edit": "Editar contrato",
+    "save": "Guardar contrato",
+    "viewDetail": "Ver detalle",
+    "deleteTooltip": "Eliminar contrato",
+    "deleteConfirmMessage": "¿Eliminar este contrato? Esta acción no se puede deshacer.",
+    "generateClasses": "Generar clases en el calendario",
+    "deleteFutureClasses": "Eliminar clases futuras",
+    "deleteFutureConfirm": "¿Eliminar todas las clases futuras de este contrato?",
+    "generateNone": "No había clases nuevas que generar",
+    "generateResult_one": "{{count}} clase creada",
+    "generateResult_other": "{{count}} clases creadas en el calendario",
+    "deleteNone": "No hay clases futuras asociadas a este contrato",
+    "deleteResult_one": "{{count}} clase eliminada",
+    "deleteResult_other": "{{count}} clases eliminadas del calendario",
+    "saveToUseActions": "Guarda los cambios para poder usar las acciones del calendario.",
+    "disabledTooltip": "Guarda los cambios primero",
+    "googleCalendar": "Google Calendar",
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "notifications": {
+      "enabled": "Activadas",
+      "disabled": "Desactivadas"
+    },
+    "form": {
+      "description": "Descripción",
+      "descriptionPlaceholder": "Ej: Clases de inglés",
+      "startDate": "Fecha inicio",
+      "endDate": "Fecha fin",
+      "rate": "Tarifa €/hora",
+      "isActive": "Contrato activo",
+      "studentPhone": "Teléfono del alumno",
+      "phonePlaceholder": "Ej: +34 600 000 000",
+      "weeklySchedule": "Horario semanal",
+      "timeTo": "a",
+      "invalidTime": "Hora inválida",
+      "perWeek": "/ semana",
+      "notes": "Notas",
+      "enableNotifications": "Activar notificaciones",
+      "eventDescription": "Descripción del evento",
+      "eventDescriptionPlaceholder": "Aparece en el cuerpo del evento y en los emails de recordatorio.",
+      "autoReminders": "Recordatorios automáticos",
+      "reminderEmail24h": "Email 24h antes (al alumno)",
+      "reminderPopup1h": "Aviso 1h antes (en tu calendario)"
+    },
+    "detail": {
+      "description": "Descripción",
+      "startDate": "Fecha inicio",
+      "endDate": "Fecha fin",
+      "rate": "Tarifa",
+      "status": "Estado",
+      "schedule": "Horario semanal",
+      "total": "Total:",
+      "perWeek": "/semana",
+      "studentPhone": "Teléfono alumno",
+      "notifications": "Notificaciones",
+      "notes": "Notas",
+      "calendarActions": "Acciones del calendario"
+    },
+    "manager": {
+      "title": "Contratos de {{name}}",
+      "empty": "No hay contratos. Añade uno para empezar.",
+      "since": "Desde {{date}}",
+      "until": "hasta {{date}}"
+    },
+    "errors": {
+      "startAfterEnd": "La fecha de inicio no puede ser posterior a la fecha de fin.",
+      "endBeforeStart": "La hora de fin de {{label}} debe ser posterior a la hora de inicio.",
+      "generate": "Error al generar clases. Inténtalo de nuevo.",
+      "deleteFuture": "Error al eliminar las clases. Inténtalo de nuevo."
+    }
+  },
+  "classes": {
+    "title": "Clases",
+    "subtitle": "Registro de clases impartidas.",
+    "newClass": "Nueva clase",
+    "editClass": "Editar clase",
+    "registerFirst": "Registrar primera clase",
+    "deleteConfirm": "¿Seguro que quieres eliminar esta clase? Esta acción no se puede deshacer.",
+    "newOnDay": "Nueva clase este día",
+    "addOnDay": "Añadir clase este día",
+    "edit": "Editar clase",
+    "delete": "Eliminar clase",
+    "save": "Guardar clase",
+    "syncing": "Sincronizando...",
+    "syncGCal": "Sync GCal",
+    "gcalSynced": "Sincronizado con Google Calendar",
+    "gcalNotSynced": "No sincronizado con Google Calendar",
+    "totalRevenue": "Total: €{{amount}}",
+    "view": {
+      "list": "Lista",
+      "calendar": "Calendario"
+    },
+    "filter": {
+      "allClients": "Todos los clientes"
+    },
+    "table": {
+      "date": "Fecha",
+      "client": "Cliente",
+      "duration": "Duración",
+      "rate": "Tarifa",
+      "total": "Total",
+      "status": "Estado",
+      "notes": "Notas",
+      "actions": "Acciones"
+    },
+    "status": {
+      "normal": "Normal",
+      "normalDesc": "Normal — clase celebrada",
+      "cancelledWithPayment": "Cancelada · con pago",
+      "cancelledPaymentDesc": "Cancelada con pago (menos de 24h)",
+      "cancelledWithoutPayment": "Cancelada · sin pago",
+      "cancelledNoPaymentDesc": "Cancelada sin pago (más de 24h)"
+    },
+    "form": {
+      "client": "Cliente",
+      "selectClientPlaceholder": "Seleccionar cliente",
+      "contract": "Contrato",
+      "contractInfo": "Contrato: {{rate}} € {{duration}}/h",
+      "selectContractPlaceholder": "Seleccionar contrato...",
+      "date": "Fecha",
+      "time": "Hora",
+      "duration": "Duración (horas)",
+      "rate": "Tarifa €/hora",
+      "statusLabel": "Estado de la clase",
+      "notes": "Notas",
+      "total": "Total de la clase"
+    },
+    "errors": {
+      "selectClient": "Selecciona un cliente",
+      "multipleContracts": "Este cliente tiene varios contratos. Selecciona uno."
+    },
+    "empty": {
+      "list": "No hay clases en este período"
+    }
+  },
+  "calendar": {
+    "moreClasses": "+{{count}} más",
+    "moreClasses_plural": "+{{count}} más"
+  },
+  "dayView": {
+    "untimed": "Sin hora asignada",
+    "emptyTimed": "No hay clases con hora asignada"
+  },
+  "payments": {
+    "title": "Pagos",
+    "subtitle": "Gestión y seguimiento de cobros.",
+    "newPayment": "Nuevo pago",
+    "importStatement": "Importar extracto",
+    "create": "Registrar pago",
+    "edit": "Editar pago",
+    "registerFirst": "Registrar primer pago",
+    "deleteTitle": "Eliminar pago",
+    "deleteMessage": "¿Estás seguro de que querés eliminar este pago? Esta acción no se puede deshacer.",
+    "totalAmount": "Total: €{{amount}}",
+    "empty": "No hay pagos registrados",
+    "tab": {
+      "payments": "Pagos",
+      "history": "Extractos importados"
+    },
+    "table": {
+      "client": "Cliente",
+      "concept": "Concepto",
+      "amount": "Monto",
+      "date": "Fecha",
+      "status": "Estado",
+      "actions": "Acciones",
+      "noClient": "Sin cliente"
+    },
+    "status": {
+      "confirmed": "Confirmado",
+      "pending": "Pendiente",
+      "unmatched": "Sin identificar"
+    },
+    "form": {
+      "client": "Cliente",
+      "noClient": "Sin cliente (pago no identificado)",
+      "amount": "Monto (€)",
+      "date": "Fecha",
+      "concept": "Concepto",
+      "conceptPlaceholder": "Ej: Mensualidad marzo",
+      "status": "Estado",
+      "notes": "Notas"
+    }
+  },
+  "statements": {
+    "empty": "No hay extractos importados",
+    "emptyHint": "Los extractos bancarios importados aparecerán aquí.",
+    "deleteTitle": "Eliminar extracto",
+    "deleteMessage": "Se eliminará el extracto y TODOS los pagos que generó. Esta acción no se puede deshacer.",
+    "deleteConfirm": "Eliminar extracto y pagos",
+    "deleteTooltip": "Eliminar extracto y sus pagos",
+    "table": {
+      "file": "Archivo",
+      "month": "Mes",
+      "importDate": "Fecha de importación",
+      "transactions": "Transacciones",
+      "total": "Total importado",
+      "actions": "Acciones"
+    }
+  },
+  "import": {
+    "importStatement": "Importar extracto bancario",
+    "parsing": "Procesando extracto...",
+    "uploadPrompt": "Haz clic para seleccionar el CSV",
+    "csvHint": "Extracto de cuenta Hello Bank / BNP Paribas (.csv)",
+    "analyzing": "Analizando extracto...",
+    "changeFile": "Cambiar archivo",
+    "periodLabel": "Movimientos de {{month}} {{year}}",
+    "spansMultiple": "El extracto abarca varios meses; se registrará en {{month}} {{year}}.",
+    "alreadyImported": "Este archivo ya fue importado el {{date}}",
+    "transactionsFound": "{{count}} transacciones encontradas en {{filename}}",
+    "duplicatesInfo": "{{marked}} de {{total}} transacciones ya estaban importadas y quedaron desmarcadas.",
+    "selectAll": "Seleccionar todo",
+    "deselectAll": "Deseleccionar todo",
+    "summary": "{{count}} pagos · €{{amount}}",
+    "confirm": "Confirmar importación ({{count}})",
+    "table": {
+      "date": "Fecha",
+      "concept": "Concepto banco",
+      "amount": "Importe",
+      "client": "Cliente",
+      "import": "Importar"
+    },
+    "match": {
+      "exact": "Exacto",
+      "partial": "Parcial {{pct}}%",
+      "alreadyImported": "Ya importado",
+      "unassigned": "Sin asignar"
+    },
+    "errors": {
+      "import": "Error al importar"
+    }
+  },
+  "filters": {
+    "allMonths": "Todos los meses",
+    "allClients": "Todos los clientes",
+    "allStatuses": "Todos los estados",
+    "statusConfirmed": "Confirmados",
+    "statusPending": "Pendientes",
+    "statusUnmatched": "Sin identificar"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "summary": {
+      "title": "Resumen de {{month}} {{year}}"
+    },
+    "stats": {
+      "expected": "Esperado",
+      "paid": "Pagado",
+      "pending": "Pendiente",
+      "activeClients": "Clientes activos"
+    },
+    "upcoming": {
+      "today": "Hoy",
+      "tomorrow": "Mañana",
+      "classCount_one": "{{count}} clase",
+      "classCount_other": "{{count}} clases",
+      "empty": "Sin clases",
+      "noClient": "Sin cliente"
+    },
+    "alerts": {
+      "paymentAlerts": "Alertas de pago",
+      "viewDetail": "Ver detalle"
+    },
+    "recentPayments": {
+      "title": "Pagos recientes",
+      "viewAll": "Ver todos",
+      "empty": "No hay pagos registrados aún.",
+      "table": {
+        "client": "Cliente",
+        "amount": "Monto",
+        "date": "Fecha",
+        "status": "Estado"
+      }
+    },
+    "quickLinks": {
+      "newClient": "Nuevo cliente",
+      "newClientDesc": "Añade un cliente con sus contratos",
+      "newClass": "Registrar clase",
+      "newClassDesc": "Anota una clase impartida",
+      "newPayment": "Registrar pago",
+      "newPaymentDesc": "Registra un cobro recibido"
+    }
+  },
+  "accounting": {
+    "title": "Contabilidad",
+    "subtitle": "Balance mensual por cliente con crédito acumulado aplicado.",
+    "exporting": "Generando...",
+    "exportExcel": "Exportar Excel",
+    "summary": {
+      "expected": "Total esperado",
+      "paid": "Total pagado",
+      "balance": "Balance final"
+    },
+    "table": {
+      "client": "Cliente",
+      "expected": "Esperado",
+      "paid": "Pagado",
+      "previousCredit": "Crédito previo",
+      "balance": "Balance"
+    },
+    "contract": {
+      "normal_one": "{{count}} normal",
+      "normal_other": "{{count}} normales",
+      "cancelledWithPayment_one": "{{count}} cancelada con pago",
+      "cancelledWithPayment_other": "{{count}} canceladas con pago",
+      "cancelledWithoutPayment_one": "{{count}} cancelada sin pago",
+      "cancelledWithoutPayment_other": "{{count}} canceladas sin pago"
+    },
+    "empty": {
+      "title": "Sin datos",
+      "description": "No hay clases ni pagos registrados para {{month}} {{year}}."
+    }
+  },
+  "alerts": {
+    "title": "Centro de Alertas",
+    "subtitle": "Discrepancias entre clases impartidas y pagos recibidos.",
+    "allOk": {
+      "title": "Todo al día",
+      "description": "No hay discrepancias entre clases y pagos este mes."
+    },
+    "summary": {
+      "totalAlerts": "Total alertas",
+      "debts": "Deudas",
+      "credits": "Créditos"
+    },
+    "section": {
+      "systemAlerts": "Avisos del sistema",
+      "debtClients": "Clientes con deuda",
+      "creditClients": "Clientes con crédito a favor",
+      "creditExplanation": "Estos clientes han pagado más de lo esperado. El exceso se aplicará automáticamente el próximo mes en Contabilidad."
+    },
+    "card": {
+      "expected": "Esperado",
+      "paid": "Pagado",
+      "difference": "Diferencia"
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "subtitle": "Recordatorios de clase enviados por WhatsApp al día siguiente.",
+    "generating": "Generando...",
+    "generate": "Generar notificaciones",
+    "updating": "Actualizando...",
+    "update": "Actualizar",
+    "send": "Enviar",
+    "classesForDate": "Clases del {{date}}",
+    "skippedHint": "Sin número de WhatsApp",
+    "tab": {
+      "notifications": "Notificaciones",
+      "history": "Historial",
+      "all": "Todas",
+      "settings": "Configuración"
+    },
+    "table": {
+      "client": "Cliente",
+      "time": "Hora",
+      "status": "Estado",
+      "info": "Info"
+    },
+    "historyTable": {
+      "client": "Cliente",
+      "class": "Clase",
+      "time": "Hora",
+      "status": "Estado",
+      "sentAt": "Enviado a las"
+    },
+    "status": {
+      "sent": "Enviado",
+      "pending": "Pendiente"
+    },
+    "settings": {
+      "defaultChannel": "Canal por defecto",
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "templateLabel": "Plantilla de mensaje",
+      "variablesHint": "Variables disponibles:",
+      "preview": "Vista previa:",
+      "saved": "Guardado",
+      "saving": "Guardando..."
+    },
+    "footer": {
+      "pending_one": "{{count}} pendiente",
+      "pending_other": "{{count}} pendientes",
+      "sent_one": "{{count}} enviado",
+      "sent_other": "{{count}} enviados",
+      "skipped_one": "{{count}} sin número",
+      "skipped_other": "{{count}} sin número"
+    },
+    "empty": {
+      "title": "No hay notificaciones generadas",
+      "hint": "Pulsa \"Generar notificaciones\" para preparar los mensajes de mañana."
+    },
+    "history": {
+      "empty": "Sin notificaciones enviadas todavía"
+    },
+    "all": {
+      "empty": "No hay notificaciones registradas"
+    },
+    "errors": {
+      "load": "Error al cargar notificaciones",
+      "generate": "Error al generar notificaciones"
+    }
+  },
+  "admin": {
+    "title": "Administración",
+    "subtitle": "Gestión de usuarios, clientes y modo demo.",
+    "tab": {
+      "users": "Usuarios",
+      "clients": "Clientes",
+      "demo": "Modo demo"
+    },
+    "users": {
+      "syncing": "Sincronizando...",
+      "syncGCal": "Sync GCal",
+      "syncedClasses": "clases encoladas",
+      "syncError": "Error al sincronizar",
+      "syncTooltip": "Forzar sincronización con Google Calendar",
+      "deleteTooltip": "Eliminar usuario y todos sus datos",
+      "deleteMessage": "¿Eliminar permanentemente a {{email}} y todos sus datos (clientes, clases, pagos)? Esta acción no se puede deshacer.",
+      "confirmRoleTitle": "Confirmar cambio de rol",
+      "confirmRoleMessage": "¿Cambiar el rol de {{email}} a \"{{role}}\"?",
+      "table": {
+        "email": "Email",
+        "role": "Rol",
+        "registered": "Registro",
+        "actions": "Acciones"
+      }
+    },
+    "clients": {
+      "archivedOnly": "Solo archivados",
+      "demoOnly": "Solo clientes demo",
+      "empty": "No hay clientes que mostrar.",
+      "archived": "Archivado",
+      "active": "Activo",
+      "moving": "Moviendo...",
+      "moveToProd": "Mover a producción",
+      "moveToDemo": "Mover a demo",
+      "deleteWarn": "Se eliminará permanentemente \"{{name}}\" (owner: {{owner}}) junto con todas sus clases, contratos y pagos. Esta acción es irreversible.",
+      "table": {
+        "client": "Cliente",
+        "owner": "Owner",
+        "status": "Estado",
+        "actions": "Acciones"
+      }
+    },
+    "demo": {
+      "status": "Modo demo: {{status}}",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "exit": "Salir del modo demo",
+      "enter": "Entrar en modo demo",
+      "reset": "Resetear datos demo",
+      "resetResult": "Datos reseteados — {{clients}} clientes, {{classes}} clases.",
+      "resetTitle": "Resetear datos demo",
+      "resetMessage": "Se van a eliminar todos los datos de prueba y se reemplazarán por el dataset inicial. ¿Continuar?",
+      "description": "Al activar el modo demo, vas a ver y operar sobre datos de prueba aislados. Tus datos reales no se ven afectados. Salí del modo demo cuando termines."
+    }
+  },
+  "payers": {
+    "title": "Identificadores de pago",
+    "description": "Nombres con los que aparece este cliente en las transferencias bancarias. Se usan para el matching automático del PDF bancario.",
+    "empty": "Sin identificadores",
+    "namePlaceholder": "Nombre en banco (ej: García)",
+    "infoPlaceholder": "Info (opcional)"
+  },
+  "toasts": {
+    "classCreated": "Clase creada correctamente",
+    "classCreateError": "Error al crear la clase",
+    "classUpdated": "Clase actualizada",
+    "classUpdateError": "Error al actualizar la clase",
+    "classDeleted": "Clase eliminada",
+    "classDeleteError": "Error al eliminar la clase",
+    "gcalSynced": "{{count}} clases encoladas para sincronizar",
+    "gcalSyncError": "Error al sincronizar con Google Calendar",
+    "paymentCreated": "Pago registrado correctamente",
+    "paymentCreateError": "Error al registrar el pago",
+    "paymentUpdated": "Pago actualizado",
+    "paymentUpdateError": "Error al actualizar el pago",
+    "paymentDeleted": "Pago eliminado",
+    "paymentDeleteError": "Error al eliminar el pago",
+    "statementImported": "Extracto importado correctamente",
+    "statementDeleted": "Extracto eliminado ({{count}} pagos)",
+    "statementDeleteError": "Error al eliminar el extracto",
+    "clientCreated": "Cliente creado correctamente",
+    "clientCreateError": "Error al crear el cliente",
+    "clientUpdated": "Cliente actualizado",
+    "clientUpdateError": "Error al actualizar el cliente",
+    "clientArchived": "Cliente archivado",
+    "clientArchiveError": "Error al archivar el cliente",
+    "clientActivated": "Cliente activado",
+    "clientActivateError": "Error al activar el cliente",
+    "clientHardDeleted": "Cliente eliminado permanentemente",
+    "clientHardDeleteError": "Error al eliminar el cliente"
   }
 }

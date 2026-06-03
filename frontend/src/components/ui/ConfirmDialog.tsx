@@ -1,3 +1,5 @@
+import { useTranslation } from '../../i18n'
+
 interface ConfirmDialogProps {
   isOpen: boolean
   title: string
@@ -14,13 +16,18 @@ export function ConfirmDialog({
   isOpen,
   title,
   message,
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
+  confirmText,
+  cancelText,
   isDangerous = false,
   isLoading = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation()
+
+  const resolvedConfirmText = confirmText ?? t('actions.confirm')
+  const resolvedCancelText = cancelText ?? t('actions.cancel')
+
   if (!isOpen) return null
 
   return (
@@ -36,7 +43,7 @@ export function ConfirmDialog({
             disabled={isLoading}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-60"
           >
-            {cancelText}
+            {resolvedCancelText}
           </button>
           <button
             onClick={onConfirm}
@@ -48,7 +55,7 @@ export function ConfirmDialog({
             {isLoading ? (
               <span className="material-symbols-outlined inline animate-spin">sync</span>
             ) : (
-              confirmText
+              resolvedConfirmText
             )}
           </button>
         </div>

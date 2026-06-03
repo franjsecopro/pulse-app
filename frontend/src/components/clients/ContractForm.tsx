@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { Contract, DaySchedule } from '../../types'
 import { calcDuration, formatHours } from '../../utils/formatters'
-import { WEEKDAYS } from './constants'
+import { useTranslation } from '../../i18n'
 
 interface ContractFormProps {
   initial?: Partial<Contract>
@@ -10,6 +10,7 @@ interface ContractFormProps {
 }
 
 export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
+  const { t } = useTranslation()
   const [form, setForm] = useState({
     description: initial?.description ?? '',
     start_date: initial?.start_date ?? new Date().toISOString().split('T')[0],
@@ -35,6 +36,11 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const weekdays = (t('common.weekdays.short', { returnObjects: true }) as string[]).map((label, i) => ({
+    index: String(i),
+    label,
+  }))
 
   const toggleDay = (dayIndex: string) => {
     setScheduleDays(prev => {
@@ -73,14 +79,14 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
     setError(null)
 
     if (form.end_date && form.start_date > form.end_date) {
-      setError('La fecha de inicio no puede ser posterior a la fecha de fin.')
+      setError(t('contracts.errors.startAfterEnd'))
       return
     }
 
     const invalidDay = Object.entries(scheduleDays).find(([, d]) => d.start >= d.end)
     if (invalidDay) {
-      const label = WEEKDAYS.find(w => w.index === invalidDay[0])?.label ?? invalidDay[0]
-      setError(`La hora de fin de ${label} debe ser posterior a la hora de inicio.`)
+      const label = weekdays.find(w => w.index === invalidDay[0])?.label ?? invalidDay[0]
+      setError(t('contracts.errors.endBeforeStart', { label }))
       return
     }
 
@@ -95,7 +101,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
         calendar_reminders: buildReminders(),
       })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al guardar')
+      setError(err instanceof Error ? err.message : t('common.errors.save'))
     } finally {
       setIsSubmitting(false)
     }
@@ -113,13 +119,13 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
 
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
-          Descripción *
+          {t('contracts.form.description')} *
         </label>
         <input
           required
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          placeholder="Ej: Clases de inglés"
+          placeholder={t('contracts.form.descriptionPlaceholder')}
           className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
         />
       </div>
@@ -127,7 +133,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Fecha inicio *
+            {t('contracts.form.startDate')} *
           </label>
           <input
             required
@@ -141,7 +147,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Fecha fin
+            {t('contracts.form.endDate')}
           </label>
           <input
             type="date"
@@ -154,7 +160,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Tarifa €/hora *
+            {t('contracts.form.rate')} *
           </label>
           <input
             required
@@ -174,30 +180,30 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
               onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
               className="w-4 h-4 accent-primary"
             />
-            <span className="text-sm font-medium text-slate-700">Contrato activo</span>
+            <span className="text-sm font-medium text-slate-700">{t('contracts.form.isActive')}</span>
           </label>
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
-          Teléfono del alumno
+          {t('contracts.form.studentPhone')}
         </label>
         <input
           type="tel"
           value={form.phone}
           onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-          placeholder="Ej: +34 600 000 000"
+          placeholder={t('contracts.form.phonePlaceholder')}
           className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
         />
       </div>
 
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-slate-700">
-          Horario semanal
+          {t('contracts.form.weeklySchedule')}
         </label>
         <div className="flex gap-1.5 flex-wrap">
-          {WEEKDAYS.map(({ index, label }) => {
+          {weekdays.map(({ index, label }) => {
             const active = index in scheduleDays
             return (
               <button
@@ -218,7 +224,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
 
         {hasSchedule && (
           <div className="space-y-2">
-            {WEEKDAYS.filter(({ index }) => index in scheduleDays).map(({ index, label }) => {
+            {weekdays.filter(({ index }) => index in scheduleDays).map(({ index, label }) => {
               const day = scheduleDays[index]
               const duration = calcDuration(day.start, day.end)
               const isInvalid = day.start >= day.end
@@ -231,7 +237,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
                     onChange={(e) => setDayTime(index, 'start', e.target.value)}
                     className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                   />
-                  <span className="text-xs text-slate-400">a</span>
+                  <span className="text-xs text-slate-400">{t('contracts.form.timeTo')}</span>
                   <input
                     type="time"
                     value={day.end}
@@ -244,7 +250,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
                     <span className="text-xs text-slate-400">{formatHours(duration)}</span>
                   )}
                   {isInvalid && (
-                    <span className="text-xs text-red-500">Hora inválida</span>
+                    <span className="text-xs text-red-500">{t('contracts.form.invalidTime')}</span>
                   )}
                 </div>
               )
@@ -252,11 +258,11 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
 
             <div className="flex items-center gap-4 pt-1 px-1 text-xs text-slate-500">
               <span>
-                <span className="font-bold text-slate-700">{formatHours(weeklyHours)}</span> / semana
+                <span className="font-bold text-slate-700">{formatHours(weeklyHours)}</span> {t('contracts.form.perWeek')}
               </span>
               {form.hourly_rate > 0 && (
                 <span>
-                  <span className="font-bold text-primary">€{weeklyRevenue.toFixed(2)}</span> / semana
+                  <span className="font-bold text-primary">€{weeklyRevenue.toFixed(2)}</span> {t('contracts.form.perWeek')}
                 </span>
               )}
             </div>
@@ -266,7 +272,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
 
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
-          Notas
+          {t('contracts.form.notes')}
         </label>
         <textarea
           value={form.notes}
@@ -289,24 +295,24 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
               onChange={(e) => setForm((f) => ({ ...f, notify: e.target.checked }))}
               className="w-4 h-4 accent-primary"
             />
-            <span className="text-sm text-slate-600">Activar notificaciones</span>
+            <span className="text-sm text-slate-600">{t('contracts.form.enableNotifications')}</span>
           </label>
         </div>
         <div>
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-            Descripción del evento
+            {t('contracts.form.eventDescription')}
           </label>
           <textarea
             value={form.calendar_description}
             onChange={(e) => setForm((f) => ({ ...f, calendar_description: e.target.value }))}
             rows={3}
-            placeholder="Aparece en el cuerpo del evento y en los emails de recordatorio. Incluye links de tareas, plataforma, contraseñas de reunión, etc."
+            placeholder={t('contracts.form.eventDescriptionPlaceholder')}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
           />
         </div>
         <div>
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-            Recordatorios automáticos
+            {t('contracts.form.autoReminders')}
           </label>
           <div className="space-y-1.5">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -316,7 +322,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
                 onChange={(e) => setReminderEmail24h(e.target.checked)}
                 className="w-4 h-4 accent-primary"
               />
-              <span className="text-sm text-slate-700">Email 24h antes (al alumno)</span>
+              <span className="text-sm text-slate-700">{t('contracts.form.reminderEmail24h')}</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -325,7 +331,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
                 onChange={(e) => setReminderPopup1h(e.target.checked)}
                 className="w-4 h-4 accent-primary"
               />
-              <span className="text-sm text-slate-700">Aviso 1h antes (en tu calendario)</span>
+              <span className="text-sm text-slate-700">{t('contracts.form.reminderPopup1h')}</span>
             </label>
           </div>
         </div>
@@ -337,7 +343,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           onClick={onCancel}
           className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
         >
-          Cancelar
+          {t('actions.cancel')}
         </button>
         <button
           type="submit"
@@ -347,7 +353,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           {isSubmitting && (
             <span className="material-symbols-outlined text-base animate-spin">sync</span>
           )}
-          Guardar contrato
+          {t('contracts.save')}
         </button>
       </div>
     </form>

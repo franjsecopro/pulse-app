@@ -1,11 +1,11 @@
 import { useState } from 'react'
+import i18n, { useTranslation } from '../i18n'
 import { Modal } from '../components/ui/Modal'
 import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { CalendarView } from '../components/classes/CalendarView'
 import { DayView } from '../components/classes/DayView'
 import { ClassForm } from '../components/classes/ClassForm'
 import { CLASS_STATUS_CONFIG } from '../components/classes/constants'
-import { MONTHS } from '../utils/constants'
 import { useClasses } from '../hooks/useClasses'
 import { Pagination } from '../components/ui/Pagination'
 import { useAuth } from '../context/AuthContext'
@@ -13,13 +13,9 @@ import type { ClassSession } from '../types'
 
 type ViewMode = 'list' | 'calendar'
 
-function formatDayTitle(dateStr: string): string {
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  })
-}
-
 export function Classes() {
+  const { t } = useTranslation()
+  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
   const now = new Date()
   const { user } = useAuth()
 
@@ -67,14 +63,20 @@ export function Classes() {
     setShowCreateModal(true)
   }
 
+  function formatDayTitle(dateStr: string): string {
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString(i18n.language, {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    })
+  }
+
   const years = Array.from({ length: 3 }, (_, i) => now.getFullYear() - i)
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Clases</h1>
-          <p className="text-slate-500 text-sm mt-1">Registro de clases impartidas.</p>
+          <h1 className="text-2xl font-black text-slate-900">{t('classes.title')}</h1>
+          <p className="text-slate-500 text-sm mt-1">{t('classes.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
@@ -84,7 +86,7 @@ export function Classes() {
                 ${viewMode === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <span className="material-symbols-outlined text-base">view_list</span>
-              Lista
+              {t('classes.view.list')}
             </button>
             <button
               onClick={() => handleViewMode('calendar')}
@@ -92,26 +94,26 @@ export function Classes() {
                 ${viewMode === 'calendar' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <span className="material-symbols-outlined text-base">calendar_month</span>
-              Calendario
+              {t('classes.view.calendar')}
             </button>
           </div>
           <button
             onClick={() => syncGCal()}
             disabled={isSyncing}
-            title="Sincronizar clases futuras con Google Calendar"
+            title={t('classes.gcalSynced')}
             className="flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
           >
             <span className={`material-symbols-outlined text-base ${isSyncing ? 'animate-spin' : ''}`}>
               {isSyncing ? 'refresh' : 'calendar_month'}
             </span>
-            {isSyncing ? 'Sincronizando...' : 'Sync GCal'}
+            {isSyncing ? t('classes.syncing') : t('classes.syncGCal')}
           </button>
           <button
             onClick={() => { setNewClassDate(null); setShowCreateModal(true) }}
             className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all"
           >
             <span className="material-symbols-outlined">add</span>
-            Nueva clase
+            {t('classes.newClass')}
           </button>
         </div>
       </div>
@@ -123,7 +125,7 @@ export function Classes() {
           onChange={(e) => setFilterMonth(parseInt(e.target.value))}
           className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
         >
-          {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+          {months.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
         </select>
         <select
           value={filterYear}
@@ -137,12 +139,12 @@ export function Classes() {
           onChange={(e) => setFilterClient(parseInt(e.target.value) || '')}
           className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary"
         >
-          <option value="">Todos los clientes</option>
+          <option value="">{t('classes.filter.allClients')}</option>
           {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         {classes.length > 0 && (
           <div className="ml-auto bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary">
-            Total: €{totalRevenue.toFixed(2)}
+            {t('classes.totalRevenue', { amount: totalRevenue.toFixed(2) })}
           </div>
         )}
       </div>
@@ -167,12 +169,12 @@ export function Classes() {
       ) : viewMode === 'list' && classes.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
           <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">event</span>
-          <p className="text-slate-500 font-medium">No hay clases en este período</p>
+          <p className="text-slate-500 font-medium">{t('classes.empty.list')}</p>
           <button
             onClick={() => { setNewClassDate(null); setShowCreateModal(true) }}
             className="mt-4 text-primary text-sm font-semibold hover:underline"
           >
-            Registrar primera clase
+            {t('classes.registerFirst')}
           </button>
         </div>
       ) : viewMode === 'list' && (
@@ -181,14 +183,14 @@ export function Classes() {
             <table className="w-full text-left" id="classes-table">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Fecha</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Cliente</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Duración</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Tarifa</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Total</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Notas</th>
-                  <th className="px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider">Acciones</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.date')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.client')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.duration')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.rate')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.total')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.status')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.notes')}</th>
+                  <th className="px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider">{t('classes.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -208,13 +210,13 @@ export function Classes() {
                           <span className="font-medium text-slate-900">{c.client_name ?? '—'}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-700">{c.duration_hours}h</td>
-                      <td className="px-6 py-4 text-slate-700">€{c.hourly_rate}/h</td>
+                      <td className="px-6 py-4 text-slate-700">{c.duration_hours}{t('common.units.hoursShort')}</td>
+                      <td className="px-6 py-4 text-slate-700">€{c.hourly_rate}/{t('common.units.hoursShort')}</td>
                       <td className="px-6 py-4 font-bold text-slate-900">€{(c.total_amount ?? 0).toFixed(2)}</td>
                       <td className="px-6 py-4">
                         {c.status !== 'normal' ? (
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${cfg.className}`}>
-                            {cfg.label}
+                            {t(cfg.label)}
                           </span>
                         ) : <span className="text-slate-300 text-xs">—</span>}
                       </td>
@@ -222,7 +224,7 @@ export function Classes() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <span
-                            title={c.google_calendar_id ? 'Sincronizado con Google Calendar' : 'No sincronizado con Google Calendar'}
+                            title={c.google_calendar_id ? t('classes.gcalSynced') : t('classes.gcalNotSynced')}
                             className={`material-symbols-outlined text-base ${c.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
                           >
                             {c.google_calendar_id ? 'event_available' : 'calendar_month'}
@@ -272,7 +274,7 @@ export function Classes() {
       <Modal
         isOpen={showCreateModal}
         onClose={() => { setShowCreateModal(false); setNewClassDate(null) }}
-        title="Nueva clase"
+        title={t('classes.newClass')}
         size="lg"
       >
         <ClassForm
@@ -286,7 +288,7 @@ export function Classes() {
       <Modal
         isOpen={!!editingClass}
         onClose={() => setEditingClass(null)}
-        title="Editar clase"
+        title={t('classes.editClass')}
         size="lg"
       >
         {editingClass && (
@@ -302,7 +304,7 @@ export function Classes() {
 
       <ConfirmModal
         isOpen={pendingDeleteId !== null}
-        message="¿Seguro que quieres eliminar esta clase? Esta acción no se puede deshacer."
+        message={t('classes.deleteConfirm')}
         onConfirm={async () => { await confirmDelete(); setEditingClass(null) }}
         onCancel={cancelDelete}
       />

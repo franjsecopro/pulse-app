@@ -23,7 +23,10 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "mcp__plugin_engram_engram__mem_save",
-      "mcp__plugin_engram_engram__mem_session_summary"
+      "mcp__plugin_engram_engram__mem_session_summary",
+      "Bash(npx vitest *)",
+      "Bash(Select-String -Pattern \"Test Files|Tests |passed|failed|FAIL|✓|✗\")",
+      "Bash(Select-Object -Last 20)"
     ]
   }
 }

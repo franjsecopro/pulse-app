@@ -17,6 +17,9 @@ export function formatDate(date: string | null | undefined, fallback = '—'): s
  * @param hours - Duration in decimal hours (e.g. 1.25)
  * @returns Formatted string (e.g. "1h 15min" or "2h")
  */
+export const HOURS_SHORT_KEY = 'common.units.hoursShort'
+export const MINUTES_SHORT_KEY = 'common.units.minutesShort'
+
 export function formatHours(hours: number): string {
   const h = Math.floor(hours)
   const min = Math.round((hours % 1) * 60)

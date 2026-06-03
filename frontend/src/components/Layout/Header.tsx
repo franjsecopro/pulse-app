@@ -1,26 +1,28 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-
-const navItems = [
-  { path: '/', label: 'Dashboard', icon: 'home' },
-  { path: '/clients', label: 'Clientes', icon: 'people' },
-  { path: '/classes', label: 'Clases', icon: 'school' },
-  { path: '/payments', label: 'Pagos', icon: 'payments' },
-  { path: '/accounting', label: 'Contabilidad', icon: 'account_balance' },
-  { path: '/alerts', label: 'Alertas', icon: 'notifications' },
-  { path: '/notifications', label: 'Notificaciones', icon: 'send' },
-  { path: '/settings', label: 'Ajustes', icon: 'settings' },
-]
-
-const adminNavItem = { path: '/admin', label: 'Admin', icon: 'admin_panel_settings' }
+import { useTranslation } from '../../i18n'
 
 export function Header() {
   const { pathname } = useLocation()
   const { user, logout, isDemoActive, realEmail } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const isAdmin = user?.role === 'admin' || isDemoActive
   const displayEmail = isDemoActive && realEmail ? realEmail : user?.email
+
+  const navItems = [
+    { path: '/', label: t('nav.dashboard'), icon: 'home' },
+    { path: '/clients', label: t('nav.clients'), icon: 'people' },
+    { path: '/classes', label: t('nav.classes'), icon: 'school' },
+    { path: '/payments', label: t('nav.payments'), icon: 'payments' },
+    { path: '/accounting', label: t('nav.accounting'), icon: 'account_balance' },
+    { path: '/alerts', label: t('nav.alerts'), icon: 'notifications' },
+    { path: '/notifications', label: t('nav.notifications'), icon: 'send' },
+    { path: '/settings', label: t('nav.settings'), icon: 'settings' },
+  ]
+
+  const adminNavItem = { path: '/admin', label: t('nav.admin'), icon: 'admin_panel_settings' }
 
   const visibleNavItems = isAdmin
     ? [...navItems, adminNavItem]
@@ -66,7 +68,7 @@ export function Header() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleLogout}
-                title="Cerrar sesión"
+                title={t('nav.logoutTooltip')}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-medium transition-colors"
               >
                 <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">

@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../i18n'
 import { useAuth } from '../../context/AuthContext'
 import { SUPPORTED_LOCALES, type Locale } from '../../i18n'
 

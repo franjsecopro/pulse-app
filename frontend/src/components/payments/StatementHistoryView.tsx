@@ -1,5 +1,5 @@
-import { MONTHS } from '../../utils/constants'
 import type { StatementImportRecord } from '../../types'
+import { useTranslation } from '../../i18n'
 
 interface StatementHistoryViewProps {
   records: StatementImportRecord[]
@@ -10,6 +10,9 @@ interface StatementHistoryViewProps {
 }
 
 export function StatementHistoryView({ records, isLoading, isAdmin = false, onDelete }: StatementHistoryViewProps) {
+  const { t } = useTranslation()
+  const months = t('common.months.full', { returnObjects: true }) as string[]
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -22,8 +25,8 @@ export function StatementHistoryView({ records, isLoading, isAdmin = false, onDe
     return (
       <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
         <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">upload_file</span>
-        <p className="text-slate-500 font-medium">No hay extractos importados</p>
-        <p className="text-slate-400 text-sm mt-1">Los extractos bancarios importados aparecerán aquí.</p>
+        <p className="text-slate-500 font-medium">{t('statements.empty')}</p>
+        <p className="text-slate-400 text-sm mt-1">{t('statements.emptyHint')}</p>
       </div>
     )
   }
@@ -33,12 +36,12 @@ export function StatementHistoryView({ records, isLoading, isAdmin = false, onDe
       <table className="w-full text-sm">
         <thead className="bg-slate-50 border-b border-slate-200">
           <tr>
-            <th className="text-left px-5 py-3 font-semibold text-slate-600">Archivo</th>
-            <th className="text-left px-4 py-3 font-semibold text-slate-600">Mes</th>
-            <th className="text-left px-4 py-3 font-semibold text-slate-600">Fecha de importación</th>
-            <th className="text-right px-4 py-3 font-semibold text-slate-600">Transacciones</th>
-            <th className="text-right px-5 py-3 font-semibold text-slate-600">Total importado</th>
-            {isAdmin && <th className="px-4 py-3 w-12" aria-label="Acciones"></th>}
+            <th className="text-left px-5 py-3 font-semibold text-slate-600">{t('statements.table.file')}</th>
+            <th className="text-left px-4 py-3 font-semibold text-slate-600">{t('statements.table.month')}</th>
+            <th className="text-left px-4 py-3 font-semibold text-slate-600">{t('statements.table.importDate')}</th>
+            <th className="text-right px-4 py-3 font-semibold text-slate-600">{t('statements.table.transactions')}</th>
+            <th className="text-right px-5 py-3 font-semibold text-slate-600">{t('statements.table.total')}</th>
+            {isAdmin && <th className="px-4 py-3 w-12" aria-label={t('statements.table.actions')}></th>}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -51,7 +54,7 @@ export function StatementHistoryView({ records, isLoading, isAdmin = false, onDe
                 </div>
               </td>
               <td className="px-4 py-4 text-slate-600">
-                {record.month && record.year ? `${MONTHS[record.month - 1]} ${record.year}` : '—'}
+                {record.month && record.year ? `${months[record.month - 1]} ${record.year}` : '—'}
               </td>
               <td className="px-4 py-4 text-slate-500">
                 {new Date(record.imported_at).toLocaleDateString('es-ES', {
@@ -64,7 +67,7 @@ export function StatementHistoryView({ records, isLoading, isAdmin = false, onDe
                 <td className="px-4 py-4 text-right">
                   <button
                     onClick={() => onDelete?.(record.id)}
-                    title="Eliminar extracto y sus pagos"
+                    title={t('statements.deleteTooltip')}
                     className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <span className="material-symbols-outlined text-base">delete</span>

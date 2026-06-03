@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { useTranslation } from '../i18n'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -8,10 +9,11 @@ interface Toast {
   id: string
   type: ToastType
   message: string
+  count?: number
 }
 
 interface ToastContextValue {
-  addToast: (message: string, type?: ToastType) => void
+  addToast: (message: string, type?: ToastType, count?: number) => void
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -38,6 +40,7 @@ const CONFIG: Record<ToastType, { icon: string; bar: string; text: string }> = {
 // ─── Single toast item ────────────────────────────────────────────────────────
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
+  const { t } = useTranslation()
   const { icon, bar, text } = CONFIG[toast.type]
 
   useEffect(() => {
@@ -55,13 +58,13 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       </span>
 
       <p className="text-sm font-medium text-slate-800 flex-1 leading-snug pt-0.5">
-        {toast.message}
+        {t(toast.message, { count: toast.count })}
       </p>
 
       <button
         onClick={() => onDismiss(toast.id)}
         className="shrink-0 text-slate-400 hover:text-slate-600 transition-colors mt-0.5"
-        aria-label="Cerrar"
+        aria-label={t('actions.close')}
       >
         <span className="material-symbols-outlined text-base">close</span>
       </button>
@@ -74,9 +77,9 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const addToast = useCallback((message: string, type: ToastType = 'info') => {
+  const addToast = useCallback((message: string, type: ToastType = 'info', count?: number) => {
     const id = `${Date.now()}-${Math.random()}`
-    setToasts(prev => [...prev, { id, type, message }])
+    setToasts(prev => [...prev, { id, type, message, count }])
   }, [])
 
   const dismiss = useCallback((id: string) => {

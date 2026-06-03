@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from '../i18n'
 import { Modal } from '../components/ui/Modal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { PaymentForm } from '../components/payments/PaymentForm'
@@ -12,6 +13,7 @@ import { Pagination } from '../components/ui/Pagination'
 import type { Payment } from '../types'
 
 export function Payments() {
+  const { t } = useTranslation()
   const now = new Date()
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
@@ -53,8 +55,8 @@ export function Payments() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Pagos</h1>
-          <p className="text-slate-500 text-sm mt-1">Gestión y seguimiento de cobros.</p>
+          <h1 className="text-2xl font-black text-slate-900">{t('payments.title')}</h1>
+          <p className="text-slate-500 text-sm mt-1">{t('payments.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -62,14 +64,14 @@ export function Payments() {
             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200"
           >
             <span className="material-symbols-outlined text-base">upload_file</span>
-            Importar extracto
+            {t('payments.importStatement')}
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all"
           >
             <span className="material-symbols-outlined">add</span>
-            Nuevo pago
+            {t('payments.newPayment')}
           </button>
         </div>
       </div>
@@ -86,7 +88,7 @@ export function Payments() {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {tab === 'payments' ? 'Pagos' : 'Extractos importados'}
+            {tab === 'payments' ? t('payments.tab.payments') : t('payments.tab.history')}
           </button>
         ))}
       </div>
@@ -115,7 +117,7 @@ export function Payments() {
             onStatusChange={setFilterStatus}
             trailing={payments.length > 0 ? (
               <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary">
-                Total: €{totalAmount.toFixed(2)}
+                {t('payments.totalAmount', { amount: totalAmount.toFixed(2) })}
               </div>
             ) : undefined}
           />
@@ -128,12 +130,12 @@ export function Payments() {
           ) : payments.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
               <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">payments</span>
-              <p className="text-slate-500 font-medium">No hay pagos registrados</p>
+              <p className="text-slate-500 font-medium">{t('payments.empty')}</p>
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="mt-4 text-primary text-sm font-semibold hover:underline"
               >
-                Registrar primer pago
+                {t('payments.registerFirst')}
               </button>
             </div>
           ) : (
@@ -142,12 +144,12 @@ export function Payments() {
                 <table className="w-full text-left">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Cliente</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Concepto</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Monto</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Fecha</th>
-                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Estado</th>
-                      <th className="px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider">Acciones</th>
+                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.client')}</th>
+                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.concept')}</th>
+                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.amount')}</th>
+                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.date')}</th>
+                      <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.status')}</th>
+                      <th className="px-6 py-3 text-right text-slate-500 text-xs font-bold uppercase tracking-wider">{t('payments.table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -160,7 +162,7 @@ export function Payments() {
                               <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
                                 {(p.client_name ?? '?').slice(0, 2).toUpperCase()}
                               </div>
-                              <span className="font-medium text-slate-900">{p.client_name ?? 'Sin cliente'}</span>
+                              <span className="font-medium text-slate-900">{p.client_name ?? t('payments.table.noClient')}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4 text-slate-600">{p.concept ?? '—'}</td>
@@ -200,11 +202,11 @@ export function Payments() {
         </>
       )}
 
-      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Registrar pago">
+      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('payments.create')}>
         <PaymentForm clients={clients} onSave={handleCreate} onCancel={() => setShowCreateModal(false)} />
       </Modal>
 
-      <Modal isOpen={!!editingPayment} onClose={() => setEditingPayment(null)} title="Editar pago">
+      <Modal isOpen={!!editingPayment} onClose={() => setEditingPayment(null)} title={t('payments.edit')}>
         {editingPayment && (
           <PaymentForm
             initial={editingPayment}
@@ -217,9 +219,9 @@ export function Payments() {
 
       <ConfirmDialog
         isOpen={pendingDeleteId !== null}
-        title="Eliminar pago"
-        message="¿Estás seguro de que querés eliminar este pago? Esta acción no se puede deshacer."
-        confirmText="Eliminar"
+        title={t('payments.deleteTitle')}
+        message={t('payments.deleteMessage')}
+        confirmText={t('actions.delete')}
         isDangerous
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
@@ -227,9 +229,9 @@ export function Payments() {
 
       <ConfirmDialog
         isOpen={pendingStatementId !== null}
-        title="Eliminar extracto"
-        message="Se eliminará el extracto y TODOS los pagos que generó. Esta acción no se puede deshacer."
-        confirmText="Eliminar extracto y pagos"
+        title={t('statements.deleteTitle')}
+        message={t('statements.deleteMessage')}
+        confirmText={t('statements.deleteConfirm')}
         isDangerous
         onConfirm={async () => {
           if (pendingStatementId !== null) await deleteStatementImport(pendingStatementId)
@@ -238,7 +240,7 @@ export function Payments() {
         onCancel={() => setPendingStatementId(null)}
       />
 
-      <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Importar extracto bancario" size="xl">
+      <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title={t('import.importStatement')} size="xl">
         <ImportStatementModal
           clients={clients}
           onClose={() => setShowImportModal(false)}

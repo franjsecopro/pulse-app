@@ -2,7 +2,86 @@
   "actions": {
     "save": "Enregistrer",
     "cancel": "Annuler",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "retry": "Réessayer",
+    "reset": "Réinitialiser",
+    "add": "Ajouter",
+    "continue": "Continuer",
+    "new": "Nouveau",
+    "noChanges": "Aucun changement",
+    "confirmDelete": "Confirmer la suppression",
+    "deletePermanently": "Supprimer définitivement"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "empty": "Aucun résultat",
+    "errors": {
+      "save": "Erreur lors de l'enregistrement",
+      "add": "Erreur lors de l'ajout",
+      "delete": "Erreur lors de la suppression",
+      "unknown": "Erreur inconnue"
+    },
+    "units": {
+      "hoursShort": "h",
+      "minutesShort": "min"
+    },
+    "weekdays": {
+      "short": [
+        "Lun",
+        "Mar",
+        "Mer",
+        "Jeu",
+        "Ven",
+        "Sam",
+        "Dim"
+      ],
+      "full": [
+        "dimanche",
+        "lundi",
+        "mardi",
+        "mercredi",
+        "jeudi",
+        "vendredi",
+        "samedi"
+      ]
+    },
+    "months": {
+      "full": [
+        "Janvier",
+        "Février",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet",
+        "Août",
+        "Septembre",
+        "Octobre",
+        "Novembre",
+        "Décembre"
+      ],
+      "lowercase": [
+        "janvier",
+        "février",
+        "mars",
+        "avril",
+        "mai",
+        "juin",
+        "juillet",
+        "août",
+        "septembre",
+        "octobre",
+        "novembre",
+        "décembre"
+      ]
+    }
+  },
+  "errors": {
+    "sessionExpired": "Session expirée",
+    "requestFailed": "Échec de la requête",
+    "blobGeneration": "Impossible de générer le fichier"
   },
   "status": {
     "loading": "Chargement…",
@@ -29,13 +108,653 @@
     "toggleToRegister": "Vous n'avez pas de compte ? Inscrivez-vous",
     "toggleToLogin": "Vous avez déjà un compte ? Connectez-vous"
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "classes": "Cours",
+    "payments": "Paiements",
+    "accounting": "Comptabilité",
+    "alerts": "Alertes",
+    "notifications": "Notifications",
+    "settings": "Paramètres",
+    "admin": "Admin",
+    "logoutTooltip": "Se déconnecter"
+  },
+  "layout": {
+    "footer": {
+      "tagline": "Pulse — Gestionnaire de Comptabilité"
+    }
+  },
+  "demoSidebar": {
+    "label": "MODE DÉMO",
+    "activeTooltip": "Mode démo actif — session réelle : {{email}}",
+    "exitTooltip": "Quitter le mode démo (session réelle : {{email}})"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "sur",
+    "records": "{{count}} enregistrements",
+    "records_plural": "{{count}} enregistrements",
+    "previous": "Précédent",
+    "next": "Suivant"
+  },
+  "doubleConfirm": {
+    "step1": {
+      "title": "Supprimer définitivement ?"
+    },
+    "step2": {
+      "title": "Confirmer la suppression",
+      "instruction": "Pour confirmer, écrivez exactement le nom :"
+    }
+  },
   "settings": {
+    "title": "Paramètres",
+    "subtitle": "Configurez les intégrations de l'application.",
     "language": {
       "label": "Langue",
       "options": {
         "es-ES": "Español",
         "fr-FR": "Français"
       }
+    },
+    "sections": {
+      "language": "Langue",
+      "languageHint": "Choisissez la langue de l'interface.",
+      "googleCalendar": "Google Calendar",
+      "gcalHint": "Synchronisez automatiquement les cours avec votre calendrier Google.",
+      "fiscal": "Données fiscales",
+      "fiscalHint": "Vos données d'émetteur. Elles seront utilisées dans les factures."
+    },
+    "gcal": {
+      "loadingStatus": "Chargement de l'état...",
+      "connectedAs": "Connecté en tant que {{email}}",
+      "notConnected": "Non connecté",
+      "connect": "Connecter Google Calendar",
+      "disconnect": "Déconnecter le compte",
+      "featuresConnected": [
+        "Les nouveaux cours sont automatiquement ajoutés à votre Google Calendar",
+        "Les changements d'heure et de date sont synchronisés lors de l'enregistrement",
+        "La suppression d'un cours le supprime également du calendrier",
+        "Les élèves avec e-mail reçoivent une invitation et des rappels automatiques"
+      ],
+      "featuresNotConnected": [
+        "Connectez votre compte Google pour synchroniser les cours automatiquement",
+        "Vos élèves recevront des invitations et des rappels par e-mail",
+        "Vous pouvez inclure des liens de devoirs dans la description de chaque contrat"
+      ]
+    },
+    "fiscal": {
+      "businessName": "Nom / Raison sociale",
+      "taxId": "NIF / CIF",
+      "taxIdPlaceholder": "B12345678",
+      "address": "Adresse fiscale",
+      "save": "Enregistrer les données fiscales"
+    },
+    "toast": {
+      "gcalConnected": "Google Calendar connecté avec succès.",
+      "gcalConnectError": "Erreur lors de la connexion à Google Calendar. Réessayez.",
+      "gcalDisconnected": "Google Calendar déconnecté.",
+      "gcalDisconnectError": "Erreur lors de la déconnexion. Réessayez.",
+      "fiscalSaved": "Données fiscales enregistrées.",
+      "fiscalSaveError": "Erreur lors de l'enregistrement des données fiscales."
+    },
+    "errors": {
+      "connectUrl": "Impossible d'obtenir l'URL de connexion. Vérifiez la configuration du serveur."
     }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Gérez votre portefeuille de clients et de contrats.",
+    "newClient": "Nouveau client",
+    "editClient": "Modifier le client",
+    "searchPlaceholder": "Rechercher par nom...",
+    "addFirst": "Ajoutez votre premier client",
+    "contracts": "Contrats",
+    "contractsLabel": "Contrats",
+    "manageContracts": "Gérer les contrats",
+    "viewData": "Voir les données",
+    "edit": "Modifier",
+    "archive": "Archiver",
+    "archiveTitle": "Archiver {{name}}",
+    "archiveMessage": "Le client sera inactif et masqué de la liste active. Vous pourrez le récupérer dans la section Archivés.",
+    "activate": "Activer",
+    "activateTitle": "Activer {{name}}",
+    "activateMessage": "Le client sera de nouveau actif et visible dans votre portefeuille principal.",
+    "activateTooltip": "Activer",
+    "archiveTooltip": "Archiver",
+    "hardDeleteTitle": "Supprimer {{name}}",
+    "hardDeleteMessage": "Supprimer définitivement {{name}} et toutes ses données (contrats, cours, paiements) ? Cette action est irréversible.",
+    "hardDeleteTooltip": "Supprimer définitivement",
+    "deleteConfirmMessage": "Supprimer ce contrat ? Cette action est irréversible.",
+    "noActiveContracts": "Aucun contrat actif",
+    "empty": "Aucun client",
+    "filter": {
+      "active": "Actifs",
+      "archived": "Archivés",
+      "all": "Tous"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "archived": "Archivé"
+    },
+    "form": {
+      "name": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "whatsappPlaceholder": "+33 6 00 00 00 00",
+      "whatsappHint": "Numéro pour les rappels automatiques",
+      "address": "Adresse",
+      "taxId": "NIF / CIF",
+      "taxIdPlaceholder": "12345678Z",
+      "taxIdHint": "Pour la facturation (optionnel)",
+      "paymentTimingLabel": "Quand paie-t-il les cours ?",
+      "isActive": "Client actif"
+    },
+    "paymentTiming": {
+      "sameMonth": "Le même mois",
+      "nextMonth": "Le mois suivant (mois échu)",
+      "nextMonthHint": "\"Mois échu\" : un paiement reçu en mai couvre les cours d'avril."
+    }
+  },
+  "contracts": {
+    "new": "Nouveau contrat",
+    "edit": "Modifier le contrat",
+    "save": "Enregistrer le contrat",
+    "viewDetail": "Voir le détail",
+    "deleteTooltip": "Supprimer le contrat",
+    "deleteConfirmMessage": "Supprimer ce contrat ? Cette action est irréversible.",
+    "generateClasses": "Générer des cours dans le calendrier",
+    "deleteFutureClasses": "Supprimer les cours futurs",
+    "deleteFutureConfirm": "Supprimer tous les cours futurs de ce contrat ?",
+    "generateNone": "Aucun nouveau cours à générer",
+    "generateResult_one": "{{count}} cours créé",
+    "generateResult_other": "{{count}} cours créés dans le calendrier",
+    "deleteNone": "Aucun cours futur associé à ce contrat",
+    "deleteResult_one": "{{count}} cours supprimé",
+    "deleteResult_other": "{{count}} cours supprimés du calendrier",
+    "saveToUseActions": "Enregistrez les modifications pour utiliser les actions du calendrier.",
+    "disabledTooltip": "Enregistrez d'abord les modifications",
+    "googleCalendar": "Google Calendar",
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "notifications": {
+      "enabled": "Activées",
+      "disabled": "Désactivées"
+    },
+    "form": {
+      "description": "Description",
+      "descriptionPlaceholder": "Ex : Cours d'anglais",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "rate": "Tarif €/heure",
+      "isActive": "Contrat actif",
+      "studentPhone": "Téléphone de l'élève",
+      "phonePlaceholder": "Ex : +33 6 00 00 00 00",
+      "weeklySchedule": "Emploi du temps hebdomadaire",
+      "timeTo": "à",
+      "invalidTime": "Heure invalide",
+      "perWeek": "/ semaine",
+      "notes": "Notes",
+      "enableNotifications": "Activer les notifications",
+      "eventDescription": "Description de l'événement",
+      "eventDescriptionPlaceholder": "Apparaît dans le corps de l'événement et dans les e-mails de rappel.",
+      "autoReminders": "Rappels automatiques",
+      "reminderEmail24h": "E-mail 24h avant (à l'élève)",
+      "reminderPopup1h": "Alerte 1h avant (dans votre calendrier)"
+    },
+    "detail": {
+      "description": "Description",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "rate": "Tarif",
+      "status": "Statut",
+      "schedule": "Emploi du temps",
+      "total": "Total :",
+      "perWeek": "/semaine",
+      "studentPhone": "Téléphone élève",
+      "notifications": "Notifications",
+      "notes": "Notes",
+      "calendarActions": "Actions du calendrier"
+    },
+    "manager": {
+      "title": "Contrats de {{name}}",
+      "empty": "Aucun contrat. Ajoutez-en un pour commencer.",
+      "since": "Depuis {{date}}",
+      "until": "jusqu'au {{date}}"
+    },
+    "errors": {
+      "startAfterEnd": "La date de début ne peut pas être postérieure à la date de fin.",
+      "endBeforeStart": "L'heure de fin de {{label}} doit être postérieure à l'heure de début.",
+      "generate": "Erreur lors de la génération des cours. Réessayez.",
+      "deleteFuture": "Erreur lors de la suppression des cours. Réessayez."
+    }
+  },
+  "classes": {
+    "title": "Cours",
+    "subtitle": "Registre des cours dispensés.",
+    "newClass": "Nouveau cours",
+    "editClass": "Modifier le cours",
+    "registerFirst": "Enregistrer le premier cours",
+    "deleteConfirm": "Voulez-vous vraiment supprimer ce cours ? Cette action est irréversible.",
+    "newOnDay": "Nouveau cours ce jour",
+    "addOnDay": "Ajouter un cours ce jour",
+    "edit": "Modifier le cours",
+    "delete": "Supprimer le cours",
+    "save": "Enregistrer le cours",
+    "syncing": "Synchronisation...",
+    "syncGCal": "Sync GCal",
+    "gcalSynced": "Synchronisé avec Google Calendar",
+    "gcalNotSynced": "Non synchronisé avec Google Calendar",
+    "totalRevenue": "Total : {{amount}} €",
+    "view": {
+      "list": "Liste",
+      "calendar": "Calendrier"
+    },
+    "filter": {
+      "allClients": "Tous les clients"
+    },
+    "table": {
+      "date": "Date",
+      "client": "Client",
+      "duration": "Durée",
+      "rate": "Tarif",
+      "total": "Total",
+      "status": "Statut",
+      "notes": "Notes",
+      "actions": "Actions"
+    },
+    "status": {
+      "normal": "Normal",
+      "normalDesc": "Normal — cours effectué",
+      "cancelledWithPayment": "Annulé · avec paiement",
+      "cancelledPaymentDesc": "Annulé avec paiement (moins de 24h)",
+      "cancelledWithoutPayment": "Annulé · sans paiement",
+      "cancelledNoPaymentDesc": "Annulé sans paiement (plus de 24h)"
+    },
+    "form": {
+      "client": "Client",
+      "selectClientPlaceholder": "Sélectionner un client",
+      "contract": "Contrat",
+      "contractInfo": "Contrat : {{rate}} € {{duration}}/h",
+      "selectContractPlaceholder": "Sélectionner un contrat...",
+      "date": "Date",
+      "time": "Heure",
+      "duration": "Durée (heures)",
+      "rate": "Tarif €/heure",
+      "statusLabel": "Statut du cours",
+      "notes": "Notes",
+      "total": "Total du cours"
+    },
+    "errors": {
+      "selectClient": "Sélectionnez un client",
+      "multipleContracts": "Ce client a plusieurs contrats. Sélectionnez-en un."
+    },
+    "empty": {
+      "list": "Aucun cours dans cette période"
+    }
+  },
+  "calendar": {
+    "moreClasses": "+{{count}} de plus",
+    "moreClasses_plural": "+{{count}} de plus"
+  },
+  "dayView": {
+    "untimed": "Sans heure assignée",
+    "emptyTimed": "Aucun cours avec heure assignée"
+  },
+  "payments": {
+    "title": "Paiements",
+    "subtitle": "Gestion et suivi des encaissements.",
+    "newPayment": "Nouveau paiement",
+    "importStatement": "Importer un relevé",
+    "create": "Enregistrer le paiement",
+    "edit": "Modifier le paiement",
+    "registerFirst": "Enregistrer le premier paiement",
+    "deleteTitle": "Supprimer le paiement",
+    "deleteMessage": "Voulez-vous vraiment supprimer ce paiement ? Cette action est irréversible.",
+    "totalAmount": "Total : {{amount}} €",
+    "empty": "Aucun paiement enregistré",
+    "tab": {
+      "payments": "Paiements",
+      "history": "Relevés importés"
+    },
+    "table": {
+      "client": "Client",
+      "concept": "Concept",
+      "amount": "Montant",
+      "date": "Date",
+      "status": "Statut",
+      "actions": "Actions",
+      "noClient": "Sans client"
+    },
+    "status": {
+      "confirmed": "Confirmé",
+      "pending": "En attente",
+      "unmatched": "Non identifié"
+    },
+    "form": {
+      "client": "Client",
+      "noClient": "Sans client (paiement non identifié)",
+      "amount": "Montant (€)",
+      "date": "Date",
+      "concept": "Concept",
+      "conceptPlaceholder": "Ex : Mensualité mars",
+      "status": "Statut",
+      "notes": "Notes"
+    }
+  },
+  "statements": {
+    "empty": "Aucun relevé importé",
+    "emptyHint": "Les relevés bancaires importés apparaîtront ici.",
+    "deleteTitle": "Supprimer le relevé",
+    "deleteMessage": "Le relevé et TOUS les paiements qu'il a générés seront supprimés. Cette action est irréversible.",
+    "deleteConfirm": "Supprimer le relevé et les paiements",
+    "deleteTooltip": "Supprimer le relevé et ses paiements",
+    "table": {
+      "file": "Fichier",
+      "month": "Mois",
+      "importDate": "Date d'importation",
+      "transactions": "Transactions",
+      "total": "Total importé",
+      "actions": "Actions"
+    }
+  },
+  "import": {
+    "importStatement": "Importer un relevé bancaire",
+    "parsing": "Traitement du relevé...",
+    "uploadPrompt": "Cliquez pour sélectionner le CSV",
+    "csvHint": "Relevé de compte Hello Bank / BNP Paribas (.csv)",
+    "analyzing": "Analyse du relevé...",
+    "changeFile": "Changer de fichier",
+    "periodLabel": "Mouvements de {{month}} {{year}}",
+    "spansMultiple": "Le relevé couvre plusieurs mois ; il sera enregistré en {{month}} {{year}}.",
+    "alreadyImported": "Ce fichier a déjà été importé le {{date}}",
+    "transactionsFound": "{{count}} transactions trouvées dans {{filename}}",
+    "duplicatesInfo": "{{marked}} sur {{total}} transactions étaient déjà importées et ont été décochées.",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner",
+    "summary": "{{count}} paiements · {{amount}} €",
+    "confirm": "Confirmer l'importation ({{count}})",
+    "table": {
+      "date": "Date",
+      "concept": "Concept banque",
+      "amount": "Montant",
+      "client": "Client",
+      "import": "Importer"
+    },
+    "match": {
+      "exact": "Exact",
+      "partial": "Partiel {{pct}}%",
+      "alreadyImported": "Déjà importé",
+      "unassigned": "Non assigné"
+    },
+    "errors": {
+      "import": "Erreur lors de l'importation"
+    }
+  },
+  "filters": {
+    "allMonths": "Tous les mois",
+    "allClients": "Tous les clients",
+    "allStatuses": "Tous les statuts",
+    "statusConfirmed": "Confirmés",
+    "statusPending": "En attente",
+    "statusUnmatched": "Non identifiés"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "summary": {
+      "title": "Résumé de {{month}} {{year}}"
+    },
+    "stats": {
+      "expected": "Attendu",
+      "paid": "Payé",
+      "pending": "En attente",
+      "activeClients": "Clients actifs"
+    },
+    "upcoming": {
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "classCount_one": "{{count}} cours",
+      "classCount_other": "{{count}} cours",
+      "empty": "Aucun cours",
+      "noClient": "Sans client"
+    },
+    "alerts": {
+      "paymentAlerts": "Alertes de paiement",
+      "viewDetail": "Voir le détail"
+    },
+    "recentPayments": {
+      "title": "Paiements récents",
+      "viewAll": "Voir tout",
+      "empty": "Aucun paiement enregistré pour le moment.",
+      "table": {
+        "client": "Client",
+        "amount": "Montant",
+        "date": "Date",
+        "status": "Statut"
+      }
+    },
+    "quickLinks": {
+      "newClient": "Nouveau client",
+      "newClientDesc": "Ajoutez un client avec ses contrats",
+      "newClass": "Enregistrer un cours",
+      "newClassDesc": "Notez un cours dispensé",
+      "newPayment": "Enregistrer un paiement",
+      "newPaymentDesc": "Enregistrez un encaissement reçu"
+    }
+  },
+  "accounting": {
+    "title": "Comptabilité",
+    "subtitle": "Bilan mensuel par client avec crédit accumulé appliqué.",
+    "exporting": "Génération...",
+    "exportExcel": "Exporter Excel",
+    "summary": {
+      "expected": "Total attendu",
+      "paid": "Total payé",
+      "balance": "Solde final"
+    },
+    "table": {
+      "client": "Client",
+      "expected": "Attendu",
+      "paid": "Payé",
+      "previousCredit": "Crédit antérieur",
+      "balance": "Solde"
+    },
+    "contract": {
+      "normal_one": "{{count}} normal",
+      "normal_other": "{{count}} normaux",
+      "cancelledWithPayment_one": "{{count}} annulé avec paiement",
+      "cancelledWithPayment_other": "{{count}} annulés avec paiement",
+      "cancelledWithoutPayment_one": "{{count}} annulé sans paiement",
+      "cancelledWithoutPayment_other": "{{count}} annulés sans paiement"
+    },
+    "empty": {
+      "title": "Aucune donnée",
+      "description": "Aucun cours ni paiement enregistré pour {{month}} {{year}}."
+    }
+  },
+  "alerts": {
+    "title": "Centre d'Alertes",
+    "subtitle": "Écarts entre les cours dispensés et les paiements reçus.",
+    "allOk": {
+      "title": "Tout est à jour",
+      "description": "Aucun écart entre les cours et les paiements ce mois-ci."
+    },
+    "summary": {
+      "totalAlerts": "Total alertes",
+      "debts": "Dettes",
+      "credits": "Crédits"
+    },
+    "section": {
+      "systemAlerts": "Avis système",
+      "debtClients": "Clients avec dette",
+      "creditClients": "Clients avec crédit en leur faveur",
+      "creditExplanation": "Ces clients ont payé plus que prévu. L'excédent sera automatiquement appliqué le mois prochain dans Comptabilité."
+    },
+    "card": {
+      "expected": "Attendu",
+      "paid": "Payé",
+      "difference": "Différence"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Rappels de cours envoyés par WhatsApp pour le lendemain.",
+    "generating": "Génération...",
+    "generate": "Générer les notifications",
+    "updating": "Mise à jour...",
+    "update": "Mettre à jour",
+    "send": "Envoyer",
+    "classesForDate": "Cours du {{date}}",
+    "skippedHint": "Sans numéro WhatsApp",
+    "tab": {
+      "notifications": "Notifications",
+      "history": "Historique",
+      "all": "Toutes",
+      "settings": "Configuration"
+    },
+    "table": {
+      "client": "Client",
+      "time": "Heure",
+      "status": "Statut",
+      "info": "Info"
+    },
+    "historyTable": {
+      "client": "Client",
+      "class": "Cours",
+      "time": "Heure",
+      "status": "Statut",
+      "sentAt": "Envoyé à"
+    },
+    "status": {
+      "sent": "Envoyé",
+      "pending": "En attente"
+    },
+    "settings": {
+      "defaultChannel": "Canal par défaut",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail",
+      "templateLabel": "Modèle de message",
+      "variablesHint": "Variables disponibles :",
+      "preview": "Aperçu :",
+      "saved": "Enregistré",
+      "saving": "Enregistrement..."
+    },
+    "footer": {
+      "pending_one": "{{count}} en attente",
+      "pending_other": "{{count}} en attente",
+      "sent_one": "{{count}} envoyé",
+      "sent_other": "{{count}} envoyés",
+      "skipped_one": "{{count}} sans numéro",
+      "skipped_other": "{{count}} sans numéro"
+    },
+    "empty": {
+      "title": "Aucune notification générée",
+      "hint": "Cliquez sur \"Générer les notifications\" pour préparer les messages de demain."
+    },
+    "history": {
+      "empty": "Aucune notification envoyée pour le moment"
+    },
+    "all": {
+      "empty": "Aucune notification enregistrée"
+    },
+    "errors": {
+      "load": "Erreur lors du chargement des notifications",
+      "generate": "Erreur lors de la génération des notifications"
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Gestion des utilisateurs, clients et mode démo.",
+    "tab": {
+      "users": "Utilisateurs",
+      "clients": "Clients",
+      "demo": "Mode démo"
+    },
+    "users": {
+      "syncing": "Synchronisation...",
+      "syncGCal": "Sync GCal",
+      "syncedClasses": "cours en file d'attente",
+      "syncError": "Erreur de synchronisation",
+      "syncTooltip": "Forcer la synchronisation avec Google Calendar",
+      "deleteTooltip": "Supprimer l'utilisateur et toutes ses données",
+      "deleteMessage": "Supprimer définitivement {{email}} et toutes ses données (clients, cours, paiements) ? Cette action est irréversible.",
+      "confirmRoleTitle": "Confirmer le changement de rôle",
+      "confirmRoleMessage": "Changer le rôle de {{email}} en \"{{role}}\" ?",
+      "table": {
+        "email": "E-mail",
+        "role": "Rôle",
+        "registered": "Inscription",
+        "actions": "Actions"
+      }
+    },
+    "clients": {
+      "archivedOnly": "Archivés uniquement",
+      "demoOnly": "Clients démo uniquement",
+      "empty": "Aucun client à afficher.",
+      "archived": "Archivé",
+      "active": "Actif",
+      "moving": "Déplacement...",
+      "moveToProd": "Déplacer en production",
+      "moveToDemo": "Déplacer en démo",
+      "deleteWarn": "\"{{name}}\" (propriétaire : {{owner}}) sera définitivement supprimé avec tous ses cours, contrats et paiements. Cette action est irréversible.",
+      "table": {
+        "client": "Client",
+        "owner": "Propriétaire",
+        "status": "Statut",
+        "actions": "Actions"
+      }
+    },
+    "demo": {
+      "status": "Mode démo : {{status}}",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "exit": "Quitter le mode démo",
+      "enter": "Entrer en mode démo",
+      "reset": "Réinitialiser les données démo",
+      "resetResult": "Données réinitialisées — {{clients}} clients, {{classes}} cours.",
+      "resetTitle": "Réinitialiser les données démo",
+      "resetMessage": "Toutes les données de test seront supprimées et remplacées par le jeu de données initial. Continuer ?",
+      "description": "En activant le mode démo, vous verrez et manipulerez des données de test isolées. Vos données réelles ne sont pas affectées. Quittez le mode démo quand vous avez terminé."
+    }
+  },
+  "payers": {
+    "title": "Identifiants de paiement",
+    "description": "Noms sous lesquels ce client apparaît dans les virements bancaires. Utilisés pour le matching automatique du PDF bancaire.",
+    "empty": "Aucun identifiant",
+    "namePlaceholder": "Nom en banque (ex : García)",
+    "infoPlaceholder": "Info (optionnel)"
+  },
+  "toasts": {
+    "classCreated": "Cours créé avec succès",
+    "classCreateError": "Erreur lors de la création du cours",
+    "classUpdated": "Cours mis à jour",
+    "classUpdateError": "Erreur lors de la mise à jour du cours",
+    "classDeleted": "Cours supprimé",
+    "classDeleteError": "Erreur lors de la suppression du cours",
+    "gcalSynced": "{{count}} cours en file d'attente pour synchronisation",
+    "gcalSyncError": "Erreur lors de la synchronisation avec Google Calendar",
+    "paymentCreated": "Paiement enregistré avec succès",
+    "paymentCreateError": "Erreur lors de l'enregistrement du paiement",
+    "paymentUpdated": "Paiement mis à jour",
+    "paymentUpdateError": "Erreur lors de la mise à jour du paiement",
+    "paymentDeleted": "Paiement supprimé",
+    "paymentDeleteError": "Erreur lors de la suppression du paiement",
+    "statementImported": "Relevé importé avec succès",
+    "statementDeleted": "Relevé supprimé ({{count}} paiements)",
+    "statementDeleteError": "Erreur lors de la suppression du relevé",
+    "clientCreated": "Client créé avec succès",
+    "clientCreateError": "Erreur lors de la création du client",
+    "clientUpdated": "Client mis à jour",
+    "clientUpdateError": "Erreur lors de la mise à jour du client",
+    "clientArchived": "Client archivé",
+    "clientArchiveError": "Erreur lors de l'archivage du client",
+    "clientActivated": "Client activé",
+    "clientActivateError": "Erreur lors de l'activation du client",
+    "clientHardDeleted": "Client définitivement supprimé",
+    "clientHardDeleteError": "Erreur lors de la suppression du client"
   }
 }

@@ -51,20 +51,20 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
   const createClass = async (data: Partial<ClassSession>) => {
     try {
       await classService.create(data as Parameters<typeof classService.create>[0])
-      addToast('Clase creada correctamente', 'success')
+      addToast('toasts.classCreated', 'success')
       loadClasses(page)
     } catch {
-      addToast('Error al crear la clase', 'error')
+      addToast('toasts.classCreateError', 'error')
     }
   }
 
   const updateClass = async (id: number, data: Partial<ClassSession>) => {
     try {
       await classService.update(id, data)
-      addToast('Clase actualizada', 'success')
+      addToast('toasts.classUpdated', 'success')
       loadClasses(page)
     } catch {
-      addToast('Error al actualizar la clase', 'error')
+      addToast('toasts.classUpdateError', 'error')
     }
   }
 
@@ -75,9 +75,9 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     if (!pendingDeleteId) return
     try {
       await classService.delete(pendingDeleteId)
-      addToast('Clase eliminada', 'success')
+      addToast('toasts.classDeleted', 'success')
     } catch {
-      addToast('Error al eliminar la clase', 'error')
+      addToast('toasts.classDeleteError', 'error')
     } finally {
       setPendingDeleteId(null)
       loadClasses(page)
@@ -88,9 +88,9 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     setIsSyncing(true)
     try {
       const result = await classService.syncGCal()
-      addToast(`${result.scheduled} clases encoladas para sincronizar`, 'success')
+      addToast('toasts.gcalSynced', 'success', result.scheduled)
     } catch {
-      addToast('Error al sincronizar con Google Calendar', 'error')
+      addToast('toasts.gcalSyncError', 'error')
     } finally {
       setIsSyncing(false)
     }

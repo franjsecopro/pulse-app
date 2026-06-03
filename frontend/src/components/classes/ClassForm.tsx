@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { ClassSession, ClassStatus, Client, Contract } from '../../types'
+import { useTranslation } from '../../i18n'
 
 interface ClassFormProps {
   initial?: Partial<ClassSession>
@@ -10,6 +11,7 @@ interface ClassFormProps {
 }
 
 export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: ClassFormProps) {
+  const { t } = useTranslation()
   const [selectedClientId, setSelectedClientId] = useState<number | ''>(initial?.client_id ?? '')
   const [form, setForm] = useState({
     contract_id: initial?.contract_id ?? null,
@@ -48,9 +50,9 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!selectedClientId) { setError('Selecciona un cliente'); return }
+    if (!selectedClientId) { setError(t('classes.errors.selectClient')); return }
     if (activeContracts.length > 1 && !form.contract_id) {
-      setError('Este cliente tiene varios contratos. Selecciona uno.')
+      setError(t('classes.errors.multipleContracts'))
       return
     }
     setError(null)
@@ -58,7 +60,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
     try {
       await onSave({ client_id: selectedClientId as number, ...form, class_time: form.class_time || null })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al guardar')
+      setError(err instanceof Error ? err.message : t('common.errors.save'))
     } finally {
       setIsSubmitting(false)
     }
@@ -73,14 +75,14 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Cliente *</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">{t('classes.form.client')} *</label>
           <select
             required
             value={selectedClientId}
             onChange={(e) => handleClientChange(e.target.value)}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white"
           >
-            <option value="">Seleccionar cliente</option>
+            <option value="">{t('classes.form.selectClientPlaceholder')}</option>
             {clients.filter((c) => c.is_active).map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -89,14 +91,14 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
         {activeContracts.length === 1 && (
           <div className="sm:col-span-2">
             <p className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-              Contrato: <span className="font-semibold text-slate-700">{activeContracts[0].description}</span> — €{activeContracts[0].hourly_rate}/h
+              {t('classes.form.contractInfo', { rate: activeContracts[0].hourly_rate, duration: form.duration_hours })}
             </p>
           </div>
         )}
         {activeContracts.length > 1 && (
           <div className="sm:col-span-2">
             <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Contrato <span className="text-red-500">*</span>
+              {t('classes.form.contract')} <span className="text-red-500">*</span>
             </label>
             <select
               required
@@ -104,7 +106,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
               onChange={(e) => handleContractChange(e.target.value)}
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white"
             >
-              <option value="">Seleccionar contrato...</option>
+              <option value="">{t('classes.form.selectContractPlaceholder')}</option>
               {activeContracts.map((c) => (
                 <option key={c.id} value={c.id}>{c.description} — €{c.hourly_rate}/h</option>
               ))}
@@ -112,7 +114,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           </div>
         )}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Fecha *</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">{t('classes.form.date')} *</label>
           <input
             required
             type="date"
@@ -123,7 +125,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Hora</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">{t('classes.form.time')}</label>
           <input
             type="time"
             value={form.class_time}
@@ -132,7 +134,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Duración (horas) *</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">{t('classes.form.duration')} *</label>
           <input
             required
             type="number"
@@ -144,7 +146,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Tarifa €/hora *</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">{t('classes.form.rate')} *</label>
           <input
             required
             type="number"
@@ -156,19 +158,19 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Estado de la clase</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">{t('classes.form.statusLabel')}</label>
           <select
             value={form.status}
             onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ClassStatus }))}
             className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white"
           >
-            <option value="normal">Normal — clase celebrada</option>
-            <option value="cancelled_with_payment">Cancelada con pago (menos de 24h)</option>
-            <option value="cancelled_without_payment">Cancelada sin pago (más de 24h)</option>
+            <option value="normal">{t('classes.status.normalDesc')}</option>
+            <option value="cancelled_with_payment">{t('classes.status.cancelledPaymentDesc')}</option>
+            <option value="cancelled_without_payment">{t('classes.status.cancelledNoPaymentDesc')}</option>
           </select>
         </div>
         <div className="sm:col-span-2">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Notas</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">{t('classes.form.notes')}</label>
           <input
             value={form.notes}
             onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
@@ -178,7 +180,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
       </div>
       {form.duration_hours > 0 && form.hourly_rate > 0 && (
         <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center justify-between">
-          <span className="text-sm text-slate-600 font-medium">Total de la clase</span>
+          <span className="text-sm text-slate-600 font-medium">{t('classes.form.total')}</span>
           <span className="text-primary font-black text-xl">€{totalAmount.toFixed(2)}</span>
         </div>
       )}
@@ -191,7 +193,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             className="px-4 py-2 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60 flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-base">delete</span>
-            Eliminar clase
+            {t('classes.delete')}
           </button>
         ) : <span />}
         <div className="flex gap-3">
@@ -200,7 +202,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             onClick={onCancel}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
           >
-            Cancelar
+            {t('actions.cancel')}
           </button>
           <button
             type="submit"
@@ -210,7 +212,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             {isSubmitting && (
               <span className="material-symbols-outlined text-base animate-spin">sync</span>
             )}
-            Guardar clase
+            {t('classes.save')}
           </button>
         </div>
       </div>

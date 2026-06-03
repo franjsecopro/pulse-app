@@ -1,7 +1,7 @@
 import { useState, useRef, type ChangeEvent } from 'react'
 import { api } from '../../services/api'
-import { MONTHS } from '../../utils/constants'
 import type { Client } from '../../types'
+import { useTranslation } from '../../i18n'
 
 interface ParsedTransaction {
   date: string
@@ -65,6 +65,8 @@ interface ImportStatementModalProps {
 }
 
 export function ImportStatementModal({ clients, onClose, onImported }: ImportStatementModalProps) {
+  const { t } = useTranslation()
+  const months = t('common.months.full', { returnObjects: true }) as string[]
   const fileRef = useRef<HTMLInputElement>(null)
   const [rows, setRows] = useState<ParsedRow[]>([])
   const [isParsing, setIsParsing] = useState(false)
@@ -101,7 +103,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
         skip: r.match_type === 'none' || r.already_imported,
       })))
     } catch (err: unknown) {
-      setParseError(err instanceof Error ? err.message : 'Error desconocido')
+      setParseError(err instanceof Error ? err.message : t('common.errors.unknown'))
     } finally {
       setIsParsing(false)
     }
@@ -130,7 +132,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
       onImported(month, year)
       onClose()
     } catch (err: unknown) {
-      setParseError(err instanceof Error ? err.message : 'Error al importar')
+      setParseError(err instanceof Error ? err.message : t('import.errors.import'))
     } finally {
       setIsConfirming(false)
     }
@@ -167,9 +169,9 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
         >
           <span className="material-symbols-outlined text-4xl text-slate-300 block mb-2">upload_file</span>
           <p className="text-slate-600 font-semibold text-sm">
-            {isParsing ? 'Procesando extracto...' : 'Haz clic para seleccionar el CSV'}
+            {isParsing ? t('import.parsing') : t('import.uploadPrompt')}
           </p>
-          <p className="text-slate-400 text-xs mt-1">Extracto de cuenta Hello Bank / BNP Paribas (.csv)</p>
+          <p className="text-slate-400 text-xs mt-1">{t('import.csvHint')}</p>
           {fileName && <p className="text-primary text-xs mt-2 font-medium">{fileName}</p>}
           <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
         </div>
@@ -178,7 +180,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
       {isParsing && (
         <div className="flex items-center justify-center gap-2 py-6">
           <span className="material-symbols-outlined animate-spin text-primary">sync</span>
-          <span className="text-sm text-slate-500">Analizando extracto...</span>
+          <span className="text-sm text-slate-500">{t('import.analyzing')}</span>
         </div>
       )}
 
@@ -186,7 +188,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
           {parseError}
           <button onClick={resetFile} className="ml-2 text-red-500 underline text-xs">
-            Intentar de nuevo
+            {t('actions.retry')}
           </button>
         </div>
       )}
@@ -195,11 +197,11 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
         <>
           <div className="flex items-center justify-between">
             <p className="text-sm text-slate-600">
-              <strong>{rows.length}</strong> transacciones encontradas en{' '}
-              <span className="text-primary">{fileName}</span>
+              <strong>{rows.length}</strong>{' '}
+              {t('import.transactionsFound', { count: rows.length, filename: fileName ?? '' })}
             </p>
             <button onClick={resetFile} className="text-xs text-slate-400 hover:text-slate-600 underline">
-              Cambiar archivo
+              {t('import.changeFile')}
             </button>
           </div>
 
@@ -207,12 +209,12 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
             <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15 text-sm">
               <span className="material-symbols-outlined text-primary text-base">calendar_month</span>
               <span className="text-slate-700">
-                Movimientos de <strong>{MONTHS[period.month - 1]} {period.year}</strong>
+                <strong>{t('import.periodLabel', { month: months[period.month - 1], year: period.year })}</strong>
                 {' · '}{rows.length} transacciones
               </span>
               {period.spansMultiple && (
                 <span className="text-amber-600 text-xs">
-                  · El extracto abarca varios meses; se registrará en {MONTHS[period.month - 1]}
+                  · {t('import.spansMultiple', { month: months[period.month - 1], year: period.year })}
                 </span>
               )}
             </div>
@@ -221,14 +223,13 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
           {fileAlreadyImportedAt && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
               <span className="material-symbols-outlined text-base">warning</span>
-              Este archivo ya fue importado el {new Date(fileAlreadyImportedAt).toLocaleDateString('es-ES')}.
+              {t('import.alreadyImported', { date: new Date(fileAlreadyImportedAt).toLocaleDateString('es-ES') })}
             </div>
           )}
 
           {duplicateCount > 0 && (
             <p className="text-xs text-slate-500">
-              <strong>{duplicateCount}</strong> de {rows.length} transacciones ya estaban
-              importadas y quedaron desmarcadas.
+              {t('import.duplicatesInfo', { marked: duplicateCount, total: rows.length })}
             </p>
           )}
 
@@ -236,10 +237,10 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Fecha</th>
-                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Concepto banco</th>
-                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Importe</th>
-                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase min-w-[260px]">Cliente</th>
+                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">{t('import.table.date')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">{t('import.table.concept')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">{t('import.table.amount')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase min-w-[260px]">{t('import.table.client')}</th>
                   <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase text-center">
                     <div className="flex flex-col items-center gap-1">
                       <input
@@ -248,9 +249,9 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                         ref={el => { if (el) el.indeterminate = someSelected && !allSelected }}
                         onChange={toggleAll}
                         className="w-4 h-4 accent-primary cursor-pointer"
-                        title={allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                        title={allSelected ? t('import.deselectAll') : t('import.selectAll')}
                       />
-                      <span>Importar</span>
+                      <span>{t('import.table.import')}</span>
                     </div>
                   </th>
                 </tr>
@@ -264,12 +265,12 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                       <div className="flex flex-wrap gap-1 mt-0.5">
                         {row.match_type !== 'none' && (
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${row.match_type === 'exact' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                            {row.match_type === 'exact' ? 'Exacto' : `Parcial ${Math.round(row.confidence * 100)}%`}
+                            {row.match_type === 'exact' ? t('import.match.exact') : t('import.match.partial', { pct: Math.round(row.confidence * 100) })}
                           </span>
                         )}
                         {row.already_imported && (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">
-                            Ya importado
+                            {t('import.match.alreadyImported')}
                           </span>
                         )}
                       </div>
@@ -284,7 +285,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                         className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:border-primary outline-none w-full min-w-[240px]"
                         disabled={row.skip}
                       >
-                        <option value="">Sin asignar</option>
+                        <option value="">{t('import.match.unassigned')}</option>
                         {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     </td>
@@ -306,15 +307,15 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
 
           <div className="flex items-center justify-between pt-2">
             <div className="text-sm text-slate-600">
-              <span className="font-bold text-primary">{toImportCount}</span> pagos ·{' '}
-              <span className="font-bold">€{totalAmount.toFixed(2)}</span>
+              <span className="font-bold text-primary">{toImportCount}</span>{' '}
+              {t('import.summary', { count: toImportCount, amount: totalAmount.toFixed(2) })}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={onClose}
                 className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
               >
-                Cancelar
+                {t('actions.cancel')}
               </button>
               <button
                 onClick={handleConfirm}
@@ -322,7 +323,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                 className="px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 flex items-center gap-2"
               >
                 {isConfirming && <span className="material-symbols-outlined text-base animate-spin">sync</span>}
-                Confirmar importación ({toImportCount})
+                {t('import.confirm', { count: toImportCount })}
               </button>
             </div>
           </div>

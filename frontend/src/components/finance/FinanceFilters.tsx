@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { MONTHS } from '../../utils/constants'
 import type { Client } from '../../types'
+import { useTranslation } from '../../i18n'
 
 interface FinanceFiltersProps {
   clients: Client[]
@@ -10,25 +10,15 @@ interface FinanceFiltersProps {
   onMonthChange: (month: number | '') => void
   onYearChange: (year: number) => void
   onClientChange: (client: number | '') => void
-  /** Status filter is rendered only when these are provided (Pagos only). */
   status?: string
   onStatusChange?: (status: string) => void
-  /** When false, the month is required (no "Todos los meses" option) — e.g. Contabilidad. */
   allowAllMonths?: boolean
-  /** Optional right-aligned slot (e.g. a total chip). */
   trailing?: ReactNode
 }
 
 const SELECT_CLASS =
   'border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
 
-/**
- * Shared filter bar for the finance pages (Pagos / Contabilidad).
- *
- * Month, year and client are common to both pages. The status filter is opt-in
- * via props (Pagos passes it, Contabilidad does not). The year selector appears
- * only once a concrete month is chosen.
- */
 export function FinanceFilters({
   clients,
   month,
@@ -42,6 +32,8 @@ export function FinanceFilters({
   allowAllMonths = true,
   trailing,
 }: FinanceFiltersProps) {
+  const { t } = useTranslation()
+  const months = t('common.months.full', { returnObjects: true }) as string[]
   const currentYear = new Date().getFullYear()
   const years = [currentYear, currentYear - 1, currentYear - 2]
   const showStatus = onStatusChange !== undefined
@@ -53,8 +45,8 @@ export function FinanceFilters({
         onChange={e => onMonthChange(parseInt(e.target.value) || '')}
         className={SELECT_CLASS}
       >
-        {allowAllMonths && <option value="">Todos los meses</option>}
-        {MONTHS.map((name, i) => (
+        {allowAllMonths && <option value="">{t('filters.allMonths')}</option>}
+        {months.map((name, i) => (
           <option key={i} value={i + 1}>{name}</option>
         ))}
       </select>
@@ -74,7 +66,7 @@ export function FinanceFilters({
         onChange={e => onClientChange(parseInt(e.target.value) || '')}
         className={SELECT_CLASS}
       >
-        <option value="">Todos los clientes</option>
+        <option value="">{t('filters.allClients')}</option>
         {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
       </select>
 
@@ -84,10 +76,10 @@ export function FinanceFilters({
           onChange={e => onStatusChange!(e.target.value)}
           className={SELECT_CLASS}
         >
-          <option value="">Todos los estados</option>
-          <option value="confirmed">Confirmados</option>
-          <option value="pending">Pendientes</option>
-          <option value="unmatched">Sin identificar</option>
+          <option value="">{t('filters.allStatuses')}</option>
+          <option value="confirmed">{t('filters.statusConfirmed')}</option>
+          <option value="pending">{t('filters.statusPending')}</option>
+          <option value="unmatched">{t('filters.statusUnmatched')}</option>
         </select>
       )}
 

@@ -1,10 +1,12 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useTranslation } from '../../i18n'
 import { Header } from './Header'
 import { DemoSidebar } from './DemoSidebar'
 
 export function AppLayout() {
   const { user, isLoading, isDemoActive } = useAuth()
+  const { t } = useTranslation()
 
   if (isLoading) {
     return (
@@ -25,7 +27,7 @@ export function AppLayout() {
       </main>
       <footer className="border-t border-slate-200 bg-white py-4">
         <p className="text-center text-slate-400 text-xs">
-          © {new Date().getFullYear()} Pulse — Gestor de Contabilidad
+          &copy; {new Date().getFullYear()} {t('layout.footer.tagline')}
         </p>
       </footer>
     </div>

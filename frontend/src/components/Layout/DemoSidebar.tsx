@@ -1,4 +1,5 @@
 import { useAuth } from '../../context/AuthContext'
+import { useTranslation } from '../../i18n'
 import { adminService } from '../../services/admin.service'
 
 /**
@@ -10,6 +11,7 @@ import { adminService } from '../../services/admin.service'
  */
 export function DemoSidebar() {
   const { realEmail, reloadUser } = useAuth()
+  const { t } = useTranslation()
 
   async function handleExit() {
     await adminService.demoExit()
@@ -19,20 +21,20 @@ export function DemoSidebar() {
   return (
     <div
       className="fixed top-0 left-0 h-screen w-[25px] bg-orange-500 z-[200] flex flex-col items-center justify-between py-3"
-      title={`Modo demo activo — sesión real: ${realEmail ?? ''}`}
+      title={t('demoSidebar.activeTooltip', { email: realEmail ?? '' })}
     >
       {/* Rotated label */}
       <span
         className="text-white text-[9px] font-black tracking-[0.2em] uppercase select-none"
         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
       >
-        MODO DEMO
+        {t('demoSidebar.label')}
       </span>
 
       {/* Exit button */}
       <button
         onClick={handleExit}
-        title={`Salir del modo demo (sesión real: ${realEmail ?? ''})`}
+        title={t('demoSidebar.exitTooltip', { email: realEmail ?? '' })}
         className="text-white hover:bg-orange-600 rounded p-0.5 transition-colors"
       >
         <span className="material-symbols-outlined text-[14px]">logout</span>

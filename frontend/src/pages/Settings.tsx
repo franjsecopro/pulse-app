@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from '../i18n'
 import { googleCalendarService } from '../services/google_calendar.service'
 import { businessProfileService } from '../services/business_profile.service'
 import { LanguageSelector } from '../components/settings/LanguageSelector'
 import type { GoogleCalendarStatus } from '../types'
 
 export function Settings() {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<GoogleCalendarStatus | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isConnecting, setIsConnecting] = useState(false)
@@ -14,17 +16,17 @@ export function Settings() {
   const [isSavingFiscal, setIsSavingFiscal] = useState(false)
 
   useEffect(() => {
-    // Read OAuth callback result from query params
     const params = new URLSearchParams(window.location.search)
     if (params.get('google_connected') === 'true') {
-      setToast({ type: 'success', message: 'Google Calendar conectado correctamente.' })
+      setToast({ type: 'success', message: t('settings.toast.gcalConnected') })
       window.history.replaceState({}, '', '/settings')
     } else if (params.get('google_error') === 'true') {
-      setToast({ type: 'error', message: 'Error al conectar con Google Calendar. Inténtalo de nuevo.' })
+      setToast({ type: 'error', message: t('settings.toast.gcalConnectError') })
       window.history.replaceState({}, '', '/settings')
     }
 
     loadStatus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -51,9 +53,9 @@ export function Settings() {
         tax_id: fiscal.tax_id || null,
         fiscal_address: fiscal.fiscal_address || null,
       })
-      setToast({ type: 'success', message: 'Datos fiscales guardados.' })
+      setToast({ type: 'success', message: t('settings.toast.fiscalSaved') })
     } catch {
-      setToast({ type: 'error', message: 'Error al guardar los datos fiscales.' })
+      setToast({ type: 'error', message: t('settings.toast.fiscalSaveError') })
     } finally {
       setIsSavingFiscal(false)
     }
@@ -77,7 +79,7 @@ export function Settings() {
       const { url } = await googleCalendarService.getConnectUrl()
       window.location.href = url
     } catch {
-      setToast({ type: 'error', message: 'No se pudo obtener la URL de conexión. Verifica la configuración del servidor.' })
+      setToast({ type: 'error', message: t('settings.errors.connectUrl') })
       setIsConnecting(false)
     }
   }
@@ -87,9 +89,9 @@ export function Settings() {
     try {
       await googleCalendarService.disconnect()
       setStatus({ connected: false })
-      setToast({ type: 'success', message: 'Google Calendar desconectado.' })
+      setToast({ type: 'success', message: t('settings.toast.gcalDisconnected') })
     } catch {
-      setToast({ type: 'error', message: 'Error al desconectar. Inténtalo de nuevo.' })
+      setToast({ type: 'error', message: t('settings.toast.gcalDisconnectError') })
     } finally {
       setIsDisconnecting(false)
     }
@@ -112,8 +114,8 @@ export function Settings() {
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Ajustes</h1>
-        <p className="text-slate-500 text-sm mt-1">Configura las integraciones de la app.</p>
+        <h1 className="text-2xl font-bold text-slate-900">{t('settings.title')}</h1>
+        <p className="text-slate-500 text-sm mt-1">{t('settings.subtitle')}</p>
       </div>
 
       {/* Language section */}
@@ -123,8 +125,8 @@ export function Settings() {
             <span className="material-symbols-outlined text-violet-500 text-xl">language</span>
           </div>
           <div>
-            <p className="font-semibold text-slate-900 text-sm">Idioma</p>
-            <p className="text-xs text-slate-500">Elige el idioma de la interfaz.</p>
+            <p className="font-semibold text-slate-900 text-sm">{t('settings.sections.language')}</p>
+            <p className="text-xs text-slate-500">{t('settings.sections.languageHint')}</p>
           </div>
         </div>
         <div className="px-6 py-5">
@@ -139,27 +141,26 @@ export function Settings() {
             <span className="material-symbols-outlined text-blue-500 text-xl">calendar_month</span>
           </div>
           <div>
-            <p className="font-semibold text-slate-900 text-sm">Google Calendar</p>
-            <p className="text-xs text-slate-500">Sincroniza las clases automáticamente con tu calendario de Google.</p>
+            <p className="font-semibold text-slate-900 text-sm">{t('settings.sections.googleCalendar')}</p>
+            <p className="text-xs text-slate-500">{t('settings.sections.gcalHint')}</p>
           </div>
         </div>
 
         <div className="px-6 py-5 space-y-4">
           {isLoading ? (
-            <p className="text-sm text-slate-400">Cargando estado...</p>
+            <p className="text-sm text-slate-400">{t('settings.gcal.loadingStatus')}</p>
           ) : status?.connected ? (
             <>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                 <p className="text-sm text-slate-700">
-                  Conectado como <span className="font-semibold">{status.email}</span>
+                  {t('settings.gcal.connectedAs', { email: status.email })}
                 </p>
               </div>
               <ul className="text-xs text-slate-500 space-y-1 pl-4 list-disc">
-                <li>Las clases nuevas se añaden automáticamente a tu Google Calendar</li>
-                <li>Los cambios de hora y fecha se sincronizan al guardar</li>
-                <li>Al eliminar una clase, se elimina también del calendario</li>
-                <li>Los alumnos con email reciben invitación y recordatorios automáticos</li>
+                {(t('settings.gcal.featuresConnected', { returnObjects: true }) as unknown as string[]).map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
               </ul>
               <button
                 onClick={handleDisconnect}
@@ -170,19 +171,19 @@ export function Settings() {
                   ? <span className="material-symbols-outlined text-base animate-spin">sync</span>
                   : <span className="material-symbols-outlined text-base">link_off</span>
                 }
-                Desconectar cuenta
+                {t('settings.gcal.disconnect')}
               </button>
             </>
           ) : (
             <>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
-                <p className="text-sm text-slate-500">No conectado</p>
+                <p className="text-sm text-slate-500">{t('settings.gcal.notConnected')}</p>
               </div>
               <ul className="text-xs text-slate-500 space-y-1 pl-4 list-disc">
-                <li>Conecta tu cuenta de Google para sincronizar las clases automáticamente</li>
-                <li>Tus alumnos recibirán invitaciones y recordatorios por email</li>
-                <li>Puedes incluir links de tareas en la descripción de cada contrato</li>
+                {(t('settings.gcal.featuresNotConnected', { returnObjects: true }) as unknown as string[]).map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
               </ul>
               <button
                 onClick={handleConnect}
@@ -193,7 +194,7 @@ export function Settings() {
                   ? <span className="material-symbols-outlined text-base animate-spin">sync</span>
                   : <span className="material-symbols-outlined text-base">add_link</span>
                 }
-                Conectar Google Calendar
+                {t('settings.gcal.connect')}
               </button>
             </>
           )}
@@ -207,14 +208,14 @@ export function Settings() {
             <span className="material-symbols-outlined text-amber-500 text-xl">receipt_long</span>
           </div>
           <div>
-            <p className="font-semibold text-slate-900 text-sm">Datos fiscales</p>
-            <p className="text-xs text-slate-500">Tus datos como emisor. Se usarán en las facturas.</p>
+            <p className="font-semibold text-slate-900 text-sm">{t('settings.sections.fiscal')}</p>
+            <p className="text-xs text-slate-500">{t('settings.sections.fiscalHint')}</p>
           </div>
         </div>
 
         <div className="px-6 py-5 space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Nombre / Razón social</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">{t('settings.fiscal.businessName')}</label>
             <input
               value={fiscal.business_name}
               onChange={e => setFiscal(f => ({ ...f, business_name: e.target.value }))}
@@ -222,16 +223,16 @@ export function Settings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">NIF / CIF</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">{t('settings.fiscal.taxId')}</label>
             <input
-              placeholder="B12345678"
+              placeholder={t('settings.fiscal.taxIdPlaceholder')}
               value={fiscal.tax_id}
               onChange={e => setFiscal(f => ({ ...f, tax_id: e.target.value }))}
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Dirección fiscal</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">{t('settings.fiscal.address')}</label>
             <input
               value={fiscal.fiscal_address}
               onChange={e => setFiscal(f => ({ ...f, fiscal_address: e.target.value }))}
@@ -247,7 +248,7 @@ export function Settings() {
               ? <span className="material-symbols-outlined text-base animate-spin">sync</span>
               : <span className="material-symbols-outlined text-base">save</span>
             }
-            Guardar datos fiscales
+            {t('settings.fiscal.save')}
           </button>
         </div>
       </div>

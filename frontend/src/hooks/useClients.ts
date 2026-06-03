@@ -46,50 +46,50 @@ export function useClients(search: string, filterActive: FilterActive) {
   const createClient = async (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>) => {
     try {
       await clientService.create(data)
-      addToast('Cliente creado correctamente', 'success')
+      addToast('toasts.clientCreated', 'success')
       loadClients()
     } catch {
-      addToast('Error al crear el cliente', 'error')
+      addToast('toasts.clientCreateError', 'error')
     }
   }
 
   const updateClient = async (id: number, data: Partial<Client>) => {
     try {
       await clientService.update(id, data)
-      addToast('Cliente actualizado', 'success')
+      addToast('toasts.clientUpdated', 'success')
       loadClients()
     } catch {
-      addToast('Error al actualizar el cliente', 'error')
+      addToast('toasts.clientUpdateError', 'error')
     }
   }
 
   const archiveClient = async (id: number) => {
     try {
       await clientService.archive(id)
-      addToast('Cliente archivado', 'success')
+      addToast('toasts.clientArchived', 'success')
       loadClients()
     } catch {
-      addToast('Error al archivar el cliente', 'error')
+      addToast('toasts.clientArchiveError', 'error')
     }
   }
 
   const activateClient = async (id: number) => {
     try {
       await clientService.activate(id)
-      addToast('Cliente activado', 'success')
+      addToast('toasts.clientActivated', 'success')
       loadClients()
     } catch {
-      addToast('Error al activar el cliente', 'error')
+      addToast('toasts.clientActivateError', 'error')
     }
   }
 
   const hardDeleteClient = async (id: number) => {
     try {
       await clientService.hardDelete(id)
-      addToast('Cliente eliminado permanentemente', 'success')
+      addToast('toasts.clientHardDeleted', 'success')
       loadClients()
     } catch {
-      addToast('Error al eliminar el cliente', 'error')
+      addToast('toasts.clientHardDeleteError', 'error')
     }
   }
 

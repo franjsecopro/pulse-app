@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import type { Client, PaymentIdentifier } from '../../types'
 import { clientService } from '../../services/client.service'
+import { useTranslation } from '../../i18n'
 
 interface PayersManagerProps {
   client: Client
@@ -8,6 +9,7 @@ interface PayersManagerProps {
 }
 
 export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
+  const { t } = useTranslation()
   const [payers, setPayers] = useState<PaymentIdentifier[]>(client.payers ?? [])
   const [newName, setNewName] = useState('')
   const [newInfo, setNewInfo] = useState('')
@@ -34,7 +36,7 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
       setNewName('')
       setNewInfo('')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al añadir')
+      setError(err instanceof Error ? err.message : t('common.errors.add'))
     } finally {
       setIsAdding(false)
     }
@@ -47,17 +49,16 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
       setPayers(updated)
       onPayersChanged(client.id, updated)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al eliminar')
+      setError(err instanceof Error ? err.message : t('common.errors.delete'))
     }
   }
 
   return (
     <div className="space-y-3 pt-4 border-t border-slate-100">
       <div>
-        <p className="text-sm font-semibold text-slate-700">Identificadores de pago</p>
+        <p className="text-sm font-semibold text-slate-700">{t('payers.title')}</p>
         <p className="text-xs text-slate-400 mt-0.5">
-          Nombres con los que aparece este cliente en las transferencias bancarias.
-          Se usan para el matching automático del PDF bancario.
+          {t('payers.description')}
         </p>
       </div>
 
@@ -81,7 +82,7 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
           </span>
         ))}
         {payers.length === 0 && (
-          <span className="text-slate-400 text-xs italic self-center">Sin identificadores</span>
+          <span className="text-slate-400 text-xs italic self-center">{t('payers.empty')}</span>
         )}
       </div>
 
@@ -89,13 +90,13 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          placeholder="Nombre en banco (ej: García)"
+          placeholder={t('payers.namePlaceholder')}
           className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
         />
         <input
           value={newInfo}
           onChange={(e) => setNewInfo(e.target.value)}
-          placeholder="Info (opcional)"
+          placeholder={t('payers.infoPlaceholder')}
           className="w-28 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
         />
         <button
@@ -103,7 +104,7 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
           disabled={isAdding || !newName.trim()}
           className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-hover transition-colors disabled:opacity-60"
         >
-          Añadir
+          {t('actions.add')}
         </button>
       </form>
     </div>

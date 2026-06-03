@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '../i18n'
 import { useAuth } from '../context/AuthContext'
 import { Modal } from '../components/ui/Modal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
@@ -13,6 +14,7 @@ import type { Client, Contract, PaymentIdentifier } from '../types'
 type FilterActive = 'all' | 'active' | 'archived'
 
 export function Clients() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [search, setSearch] = useState('')
   const [filterActive, setFilterActive] = useState<FilterActive>('active')
@@ -84,9 +86,9 @@ export function Clients() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Clientes</h1>
+          <h1 className="text-2xl font-black text-slate-900">{t('clients.title')}</h1>
           <p className="text-slate-500 text-sm mt-1">
-            Administra tu cartera de clientes y contratos.
+            {t('clients.subtitle')}
           </p>
         </div>
         <button
@@ -94,7 +96,7 @@ export function Clients() {
           className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all"
         >
           <span className="material-symbols-outlined">add</span>
-          Nuevo cliente
+          {t('clients.newClient')}
         </button>
       </div>
 
@@ -106,7 +108,7 @@ export function Clients() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre..."
+            placeholder={t('clients.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
@@ -115,9 +117,9 @@ export function Clients() {
           onChange={(e) => setFilterActive(e.target.value as FilterActive)}
           className="border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm focus:ring-primary focus:border-primary text-slate-600 bg-white"
         >
-          <option value="active">Activos</option>
-          <option value="archived">Archivados</option>
-          <option value="all">Todos</option>
+          <option value="active">{t('clients.filter.active')}</option>
+          <option value="archived">{t('clients.filter.archived')}</option>
+          <option value="all">{t('clients.filter.all')}</option>
         </select>
       </div>
 
@@ -128,12 +130,12 @@ export function Clients() {
       ) : clients.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
           <span className="material-symbols-outlined text-5xl text-slate-300 block mb-3">group</span>
-          <p className="text-slate-500 font-medium">No hay clientes</p>
+          <p className="text-slate-500 font-medium">{t('clients.empty')}</p>
           <button
             onClick={() => setShowCreateModal(true)}
             className="mt-4 text-primary text-sm font-semibold hover:underline"
           >
-            Añade tu primer cliente
+            {t('clients.addFirst')}
           </button>
         </div>
       ) : (
@@ -155,11 +157,11 @@ export function Clients() {
         </div>
       )}
 
-      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nuevo cliente">
+      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('clients.newClient')}>
         <ClientForm onSave={handleCreate} onCancel={() => setShowCreateModal(false)} />
       </Modal>
 
-      <Modal isOpen={!!editingClient} onClose={() => setEditingClient(null)} title="Editar cliente" size="lg">
+      <Modal isOpen={!!editingClient} onClose={() => setEditingClient(null)} title={t('clients.editClient')} size="lg">
         {editingClient && (
           <div className="space-y-0">
             <ClientForm
@@ -172,7 +174,7 @@ export function Clients() {
         )}
       </Modal>
 
-      <Modal isOpen={!!contractsClient} onClose={() => setContractsClient(null)} title="Contratos" size="lg">
+      <Modal isOpen={!!contractsClient} onClose={() => setContractsClient(null)} title={t('clients.contracts')} size="lg">
         {contractsClient && (
           <ContractsManager
             client={contractsClient}
@@ -184,13 +186,13 @@ export function Clients() {
 
       <ConfirmDialog
         isOpen={!!confirmDialog}
-        title={confirmDialog?.action === 'archive' ? `Archivar a ${confirmDialog?.client.name}` : `Activar a ${confirmDialog?.client.name}`}
+        title={confirmDialog?.action === 'archive' ? t('clients.archiveTitle', { name: confirmDialog?.client.name }) : t('clients.activateTitle', { name: confirmDialog?.client.name })}
         message={
           confirmDialog?.action === 'archive'
-            ? 'El cliente quedará inactivo y se ocultará de la lista de activos. Podrás recuperarlo en la sección de Archivados.'
-            : 'El cliente volverá a estar activo y visible en tu cartera principal.'
+            ? t('clients.archiveMessage')
+            : t('clients.activateMessage')
         }
-        confirmText={confirmDialog?.action === 'archive' ? 'Archivar' : 'Activar'}
+        confirmText={confirmDialog?.action === 'archive' ? t('clients.archive') : t('clients.activate')}
         isDangerous={confirmDialog?.action === 'archive'}
         isLoading={isConfirmingAction}
         onConfirm={handleConfirmAction}
@@ -199,9 +201,9 @@ export function Clients() {
 
       <ConfirmDialog
         isOpen={!!hardDeleteTarget}
-        title={`Eliminar a ${hardDeleteTarget?.name}`}
-        message={`¿Eliminar permanentemente a ${hardDeleteTarget?.name} y todos sus datos (contratos, clases, pagos)? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
+        title={t('clients.hardDeleteTitle', { name: hardDeleteTarget?.name })}
+        message={t('clients.hardDeleteMessage', { name: hardDeleteTarget?.name })}
+        confirmText={t('actions.delete')}
         isDangerous
         isLoading={isHardDeleting}
         onConfirm={handleHardDelete}

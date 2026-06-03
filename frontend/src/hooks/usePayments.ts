@@ -62,20 +62,20 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   const createPayment = async (data: Parameters<typeof paymentService.create>[0]) => {
     try {
       await paymentService.create(data)
-      addToast('Pago registrado correctamente', 'success')
+      addToast('toasts.paymentCreated', 'success')
       loadPayments(page)
     } catch {
-      addToast('Error al registrar el pago', 'error')
+      addToast('toasts.paymentCreateError', 'error')
     }
   }
 
   const updatePayment = async (id: number, data: Partial<Payment>) => {
     try {
       await paymentService.update(id, data)
-      addToast('Pago actualizado', 'success')
+      addToast('toasts.paymentUpdated', 'success')
       loadPayments(page)
     } catch {
-      addToast('Error al actualizar el pago', 'error')
+      addToast('toasts.paymentUpdateError', 'error')
     }
   }
 
@@ -86,9 +86,9 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
     if (!pendingDeleteId) return
     try {
       await paymentService.delete(pendingDeleteId)
-      addToast('Pago eliminado', 'success')
+      addToast('toasts.paymentDeleted', 'success')
     } catch {
-      addToast('Error al eliminar el pago', 'error')
+      addToast('toasts.paymentDeleteError', 'error')
     } finally {
       setPendingDeleteId(null)
       loadPayments(page)
@@ -96,7 +96,7 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   }
 
   const handleImported = () => {
-    addToast('Extracto importado correctamente', 'success')
+    addToast('toasts.statementImported', 'success')
     loadPayments(1)
     setStatementHistory([])
   }
@@ -104,11 +104,11 @@ export function usePayments({ filterMonth, filterYear, filterClient, filterStatu
   const deleteStatementImport = async (id: number) => {
     try {
       const { payments_deleted } = await accountingService.deleteStatementImport(id)
-      addToast(`Extracto eliminado (${payments_deleted} pagos)`, 'success')
+      addToast('toasts.statementDeleted', 'success', payments_deleted)
       loadStatementHistory()
       loadPayments(page)
     } catch {
-      addToast('Error al eliminar el extracto', 'error')
+      addToast('toasts.statementDeleteError', 'error')
     }
   }
 

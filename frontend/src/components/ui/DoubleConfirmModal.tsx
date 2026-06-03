@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '../../i18n'
 
 interface Props {
   isOpen: boolean
@@ -16,6 +17,7 @@ interface Props {
 export function DoubleConfirmModal({ isOpen, entityName, warningMessage, onConfirm, onCancel }: Props) {
   const [step, setStep] = useState<1 | 2>(1)
   const [typed, setTyped] = useState('')
+  const { t } = useTranslation()
 
   if (!isOpen) return null
 
@@ -41,7 +43,7 @@ export function DoubleConfirmModal({ isOpen, entityName, warningMessage, onConfi
             <div className="flex items-start gap-3">
               <span className="material-symbols-outlined text-red-500 text-2xl mt-0.5">warning</span>
               <div>
-                <h2 className="font-bold text-slate-900 text-base">¿Eliminar permanentemente?</h2>
+                <h2 className="font-bold text-slate-900 text-base">{t('doubleConfirm.step1.title')}</h2>
                 <p className="text-slate-600 text-sm mt-1">{warningMessage}</p>
               </div>
             </div>
@@ -50,13 +52,13 @@ export function DoubleConfirmModal({ isOpen, entityName, warningMessage, onConfi
                 onClick={handleCancel}
                 className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
               >
-                Cancelar
+                {t('actions.cancel')}
               </button>
               <button
                 onClick={handleFirstConfirm}
                 className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
               >
-                Continuar
+                {t('actions.continue')}
               </button>
             </div>
           </>
@@ -65,9 +67,9 @@ export function DoubleConfirmModal({ isOpen, entityName, warningMessage, onConfi
             <div className="flex items-start gap-3">
               <span className="material-symbols-outlined text-red-500 text-2xl mt-0.5">delete_forever</span>
               <div className="flex-1">
-                <h2 className="font-bold text-slate-900 text-base">Confirmar eliminación</h2>
+                <h2 className="font-bold text-slate-900 text-base">{t('doubleConfirm.step2.title')}</h2>
                 <p className="text-slate-600 text-sm mt-1">
-                  Para confirmar, escribí exactamente el nombre:
+                  {t('doubleConfirm.step2.instruction')}
                 </p>
                 <p className="font-mono font-semibold text-slate-800 text-sm mt-1 bg-slate-100 rounded px-2 py-1 inline-block">
                   {entityName}
@@ -87,14 +89,14 @@ export function DoubleConfirmModal({ isOpen, entityName, warningMessage, onConfi
                 onClick={handleCancel}
                 className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
               >
-                Cancelar
+                {t('actions.cancel')}
               </button>
               <button
                 onClick={handleFinalConfirm}
                 disabled={typed !== entityName}
                 className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
               >
-                Eliminar permanentemente
+                {t('actions.deletePermanently')}
               </button>
             </div>
           </>

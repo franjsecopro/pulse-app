@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import i18n, { useTranslation } from '../i18n'
 import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { DoubleConfirmModal } from '../components/ui/DoubleConfirmModal'
 import { useAuth } from '../context/AuthContext'
@@ -19,9 +20,9 @@ interface PendingRoleChange {
   newRole: 'admin' | 'user'
 }
 
-// ── Users tab ─────────────────────────────────────────────────────────────────
+// Users tab
 
-function UsersTab() {
+function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) => string }) {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [syncingId, setSyncingId] = useState<number | null>(null)
@@ -41,11 +42,11 @@ function UsersTab() {
     setSyncResult(prev => ({ ...prev, [user.id]: '' }))
     try {
       const result = await adminService.syncGCal(user.id)
-      setSyncResult(prev => ({ ...prev, [user.id]: `${result.scheduled} clases encoladas` }))
+      setSyncResult(prev => ({ ...prev, [user.id]: `${result.scheduled} ${t('admin.users.syncedClasses')}` }))
     } catch (err: unknown) {
       setSyncResult(prev => ({
         ...prev,
-        [user.id]: err instanceof Error ? err.message : 'Error al sincronizar',
+        [user.id]: err instanceof Error ? err.message : t('admin.users.syncError'),
       }))
     } finally {
       setSyncingId(null)
@@ -78,7 +79,7 @@ function UsersTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 text-slate-400">
-        <span className="material-symbols-outlined animate-spin mr-2">refresh</span> Cargando...
+        <span className="material-symbols-outlined animate-spin mr-2">refresh</span> {t('common.loading')}
       </div>
     )
   }
@@ -89,10 +90,10 @@ function UsersTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
-              <th className="text-left px-4 py-3 font-medium text-slate-500">Email</th>
-              <th className="text-left px-4 py-3 font-medium text-slate-500">Rol</th>
-              <th className="text-left px-4 py-3 font-medium text-slate-500">Registro</th>
-              <th className="px-4 py-3 text-right font-medium text-slate-500">Acciones</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-500">{t('admin.users.table.email')}</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-500">{t('admin.users.table.role')}</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-500">{t('admin.users.table.registered')}</th>
+              <th className="px-4 py-3 text-right font-medium text-slate-500">{t('admin.users.table.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -111,7 +112,7 @@ function UsersTab() {
                   </select>
                 </td>
                 <td className="px-4 py-3 text-slate-500">
-                  {new Date(user.created_at).toLocaleDateString('es-ES')}
+                  {new Date(user.created_at).toLocaleDateString(i18n.language)}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
@@ -121,21 +122,21 @@ function UsersTab() {
                     <button
                       onClick={() => handleSyncGCal(user)}
                       disabled={syncingId === user.id}
-                      title="Forzar sincronización con Google Calendar"
+                      title={t('admin.users.syncTooltip')}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[14px]">
                         {syncingId === user.id ? 'hourglass_empty' : 'calendar_month'}
                       </span>
-                      {syncingId === user.id ? 'Sincronizando...' : 'Sync GCal'}
+                      {syncingId === user.id ? t('admin.users.syncing') : t('admin.users.syncGCal')}
                     </button>
                     <button
                       onClick={() => setDeleteTarget(user)}
-                      title="Eliminar usuario y todos sus datos"
+                      title={t('admin.users.deleteTooltip')}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[14px]">delete</span>
-                      Eliminar
+                      {t('actions.delete')}
                     </button>
                   </div>
                 </td>
@@ -147,16 +148,16 @@ function UsersTab() {
 
       <ConfirmModal
         isOpen={!!deleteTarget}
-        message={`¿Eliminar permanentemente a ${deleteTarget?.email} y todos sus datos (clientes, clases, pagos)? Esta acción no se puede deshacer.`}
-        confirmLabel="Eliminar"
+        message={t('admin.users.deleteMessage', { email: deleteTarget?.email })}
+        confirmLabel={t('actions.delete')}
         onConfirm={handleDeleteUser}
         onCancel={() => setDeleteTarget(null)}
       />
       <ConfirmModal
         isOpen={!!pendingRoleChange}
-        title="Confirmar cambio de rol"
-        message={`¿Cambiar el rol de ${pendingRoleChange?.user.email} a "${pendingRoleChange?.newRole}"?`}
-        confirmLabel="Confirmar"
+        title={t('admin.users.confirmRoleTitle')}
+        message={t('admin.users.confirmRoleMessage', { email: pendingRoleChange?.user.email, role: pendingRoleChange?.newRole })}
+        confirmLabel={t('actions.confirm')}
         onConfirm={confirmRoleChange}
         onCancel={() => setPendingRoleChange(null)}
       />
@@ -164,9 +165,9 @@ function UsersTab() {
   )
 }
 
-// ── Clients tab ───────────────────────────────────────────────────────────────
+// Clients tab
 
-function ClientsTab() {
+function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>) => string }) {
   const { isDemoActive } = useAuth()
   const [clients, setClients] = useState<AdminClient[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -228,7 +229,7 @@ function ClientsTab() {
             onChange={e => { setShowArchivedOnly(e.target.checked); setShowDemoOnly(false) }}
             className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
           />
-          Solo archivados
+          {t('admin.clients.archivedOnly')}
         </label>
         <label className="flex items-center gap-2 text-sm text-orange-600 cursor-pointer select-none">
           <input
@@ -237,25 +238,25 @@ function ClientsTab() {
             onChange={e => { setShowDemoOnly(e.target.checked); setShowArchivedOnly(false) }}
             className="rounded border-orange-300 text-orange-500 focus:ring-orange-400"
           />
-          Solo clientes demo
+          {t('admin.clients.demoOnly')}
         </label>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16 text-slate-400">
-          <span className="material-symbols-outlined animate-spin mr-2">refresh</span> Cargando...
+          <span className="material-symbols-outlined animate-spin mr-2">refresh</span> {t('common.loading')}
         </div>
       ) : clients.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 text-sm">No hay clientes que mostrar.</div>
+        <div className="text-center py-16 text-slate-400 text-sm">{t('admin.clients.empty')}</div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Cliente</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Owner</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Estado</th>
-                <th className="px-4 py-3 text-right font-medium text-slate-500">Acciones</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500">{t('admin.clients.table.client')}</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500">{t('admin.clients.table.owner')}</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500">{t('admin.clients.table.status')}</th>
+                <th className="px-4 py-3 text-right font-medium text-slate-500">{t('admin.clients.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -266,11 +267,11 @@ function ClientsTab() {
                   <td className="px-4 py-3">
                     {client.archived_at ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
-                        Archivado
+                        {t('admin.clients.archived')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
-                        Activo
+                        {t('admin.clients.active')}
                       </span>
                     )}
                   </td>
@@ -283,7 +284,7 @@ function ClientsTab() {
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-indigo-200 rounded-lg text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 transition-colors"
                         >
                           <span className="material-symbols-outlined text-[14px]">move_up</span>
-                          {movingFromDemo === client.id ? 'Moviendo...' : 'Mover a producción'}
+                          {movingFromDemo === client.id ? t('admin.clients.moving') : t('admin.clients.moveToProd')}
                         </button>
                       ) : (
                         <button
@@ -292,7 +293,7 @@ function ClientsTab() {
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-orange-200 rounded-lg text-xs font-medium text-orange-600 hover:bg-orange-50 disabled:opacity-50 transition-colors"
                         >
                           <span className="material-symbols-outlined text-[14px]">science</span>
-                          {movingToDemo === client.id ? 'Moviendo...' : 'Mover a demo'}
+                          {movingToDemo === client.id ? t('admin.clients.moving') : t('admin.clients.moveToDemo')}
                         </button>
                       )}
                       <button
@@ -300,7 +301,7 @@ function ClientsTab() {
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
                       >
                         <span className="material-symbols-outlined text-[14px]">delete_forever</span>
-                        Eliminar
+                        {t('actions.delete')}
                       </button>
                     </div>
                   </td>
@@ -314,7 +315,7 @@ function ClientsTab() {
       <DoubleConfirmModal
         isOpen={!!deleteTarget}
         entityName={deleteTarget?.name ?? ''}
-        warningMessage={`Se eliminará permanentemente "${deleteTarget?.name}" (owner: ${deleteTarget?.owner_email}) junto con todas sus clases, contratos y pagos. Esta acción es irreversible.`}
+        warningMessage={t('admin.clients.deleteWarn', { name: deleteTarget?.name, owner: deleteTarget?.owner_email })}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
@@ -322,9 +323,9 @@ function ClientsTab() {
   )
 }
 
-// ── Demo tab ──────────────────────────────────────────────────────────────────
+// Demo tab
 
-function DemoTab() {
+function DemoTab({ t }: { t: (key: string, options?: Record<string, unknown>) => string }) {
   const { isDemoActive, reloadUser } = useAuth()
   const [isWorking, setIsWorking] = useState(false)
   const [resetResult, setResetResult] = useState<string | null>(null)
@@ -356,7 +357,7 @@ function DemoTab() {
     setResetResult(null)
     try {
       const result = await adminService.demoReset()
-      setResetResult(`Datos reseteados — ${result.clients_count} clientes, ${result.classes_count} clases.`)
+      setResetResult(t('admin.demo.resetResult', { clients: result.clients_count, classes: result.classes_count }))
     } finally {
       setIsWorking(false)
     }
@@ -368,13 +369,12 @@ function DemoTab() {
         <div className="flex items-center gap-3">
           <span className={`w-3 h-3 rounded-full ${isDemoActive ? 'bg-orange-500' : 'bg-slate-300'}`} />
           <span className="font-semibold text-slate-800">
-            Modo demo: {isDemoActive ? 'Activo' : 'Inactivo'}
+            {t('admin.demo.status', { status: isDemoActive ? t('admin.demo.active') : t('admin.demo.inactive') })}
           </span>
         </div>
 
         <p className="text-sm text-slate-500">
-          Al activar el modo demo, vas a ver y operar sobre datos de prueba aislados.
-          Tus datos reales no se ven afectados. Salí del modo demo cuando termines.
+          {t('admin.demo.description')}
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -385,7 +385,7 @@ function DemoTab() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white text-sm font-medium transition-colors"
             >
               <span className="material-symbols-outlined text-[16px]">logout</span>
-              Salir del modo demo
+              {t('admin.demo.exit')}
             </button>
           ) : (
             <button
@@ -394,7 +394,7 @@ function DemoTab() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
             >
               <span className="material-symbols-outlined text-[16px]">science</span>
-              Entrar en modo demo
+              {t('admin.demo.enter')}
             </button>
           )}
 
@@ -404,7 +404,7 @@ function DemoTab() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 hover:bg-red-50 disabled:opacity-50 text-red-600 text-sm font-medium transition-colors"
           >
             <span className="material-symbols-outlined text-[16px]">restart_alt</span>
-            Resetear datos demo
+            {t('admin.demo.reset')}
           </button>
         </div>
 
@@ -415,9 +415,9 @@ function DemoTab() {
 
       <ConfirmModal
         isOpen={confirmReset}
-        title="Resetear datos demo"
-        message="Se van a eliminar todos los datos de prueba y se reemplazarán por el dataset inicial. ¿Continuar?"
-        confirmLabel="Resetear"
+        title={t('admin.demo.resetTitle')}
+        message={t('admin.demo.resetMessage')}
+        confirmLabel={t('actions.reset')}
         onConfirm={handleReset}
         onCancel={() => setConfirmReset(false)}
       />
@@ -425,25 +425,25 @@ function DemoTab() {
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// Page
 
 export function Admin() {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Tab>('users')
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'users', label: 'Usuarios', icon: 'manage_accounts' },
-    { id: 'clients', label: 'Clientes', icon: 'people' },
-    { id: 'demo', label: 'Modo demo', icon: 'science' },
+    { id: 'users', label: t('admin.tab.users'), icon: 'manage_accounts' },
+    { id: 'clients', label: t('admin.tab.clients'), icon: 'people' },
+    { id: 'demo', label: t('admin.tab.demo'), icon: 'science' },
   ]
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-slate-900">Administración</h1>
-        <p className="text-slate-500 text-sm mt-1">Gestión de usuarios, clientes y modo demo.</p>
+        <h1 className="text-2xl font-black text-slate-900">{t('admin.title')}</h1>
+        <p className="text-slate-500 text-sm mt-1">{t('admin.subtitle')}</p>
       </div>
 
-      {/* Tab nav */}
       <div className="flex gap-1 border-b border-slate-200">
         {tabs.map(t => (
           <button
@@ -461,9 +461,9 @@ export function Admin() {
         ))}
       </div>
 
-      {tab === 'users' && <UsersTab />}
-      {tab === 'clients' && <ClientsTab />}
-      {tab === 'demo' && <DemoTab />}
+      {tab === 'users' && <UsersTab t={t} />}
+      {tab === 'clients' && <ClientsTab t={t} />}
+      {tab === 'demo' && <DemoTab t={t} />}
     </div>
   )
 }

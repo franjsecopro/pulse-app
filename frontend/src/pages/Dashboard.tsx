@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from '../i18n'
 import { dashboardService } from '../services/dashboard.service'
 import { paymentService } from '../services/payment.service'
 import type { DashboardSummary, Alert, Payment, UpcomingClasses } from '../types'
-
-const MONTH_NAMES = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
-]
 
 function StatCard({ label, value, icon, iconColor }: {
   label: string; value: string; icon: string; iconColor: string
@@ -24,6 +20,8 @@ function StatCard({ label, value, icon, iconColor }: {
 }
 
 export function Dashboard() {
+  const { t } = useTranslation()
+  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [recentPayments, setRecentPayments] = useState<Payment[]>([])
@@ -61,18 +59,18 @@ export function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black text-slate-900">Dashboard</h1>
+        <h1 className="text-2xl font-black text-slate-900">{t('dashboard.title')}</h1>
         <p className="text-slate-500 text-sm mt-1">
-          Resumen de {summary ? MONTH_NAMES[summary.month - 1] : ''} {summary?.year}
+          {summary ? t('dashboard.summary.title', { month: months[summary.month - 1], year: summary.year }) : ''}
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Esperado" value={`€${summary?.total_expected.toFixed(2) ?? '0.00'}`} icon="trending_up" iconColor="text-emerald-600" />
-        <StatCard label="Pagado" value={`€${summary?.total_paid.toFixed(2) ?? '0.00'}`} icon="check_circle" iconColor="text-primary" />
-        <StatCard label="Pendiente" value={`€${summary?.total_pending.toFixed(2) ?? '0.00'}`} icon="schedule" iconColor="text-amber-600" />
-        <StatCard label="Clientes activos" value={String(summary?.active_clients ?? 0)} icon="groups" iconColor="text-slate-500" />
+        <StatCard label={t('dashboard.stats.expected')} value={`€${summary?.total_expected.toFixed(2) ?? '0.00'}`} icon="trending_up" iconColor="text-emerald-600" />
+        <StatCard label={t('dashboard.stats.paid')} value={`€${summary?.total_paid.toFixed(2) ?? '0.00'}`} icon="check_circle" iconColor="text-primary" />
+        <StatCard label={t('dashboard.stats.pending')} value={`€${summary?.total_pending.toFixed(2) ?? '0.00'}`} icon="schedule" iconColor="text-amber-600" />
+        <StatCard label={t('dashboard.stats.activeClients')} value={String(summary?.active_clients ?? 0)} icon="groups" iconColor="text-slate-500" />
       </div>
 
       {/* Upcoming Classes */}
@@ -80,15 +78,15 @@ export function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(['today', 'tomorrow'] as const).map((day) => {
             const classes = upcoming[day]
-            const label = day === 'today' ? 'Hoy' : 'Mañana'
+            const label = day === 'today' ? t('dashboard.upcoming.today') : t('dashboard.upcoming.tomorrow')
             return (
               <div key={day} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
                   <h3 className="font-bold text-slate-900 text-sm">{label}</h3>
-                  <span className="text-xs font-semibold text-slate-400">{classes.length} clase{classes.length !== 1 ? 's' : ''}</span>
+                  <span className="text-xs font-semibold text-slate-400">{t('dashboard.upcoming.classCount', { count: classes.length })}</span>
                 </div>
                 {classes.length === 0 ? (
-                  <div className="px-5 py-6 text-center text-slate-400 text-sm">Sin clases</div>
+                  <div className="px-5 py-6 text-center text-slate-400 text-sm">{t('dashboard.upcoming.empty')}</div>
                 ) : (
                   <ul className="divide-y divide-slate-100">
                     {classes.map((c) => (
@@ -98,7 +96,7 @@ export function Dashboard() {
                             {(c.client_name ?? '?').slice(0, 2).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 truncate">{c.client_name ?? 'Sin cliente'}</p>
+                            <p className="text-sm font-semibold text-slate-900 truncate">{c.client_name ?? t('dashboard.upcoming.noClient')}</p>
                             {c.contract_description && (
                               <p className="text-xs text-slate-400 truncate">{c.contract_description}</p>
                             )}
@@ -108,7 +106,7 @@ export function Dashboard() {
                           <p className="text-sm font-bold text-slate-900">
                             {c.class_time ? c.class_time.slice(0, 5) : '—'}
                           </p>
-                          <p className="text-xs text-slate-400">{c.duration_hours}h · €{c.total_amount.toFixed(2)}</p>
+                          <p className="text-xs text-slate-400">{c.duration_hours}{t('common.units.hoursShort')} · €{c.total_amount.toFixed(2)}</p>
                         </div>
                       </li>
                     ))}
@@ -123,7 +121,7 @@ export function Dashboard() {
       {/* Debt Alerts */}
       {debtAlerts.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-base font-bold text-slate-900">Alertas de pago</h2>
+          <h2 className="text-base font-bold text-slate-900">{t('dashboard.alerts.paymentAlerts')}</h2>
           {debtAlerts.map((alert) => (
             <div
               key={alert.client_id}
@@ -140,7 +138,7 @@ export function Dashboard() {
                 to="/alerts"
                 className="shrink-0 flex items-center gap-2 rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-colors"
               >
-                Ver detalle
+                {t('dashboard.alerts.viewDetail')}
               </Link>
             </div>
           ))}
@@ -150,25 +148,25 @@ export function Dashboard() {
       {/* Recent Payments */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-slate-900 font-bold">Pagos recientes</h3>
+          <h3 className="text-slate-900 font-bold">{t('dashboard.recentPayments.title')}</h3>
           <Link to="/payments" className="text-primary text-sm font-semibold hover:underline">
-            Ver todos
+            {t('dashboard.recentPayments.viewAll')}
           </Link>
         </div>
         {recentPayments.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
             <span className="material-symbols-outlined text-4xl block mb-2">payments</span>
-            No hay pagos registrados aún.
+            {t('dashboard.recentPayments.empty')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Cliente</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Monto</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Fecha</th>
-                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('dashboard.recentPayments.table.client')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('dashboard.recentPayments.table.amount')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('dashboard.recentPayments.table.date')}</th>
+                  <th className="px-6 py-3 text-slate-500 text-xs font-bold uppercase tracking-wider">{t('dashboard.recentPayments.table.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -179,7 +177,7 @@ export function Dashboard() {
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
                           {(p.client_name ?? '?').slice(0, 2).toUpperCase()}
                         </div>
-                        <span className="font-medium text-slate-900">{p.client_name ?? 'Sin cliente'}</span>
+                        <span className="font-medium text-slate-900">{p.client_name ?? t('dashboard.upcoming.noClient')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-900">€{p.amount.toFixed(2)}</td>
@@ -188,12 +186,12 @@ export function Dashboard() {
                       {p.status === 'confirmed' ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
                           <span className="material-symbols-outlined text-[12px]">check_circle</span>
-                          Confirmado
+                          {t('payments.status.confirmed')}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
                           <span className="material-symbols-outlined text-[12px]">schedule</span>
-                          Pendiente
+                          {t('payments.status.pending')}
                         </span>
                       )}
                     </td>
@@ -208,9 +206,9 @@ export function Dashboard() {
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { to: '/clients', icon: 'group_add', label: 'Nuevo cliente', desc: 'Añade un cliente con sus contratos' },
-          { to: '/classes', icon: 'event', label: 'Registrar clase', desc: 'Anota una clase impartida' },
-          { to: '/payments', icon: 'add_card', label: 'Registrar pago', desc: 'Registra un cobro recibido' },
+          { to: '/clients', icon: 'group_add', label: t('dashboard.quickLinks.newClient'), desc: t('dashboard.quickLinks.newClientDesc') },
+          { to: '/classes', icon: 'event', label: t('dashboard.quickLinks.newClass'), desc: t('dashboard.quickLinks.newClassDesc') },
+          { to: '/payments', icon: 'add_card', label: t('dashboard.quickLinks.newPayment'), desc: t('dashboard.quickLinks.newPaymentDesc') },
         ].map(({ to, icon, label, desc }) => (
           <Link
             key={to}

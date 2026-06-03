@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { ClassSession } from '../../types'
+import { useTranslation } from '../../i18n'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -16,7 +17,6 @@ function clientColor(clientId: number) {
   return CLIENT_COLORS[clientId % CLIENT_COLORS.length]
 }
 
-const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 const MAX_VISIBLE = 2
 
 interface TooltipData {
@@ -35,6 +35,7 @@ interface Props {
 }
 
 export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDetail }: Props) {
+  const { t } = useTranslation()
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
   const [tooltip, setTooltip] = useState<TooltipData | null>(null)
@@ -43,7 +44,6 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
   const lastDay = new Date(year, month, 0)
   const daysInMonth = lastDay.getDate()
 
-  // Monday-based: 0=Mon … 6=Sun
   const startOffset = (firstDay.getDay() + 6) % 7
 
   const byDate = classes.reduce<Record<string, ClassSession[]>>((acc, c) => {
@@ -69,18 +69,18 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
     setTooltip({ x: rect.left, y: rect.top, class: c })
   }
 
+  const weekdays: string[] = t('common.weekdays.short', { returnObjects: true }) as string[]
+
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* Weekday headers */}
       <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
-        {WEEKDAYS.map(d => (
+        {weekdays.map(d => (
           <div key={d} className="py-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
             {d}
           </div>
         ))}
       </div>
 
-      {/* Day grid */}
       <div className="grid grid-cols-7 divide-x divide-y divide-slate-100">
         {cells.map((day, i) => {
           if (!day) {
@@ -97,7 +97,6 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
               key={key}
               className="h-[110px] p-1.5 flex flex-col gap-1 hover:bg-slate-50/60 transition-colors group relative"
             >
-              {/* Day number — clickable */}
               <div className="flex items-center justify-between">
                 <span
                   onClick={() => onDayDetail(key)}
@@ -113,7 +112,6 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
                 )}
               </div>
 
-              {/* Class chips — máximo MAX_VISIBLE */}
               <div className="flex flex-col gap-0.5">
                 {visibleClasses.map(c => (
                   <button
@@ -133,16 +131,15 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
                     onClick={() => onDayDetail(key)}
                     className="text-[10px] font-semibold text-slate-400 hover:text-primary cursor-pointer pl-1.5"
                   >
-                    +{hiddenCount} más
+                    {t('calendar.moreClasses', { count: hiddenCount })}
                   </span>
                 )}
               </div>
 
-              {/* Add button — absolute para no afectar al flujo */}
               <button
                 onClick={() => onNewClass(key)}
                 className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-primary"
-                title="Añadir clase este día"
+                title={t('classes.addOnDay')}
               >
                 <span className="material-symbols-outlined text-sm">add</span>
               </button>
@@ -151,7 +148,6 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
         })}
       </div>
 
-      {/* Tooltip — position:fixed escapa de cualquier overflow:hidden */}
       {tooltip && (
         <div
           style={{
