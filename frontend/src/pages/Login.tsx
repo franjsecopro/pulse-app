@@ -74,7 +74,7 @@ export function Login() {
 
             <form onSubmit={handleSubmit} className='space-y-5'>
               <div>
-                <label className='block text-sm font-semibold text-slate-700 mb-2'>
+                <label htmlFor='email' className='block text-sm font-semibold text-slate-700 mb-2'>
                   {t('auth.fields.email')}
                 </label>
                 <div className='relative'>
@@ -93,7 +93,7 @@ export function Login() {
               </div>
 
               <div>
-                <label className='block text-sm font-semibold text-slate-700 mb-2'>
+                <label htmlFor='password' className='block text-sm font-semibold text-slate-700 mb-2'>
                   {t('auth.fields.password')}
                 </label>
                 <div className='relative'>
