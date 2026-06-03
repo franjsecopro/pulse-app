@@ -6,7 +6,7 @@ import frFR from '../locales/fr-FR/common.json'
 export const SUPPORTED_LOCALES = ['es-ES', 'fr-FR'] as const
 export type Locale = (typeof SUPPORTED_LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = 'es-ES'
-const STORAGE_KEY = 'locale'
+export const STORAGE_KEY = 'locale'
 
 export function isSupportedLocale(value: string | null): value is Locale {
   return value !== null && (SUPPORTED_LOCALES as readonly string[]).includes(value)

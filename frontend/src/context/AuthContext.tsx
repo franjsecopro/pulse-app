@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { authService } from '../services/auth.service'
-import i18n, { type Locale } from '../i18n'
+import i18n, { type Locale, STORAGE_KEY } from '../i18n'
 import type { User } from '../types'
 
 interface AuthContextValue {
@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Keep i18n + localStorage in sync with the user's stored preference.
   useEffect(() => {
     if (user?.locale && i18n.language !== user.locale) {
-      i18n.changeLanguage(user.locale)
-      localStorage.setItem('locale', user.locale)
+      void i18n.changeLanguage(user.locale)
+      localStorage.setItem(STORAGE_KEY, user.locale)
     }
   }, [user?.locale])
 
