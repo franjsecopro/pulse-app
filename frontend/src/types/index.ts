@@ -1,7 +1,10 @@
+import type { Locale } from '../i18n'
+
 export interface User {
   id: number
   email: string
   role: 'admin' | 'user'
+  locale: Locale
   is_demo_active?: boolean
   real_email?: string | null
 }
