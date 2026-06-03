@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from app.schemas.auth import UserRegisterRequest, UserLoginRequest, UserResponse
+from app.schemas.auth import UserRegisterRequest, UserLoginRequest, UserResponse, UserUpdateRequest
 from app.services.auth_service import AuthService
 
 def _token_from_request(request: Request) -> str | None:
@@ -101,6 +101,31 @@ async def get_me(request: Request, current_user: User = Depends(get_current_user
         id=current_user.id,
         email=current_user.email,
         role=current_user.role,
+        locale=current_user.locale,
+        is_demo_active=is_demo_active,
+        real_email=real_email,
+    )
+
+
+@router.patch("/me", response_model=UserResponse)
+async def update_me(
+    request: Request,
+    data: UserUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await db.get(User, current_user.id)
+    user.locale = data.locale
+    await db.commit()
+    await db.refresh(user)
+
+    token = _token_from_request(request)
+    is_demo_active, real_email = AuthService.decode_demo_claims(token) if token else (False, None)
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        role=user.role,
+        locale=user.locale,
         is_demo_active=is_demo_active,
         real_email=real_email,
     )
