@@ -45,10 +45,11 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
       )}
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
         <div className='sm:col-span-2'>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='payment-client' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('payments.form.client')}
           </label>
           <select
+            id='payment-client'
             value={form.client_id ?? ''}
             onChange={(e) =>
               setForm((f) => ({ ...f, client_id: parseInt(e.target.value, 10) || null }))
@@ -64,7 +65,7 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           </select>
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='payment-amount' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('payments.form.amount')} *
           </label>
           <div className='relative'>
@@ -83,22 +84,24 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           </div>
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='payment-date' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('payments.form.date')} *
           </label>
           <input
             required
             type='date'
+            id='payment-date'
             value={form.payment_date}
             onChange={(e) => setForm((f) => ({ ...f, payment_date: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='payment-concept' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('payments.form.concept')}
           </label>
           <input
+            id='payment-concept'
             value={form.concept}
             onChange={(e) => setForm((f) => ({ ...f, concept: e.target.value }))}
             placeholder={t('payments.form.conceptPlaceholder')}
@@ -106,10 +109,11 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='payment-status' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('payments.form.status')}
           </label>
           <select
+            id='payment-status'
             value={form.status}
             onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
@@ -120,10 +124,11 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           </select>
         </div>
         <div className='sm:col-span-2'>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='payment-notes' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('payments.form.notes')}
           </label>
           <input
+            id='payment-notes'
             value={form.notes}
             onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'

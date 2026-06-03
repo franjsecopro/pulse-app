@@ -120,11 +120,12 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       )}
 
       <div>
-        <label className='block text-sm font-semibold text-slate-700 mb-1'>
+        <label htmlFor='contract-description' className='block text-sm font-semibold text-slate-700 mb-1'>
           {t('contracts.form.description')} *
         </label>
         <input
           required
+          id='contract-description'
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
           placeholder={t('contracts.form.descriptionPlaceholder')}
@@ -134,13 +135,14 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
 
       <div className='grid grid-cols-2 gap-4'>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='contract-start-date' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('contracts.form.startDate')} *
           </label>
           <input
             required
             type='date'
             lang='es-ES'
+            id='contract-start-date'
             value={form.start_date}
             max={form.end_date || undefined}
             onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
@@ -148,12 +150,13 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='contract-end-date' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('contracts.form.endDate')}
           </label>
           <input
             type='date'
             lang='es-ES'
+            id='contract-end-date'
             value={form.end_date}
             min={form.start_date || undefined}
             onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
@@ -161,11 +164,12 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='contract-rate' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('contracts.form.rate')} *
           </label>
           <input
             required
+            id='contract-rate'
             type='number'
             step='0.01'
             min='0'
@@ -175,9 +179,10 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           />
         </div>
         <div className='flex items-end pb-2'>
-          <label className='flex items-center gap-2 cursor-pointer'>
+          <label htmlFor='contract-is-active' className='flex items-center gap-2 cursor-pointer'>
             <input
               type='checkbox'
+              id='contract-is-active'
               checked={form.is_active}
               onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
               className='w-4 h-4 accent-primary'
@@ -190,11 +195,12 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       </div>
 
       <div>
-        <label className='block text-sm font-semibold text-slate-700 mb-1'>
+        <label htmlFor='contract-student-phone' className='block text-sm font-semibold text-slate-700 mb-1'>
           {t('contracts.form.studentPhone')}
         </label>
         <input
           type='tel'
+          id='contract-student-phone'
           value={form.phone}
           onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
           placeholder={t('contracts.form.phonePlaceholder')}
@@ -203,7 +209,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       </div>
 
       <div className='space-y-3'>
-        <label className='block text-sm font-semibold text-slate-700'>
+        <label htmlFor='contract-weekly-schedule' className='block text-sm font-semibold text-slate-700'>
           {t('contracts.form.weeklySchedule')}
         </label>
         <div className='flex gap-1.5 flex-wrap'>
@@ -281,10 +287,11 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       </div>
 
       <div>
-        <label className='block text-sm font-semibold text-slate-700 mb-1'>
+        <label htmlFor='contract-notes' className='block text-sm font-semibold text-slate-700 mb-1'>
           {t('contracts.form.notes')}
         </label>
         <textarea
+          id='contract-notes'
           value={form.notes}
           onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
           rows={2}
@@ -300,9 +307,10 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
             </span>
             <p className='text-sm font-semibold text-slate-700'>Google Calendar</p>
           </div>
-          <label className='flex items-center gap-2 cursor-pointer'>
+          <label htmlFor='contract-notify' className='flex items-center gap-2 cursor-pointer'>
             <input
               type='checkbox'
+              id='contract-notify'
               checked={form.notify}
               onChange={(e) => setForm((f) => ({ ...f, notify: e.target.checked }))}
               className='w-4 h-4 accent-primary'
@@ -313,10 +321,11 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           </label>
         </div>
         <div>
-          <label className='block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1'>
+          <label htmlFor='contract-calendar-description' className='block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1'>
             {t('contracts.form.eventDescription')}
           </label>
           <textarea
+            id='contract-calendar-description'
             value={form.calendar_description}
             onChange={(e) => setForm((f) => ({ ...f, calendar_description: e.target.value }))}
             rows={3}
@@ -325,22 +334,24 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           />
         </div>
         <div>
-          <label className='block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2'>
+          <label htmlFor='contract-auto-reminders' className='block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2'>
             {t('contracts.form.autoReminders')}
           </label>
           <div className='space-y-1.5'>
-            <label className='flex items-center gap-2 cursor-pointer'>
+            <label htmlFor='contract-reminder-email-24h' className='flex items-center gap-2 cursor-pointer'>
               <input
                 type='checkbox'
+                id='contract-reminder-email-24h'
                 checked={reminderEmail24h}
                 onChange={(e) => setReminderEmail24h(e.target.checked)}
                 className='w-4 h-4 accent-primary'
               />
               <span className='text-sm text-slate-700'>{t('contracts.form.reminderEmail24h')}</span>
             </label>
-            <label className='flex items-center gap-2 cursor-pointer'>
+            <label htmlFor='contract-reminder-popup-1h' className='flex items-center gap-2 cursor-pointer'>
               <input
                 type='checkbox'
+                id='contract-reminder-popup-1h'
                 checked={reminderPopup1h}
                 onChange={(e) => setReminderPopup1h(e.target.checked)}
                 className='w-4 h-4 accent-primary'

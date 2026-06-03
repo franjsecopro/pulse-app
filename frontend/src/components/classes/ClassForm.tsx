@@ -88,11 +88,12 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
       )}
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
         <div className='sm:col-span-2'>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('classes.form.client')} *
           </label>
           <select
             required
+            id='client'
             value={selectedClientId}
             onChange={(e) => handleClientChange(e.target.value)}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
@@ -119,11 +120,12 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
         )}
         {activeContracts.length > 1 && (
           <div className='sm:col-span-2'>
-            <label className='block text-sm font-semibold text-slate-700 mb-1'>
+            <label htmlFor='contract' className='block text-sm font-semibold text-slate-700 mb-1'>
               {t('classes.form.contract')} <span className='text-red-500'>*</span>
             </label>
             <select
               required
+              id='contract' 
               value={form.contract_id ?? ''}
               onChange={(e) => handleContractChange(e.target.value)}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
@@ -138,35 +140,38 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           </div>
         )}
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='class-date' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('classes.form.date')} *
           </label>
           <input
             required
             type='date'
             lang='es-ES'
+            id='class-date'
             value={form.class_date}
             onChange={(e) => setForm((f) => ({ ...f, class_date: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='class-time' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('classes.form.time')}
           </label>
           <input
             type='time'
+            id='class-time'
             value={form.class_time}
             onChange={(e) => setForm((f) => ({ ...f, class_time: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='duration' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('classes.form.duration')} *
           </label>
           <input
             required
+            id='duration'
             type='number'
             step='0.5'
             min='0.5'
@@ -178,11 +183,12 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='rate' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('classes.form.rate')} *
           </label>
           <input
             required
+            id='rate'
             type='number'
             step='0.01'
             min='0'
@@ -194,10 +200,11 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           />
         </div>
         <div className='sm:col-span-2'>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='status' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('classes.form.statusLabel')}
           </label>
           <select
+            id='status'
             value={form.status}
             onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ClassStatus }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
@@ -212,10 +219,11 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           </select>
         </div>
         <div className='sm:col-span-2'>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='notes' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('classes.form.notes')}
           </label>
           <input
+            id='notes'
             value={form.notes}
             onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'

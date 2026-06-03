@@ -57,42 +57,46 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
       )}
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
         <div className='sm:col-span-2'>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client-name' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('clients.form.name')} *
           </label>
           <input
             required
+            id='client-name'
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client-email' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('clients.form.email')}
           </label>
           <input
             type='email'
+            id='client-email'
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client-phone' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('clients.form.phone')}
           </label>
           <input
+            id='client-phone'
             value={form.phone}
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client-whatsapp' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('clients.form.whatsapp')}
           </label>
           <input
+            id='client-whatsapp'
             placeholder={t('clients.form.whatsappPlaceholder')}
             value={form.whatsapp_phone}
             onChange={(e) => setForm((f) => ({ ...f, whatsapp_phone: e.target.value }))}
@@ -101,20 +105,22 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.whatsappHint')}</p>
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client-address' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('clients.form.address')}
           </label>
           <input
+            id='client-address'
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
         <div>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client-tax-id' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('clients.form.taxId')}
           </label>
           <input
+            id='client-tax-id'
             placeholder={t('clients.form.taxIdPlaceholder')}
             value={form.tax_id}
             onChange={(e) => setForm((f) => ({ ...f, tax_id: e.target.value }))}
@@ -123,10 +129,11 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.taxIdHint')}</p>
         </div>
         <div className='sm:col-span-2'>
-          <label className='block text-sm font-semibold text-slate-700 mb-1'>
+          <label htmlFor='client-payment-timing' className='block text-sm font-semibold text-slate-700 mb-1'>
             {t('clients.form.paymentTimingLabel')}
           </label>
           <select
+            id='client-payment-timing'
             value={form.payment_timing}
             onChange={(e) =>
               setForm((f) => ({ ...f, payment_timing: e.target.value as PaymentTiming }))

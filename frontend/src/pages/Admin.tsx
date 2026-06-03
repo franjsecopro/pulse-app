@@ -247,8 +247,9 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
   return (
     <>
       <div className='flex items-center gap-4 mb-4'>
-        <label className='flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none'>
+        <label htmlFor='show-archived' className='flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none'>
           <input
+            id='show-archived'
             type='checkbox'
             checked={showArchivedOnly}
             onChange={(e) => {
@@ -259,8 +260,9 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
           />
           {t('admin.clients.archivedOnly')}
         </label>
-        <label className='flex items-center gap-2 text-sm text-orange-600 cursor-pointer select-none'>
+        <label htmlFor='show-demo' className='flex items-center gap-2 text-sm text-orange-600 cursor-pointer select-none'>
           <input
+            id='show-demo'
             type='checkbox'
             checked={showDemoOnly}
             onChange={(e) => {

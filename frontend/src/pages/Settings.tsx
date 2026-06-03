@@ -205,20 +205,22 @@ export function Settings() {
 
         <div className='px-6 py-5 space-y-4'>
           <div>
-            <label className='block text-sm font-semibold text-slate-700 mb-1'>
+            <label htmlFor='business-name' className='block text-sm font-semibold text-slate-700 mb-1'>
               {t('settings.fiscal.businessName')}
             </label>
             <input
+              id='business-name'
               value={fiscal.business_name}
               onChange={(e) => setFiscal((f) => ({ ...f, business_name: e.target.value }))}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>
           <div>
-            <label className='block text-sm font-semibold text-slate-700 mb-1'>
+            <label htmlFor='tax-id' className='block text-sm font-semibold text-slate-700 mb-1'>
               {t('settings.fiscal.taxId')}
             </label>
             <input
+              id='tax-id'
               placeholder={t('settings.fiscal.taxIdPlaceholder')}
               value={fiscal.tax_id}
               onChange={(e) => setFiscal((f) => ({ ...f, tax_id: e.target.value }))}
@@ -226,10 +228,11 @@ export function Settings() {
             />
           </div>
           <div>
-            <label className='block text-sm font-semibold text-slate-700 mb-1'>
+            <label htmlFor='fiscal-address' className='block text-sm font-semibold text-slate-700 mb-1'>
               {t('settings.fiscal.address')}
             </label>
             <input
+              id='fiscal-address'
               value={fiscal.fiscal_address}
               onChange={(e) => setFiscal((f) => ({ ...f, fiscal_address: e.target.value }))}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
