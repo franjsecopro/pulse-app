@@ -334,10 +334,60 @@ DELETE /api/auth/account               # Eliminar cuenta (GDPR, Fase 2)
 
 ## 🔐 Privacidad y Seguridad
 
-### **Encriptación:**
-- **AES-256** en reposo (datos en PostgreSQL)
-- **HTTPS/TLS** en tránsito (cliente-servidor)
-- **End-to-end:** Solo tú puedes desencriptar tus datos
+### **Cifrado de PII en reposo (migración 0020)**
+
+Las columnas de datos personales de clientes y del negocio se cifran en la base con **Fernet** (AES-128-CBC + HMAC-SHA256), de forma transparente para el resto del código:
+
+- `Client`: `email`, `phone`, `whatsapp_phone`, `address`, `tax_id`
+- `BusinessProfile`: `tax_id`, `fiscal_address`
+- `PaymentIdentifier`: `info`
+
+Fuera de scope (deliberado): `Client.name`, `Client.payment_name` y `PaymentIdentifier.name` quedan en plano porque son la etiqueta humana de cada registro y la clave del matching de pagos.
+
+#### Custodia de la clave
+
+- **Producción:** la clave vive en **Supabase Vault** (cifrada con la root key que custodia Supabase fuera de las tablas). La app la lee al arrancar con un `SELECT` sobre `vault.decrypted_secrets` usando el rol `service_role`. No se guarda en el `.env` de prod.
+- **Desarrollo / tests:** la clave se setea como `FIELD_ENCRYPTION_KEYS` en el `.env` (CSV de Fernet keys). La primera key es la primaria; las adicionales son fallback de rotación.
+- **Fail-closed:** si no se resuelve ninguna clave en ningún entorno, la app no arranca.
+
+Generar una clave Fernet:
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+Cargarla en Supabase Vault (producción):
+```sql
+select vault.create_secret('<key>', 'field_encryption_key');
+-- rotación: la nueva se carga como field_encryption_key y la vieja como field_encryption_key_prev
+```
+
+#### Rotación
+
+MultiFernet cifra con la primera clave y descifra con cualquiera. Para rotar:
+1. Cargar la nueva clave como `field_encryption_key`.
+2. Mover la actual a `field_encryption_key_prev`.
+3. (Opcional) Re-cifrado gradual: tarea de fondo que recorre filas y las re-cifra con la nueva clave.
+
+El proceso no requiere downtime.
+
+#### Threat model — lo que protege y lo que NO
+
+✅ Protege contra: dump/backup robado, acceso directo a la tabla (Supabase, SQLi de solo lectura), alguien con credenciales de la DB pero sin la clave de cifrado.
+
+❌ NO protege contra: un servidor de aplicación comprometido. Si la app muestra el dato, la app puede descifrarlo (propiedad inherente). Se mitiga sacando la clave del env crudo y se detecta con auditoría (fase futura), pero no se elimina con cripto.
+
+No reemplaza HTTPS ni RLS — son capas distintas (defensa en profundidad). RLS y auditoría de descifrado están en fases futuras.
+
+### **HTTPS/TLS en tránsito**
+- **TLS** en tránsito (cliente-servidor y cliente-DB)
+- **HSTS** se resuelve en el reverse-proxy del hosting (Nginx, Caddy, etc.) — no es código de la app
+
+### **Hardening de producción (checklist)**
+- `APP_ENV=production` (deriva `COOKIE_SECURE=True` automáticamente)
+- `SECRET_KEY` real (no el default `dev-secret-key-change-in-production` — la app falla al arrancar si sigue así)
+- `FIELD_ENCRYPTION_KEYS` cargada en Supabase Vault (no en el `.env`)
+- HTTPS configurado en el reverse-proxy con HSTS habilitado
+- Backups automáticos de la DB y de la clave Fernet (si se pierde, los datos cifrados son irrecuperables)
 
 ### **Backup y recuperación:**
 - Backup automático diario en SQLite (tu PC)

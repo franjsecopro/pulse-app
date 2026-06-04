@@ -3,6 +3,7 @@ from typing import Optional
 from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.crypto import EncryptedString
 from app.core.database import Base
 
 
@@ -13,12 +14,12 @@ class Client(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     payment_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    whatsapp_phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    address: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(EncryptedString, nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(EncryptedString, nullable=True)
+    whatsapp_phone: Mapped[Optional[str]] = mapped_column(EncryptedString, nullable=True)
+    address: Mapped[Optional[str]] = mapped_column(EncryptedString, nullable=True)
     # Fiscal id (NIF/CIF) — groundwork for invoicing.
-    tax_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    tax_id: Mapped[Optional[str]] = mapped_column(EncryptedString, nullable=True)
     # When this client's payments apply: "same_month" (pays the current month's classes)
     # or "next_month" (pays in arrears — a payment received this month covers last month).
     # Drives the billing-period offset in AccountingService.

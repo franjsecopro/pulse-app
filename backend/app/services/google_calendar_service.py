@@ -15,6 +15,11 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.crypto import (
+    KEYSET_GOOGLE,
+    decrypt_value,
+    encrypt_value,
+)
 from app.models.google_auth import UserGoogleAuth
 from app.repositories.google_auth_repository import GoogleAuthRepository
 
@@ -40,15 +45,11 @@ def _is_configured() -> bool:
 
 
 def _encrypt(plain: str) -> str:
-    from cryptography.fernet import Fernet
-    key = settings.GOOGLE_TOKEN_ENCRYPTION_KEY.encode()
-    return Fernet(key).encrypt(plain.encode()).decode()
+    return encrypt_value(plain, KEYSET_GOOGLE)
 
 
 def _decrypt(cipher: str) -> str:
-    from cryptography.fernet import Fernet
-    key = settings.GOOGLE_TOKEN_ENCRYPTION_KEY.encode()
-    return Fernet(key).decrypt(cipher.encode()).decode()
+    return decrypt_value(cipher, KEYSET_GOOGLE)
 
 
 def _build_credentials(google_auth: UserGoogleAuth):

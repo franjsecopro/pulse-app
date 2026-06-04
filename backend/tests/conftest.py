@@ -1,16 +1,14 @@
-"""
-Shared test fixtures.
-
-Sets DATABASE_URL before any app imports so pydantic-settings
-doesn't fail looking for the production .env value.
-"""
 import os
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+_TEST_FERNET_KEY = "VdGPZU_Fwo2rTdZ5AYMazTmg8jzjyDRVktJSEhafJm4="
+os.environ.setdefault("FIELD_ENCRYPTION_KEYS", _TEST_FERNET_KEY)
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
+from app.core import crypto
 from app.core.database import Base, get_db
 from app.core.dependencies import get_current_user, get_real_user, require_admin
 from app.models.user import User
@@ -33,6 +31,12 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 # Fake users reused across router tests — mirror the User model fields
 FAKE_USER  = User(id=1, email="test@pulse.dev",  role="user",  password_hash="x", locale="es-ES")
 FAKE_ADMIN = User(id=1, email="admin@pulse.dev", role="admin", password_hash="x", locale="es-ES")
+
+
+@pytest.fixture(autouse=True)
+def _seed_crypto_keys():
+    crypto._set_keys([_TEST_FERNET_KEY])
+    yield
 
 
 @pytest_asyncio.fixture

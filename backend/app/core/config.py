@@ -1,3 +1,4 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,7 +12,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str  # Sin default — debe venir del .env
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
     APP_ENV: str = "development"   # "development" | "production"
-    COOKIE_SECURE: bool = False    # True en producción (requiere HTTPS)
+    COOKIE_SECURE: bool = False
 
     # Google Calendar OAuth — dejar vacíos si no se usa la integración
     GOOGLE_CLIENT_ID: str = ""
@@ -19,6 +20,28 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str = "http://localhost:8001/api/google-calendar/callback"
     GOOGLE_TOKEN_ENCRYPTION_KEY: str = ""  # Fernet key: 32 bytes url-safe base64
     FRONTEND_URL: str = "http://localhost:5173"
+
+    @model_validator(mode="after")
+    def _derive_cookie_secure(self):
+        self.COOKIE_SECURE = self.APP_ENV == "production"
+        return self
+
+    def validate_production_secrets(self) -> None:
+        if self.APP_ENV != "production":
+            return
+        if self.SECRET_KEY == "dev-secret-key-change-in-production":
+            raise ValueError(
+                "SECRET_KEY is still the dev default. Set a real SECRET_KEY "
+                "in the environment for production."
+            )
+        if not self.GOOGLE_TOKEN_ENCRYPTION_KEY and (
+            self.GOOGLE_CLIENT_ID or self.GOOGLE_CLIENT_SECRET
+        ):
+            raise ValueError(
+                "GOOGLE_TOKEN_ENCRYPTION_KEY is empty but Google OAuth is "
+                "configured. Either set the key or clear GOOGLE_CLIENT_ID/"
+                "GOOGLE_CLIENT_SECRET to disable the integration."
+            )
 
 
 settings = Settings()

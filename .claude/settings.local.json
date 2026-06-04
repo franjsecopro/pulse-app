@@ -26,7 +26,9 @@
       "mcp__plugin_engram_engram__mem_session_summary",
       "Bash(npx vitest *)",
       "Bash(Select-String -Pattern \"Test Files|Tests |passed|failed|FAIL|✓|✗\")",
-      "Bash(Select-Object -Last 20)"
+      "Bash(Select-Object -Last 20)",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -First 30)"
     ]
   }
 }

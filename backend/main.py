@@ -11,6 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from app.core.config import settings
+from app.core.crypto import load_field_encryption_keys, load_google_token_encryption_keys
 from app.middleware.error_handler import global_error_handler
 from app.routers import auth, clients, classes, payments, dashboard, google_calendar, accounting, notifications, admin
 from app.routers import imports as imports_router
@@ -30,7 +31,10 @@ os.environ.setdefault("OAUTHLIB_RELAX_TOKEN_SCOPE", "1")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    yield  # Tablas gestionadas por Alembic: ejecutar "make migrate"
+    settings.validate_production_secrets()
+    load_field_encryption_keys()
+    load_google_token_encryption_keys()
+    yield
 
 
 app = FastAPI(
