@@ -55,7 +55,9 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
   }, {})
 
   const cells: { key: string; day: number | null }[] = [
-    ...Array(startOffset).fill(null).map((_, i) => ({ key: `pre-${i}`, day: null })),
+    ...Array(startOffset)
+      .fill(null)
+      .map((_, i) => ({ key: `pre-${i}`, day: null })),
     ...Array.from({ length: daysInMonth }, (_, i) => ({ key: `day-${i + 1}`, day: i + 1 })),
   ]
   while (cells.length % 7 !== 0) cells.push({ key: `post-${cells.length}`, day: null })
