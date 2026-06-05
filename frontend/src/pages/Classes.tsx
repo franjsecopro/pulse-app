@@ -148,7 +148,7 @@ export function Classes() {
           className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
         >
           {months.map((m, i) => (
-            <option key={i} value={i + 1}>
+            <option key={m} value={i + 1}>
               {m}
             </option>
           ))}

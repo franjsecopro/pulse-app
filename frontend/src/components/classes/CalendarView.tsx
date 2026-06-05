@@ -54,11 +54,11 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
     return acc
   }, {})
 
-  const cells: (number | null)[] = [
-    ...Array(startOffset).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  const cells: { key: string; day: number | null }[] = [
+    ...Array(startOffset).fill(null).map((_, i) => ({ key: `pre-${i}`, day: null })),
+    ...Array.from({ length: daysInMonth }, (_, i) => ({ key: `day-${i + 1}`, day: i + 1 })),
   ]
-  while (cells.length % 7 !== 0) cells.push(null)
+  while (cells.length % 7 !== 0) cells.push({ key: `post-${cells.length}`, day: null })
 
   const dateStr = (day: number) =>
     `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -86,10 +86,11 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
       </div>
 
       <div className='grid grid-cols-7 divide-x divide-y divide-slate-100'>
-        {cells.map((day, i) => {
-          if (!day) {
-            return <div key={`empty-${i}`} className='h-[110px] bg-slate-50/40' />
+        {cells.map((cell) => {
+          if (cell.day === null) {
+            return <div key={cell.key} className='h-[110px] bg-slate-50/40' />
           }
+          const day = cell.day
           const key = dateStr(day)
           const dayClasses = byDate[key] ?? []
           const visibleClasses = dayClasses.slice(0, MAX_VISIBLE)

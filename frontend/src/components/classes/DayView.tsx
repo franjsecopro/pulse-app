@@ -40,10 +40,10 @@ function assignColumns(classes: ClassSession[]): ColumnedClass[] {
   const result: ColumnedClass[] = []
   const columnEnds: number[] = []
 
-  for (const c of sorted) {
-    const [h, m] = (c.class_time ?? '').split(':').map(Number)
+  for (const classItem of sorted) {
+    const [h, m] = (classItem.class_time ?? '').split(':').map(Number)
     const start = h + m / 60
-    const end = start + c.duration_hours
+    const end = start + classItem.duration_hours
 
     let col = columnEnds.findIndex((endTime) => endTime <= start)
     if (col === -1) {
@@ -52,7 +52,7 @@ function assignColumns(classes: ClassSession[]): ColumnedClass[] {
     columnEnds[col] = end
 
     result.push({
-      class: c,
+      class: classItem,
       columnIndex: col,
       totalColumns: 0,
       startFrac: start,
@@ -172,16 +172,16 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
             />
           ))}
 
-          {columnedClasses.map(({ class: c, columnIndex, totalColumns }) => {
-            const top = getTop(c.class_time ?? '')
-            const height = getHeight(c.duration_hours)
+          {columnedClasses.map(({ class: classItem, columnIndex, totalColumns }) => {
+            const top = getTop(classItem.class_time ?? '')
+            const height = getHeight(classItem.duration_hours)
             const widthPct = 100 / totalColumns
             const leftPct = columnIndex * widthPct
 
             return (
               <div
-                key={c.id}
-                className={`absolute rounded-lg border px-2 py-1 overflow-hidden group/block ${clientColor(c.client_id)}`}
+                key={classItem.id}
+                className={`absolute rounded-lg border px-2 py-1 overflow-hidden group/block ${clientColor(classItem.client_id)}`}
                 style={{
                   top,
                   height,
@@ -191,16 +191,16 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
               >
                 <button
                   type='button'
-                  onClick={() => onEdit(c)}
+                  onClick={() => onEdit(classItem)}
                   className='cursor-pointer h-full pr-10 border-0 bg-transparent w-full text-left'
                 >
                   <p className='text-[11px] font-bold truncate leading-tight'>
-                    {c.contract_description ?? c.client_name}
+                    {classItem.contract_description ?? classItem.client_name}
                   </p>
                   {height >= 40 && (
                     <p className='text-[10px] opacity-70 truncate'>
-                      {c.class_time?.slice(0, 5)} · {c.duration_hours}h · €
-                      {(c.total_amount ?? 0).toFixed(0)}
+                      {classItem.class_time?.slice(0, 5)} · {classItem.duration_hours}h · €
+                      {(classItem.total_amount ?? 0).toFixed(0)}
                     </p>
                   )}
                 </button>
@@ -208,7 +208,7 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                 <div className='absolute top-0.5 right-0.5 flex items-center gap-0.5 opacity-0 group-hover/block:opacity-100 transition-opacity'>
                   <button
                     type='button'
-                    onClick={() => onEdit(c)}
+                    onClick={() => onEdit(classItem)}
                     title={t('classes.edit')}
                     className='p-0.5 rounded text-slate-500 hover:text-slate-800 hover:bg-black/10 transition-colors'
                   >
@@ -216,7 +216,7 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                   </button>
                   <button
                     type='button'
-                    onClick={() => onDelete(c.id)}
+                    onClick={() => onDelete(classItem.id)}
                     title={t('classes.delete')}
                     className='p-0.5 rounded text-red-400 hover:text-red-600 hover:bg-black/10 transition-colors'
                   >

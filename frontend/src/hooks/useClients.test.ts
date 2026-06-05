@@ -99,9 +99,9 @@ describe('search forwarding', () => {
 describe('sorting', () => {
   it('active clients appear before archived ones', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 1, name: 'Archivado', is_active: false } as any,
-      { id: 2, name: 'Activo', is_active: true } as any,
-    ])
+      { id: 1, name: 'Archivado', is_active: false },
+      { id: 2, name: 'Activo', is_active: true },
+    ] as never)
 
     const { result } = renderHook(() => useClients('', 'all'))
 
@@ -129,13 +129,13 @@ describe('loading state', () => {
 describe('updateClientContracts', () => {
   it('replaces contracts for the target client without re-fetching', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 1, name: 'Cliente', is_active: true, contracts: [] } as any,
-    ])
+      { id: 1, name: 'Cliente', is_active: true, contracts: [] },
+    ] as never)
     const { result } = renderHook(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    const newContracts = [{ id: 99 }] as any
+    const newContracts = [{ id: 99 }] as never
     act(() => result.current.updateClientContracts(1, newContracts))
 
     expect(result.current.clients[0].contracts).toEqual(newContracts)
@@ -145,14 +145,14 @@ describe('updateClientContracts', () => {
 
   it('does not affect other clients', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 1, name: 'A', is_active: true, contracts: [] } as any,
-      { id: 2, name: 'B', is_active: true, contracts: [] } as any,
-    ])
+      { id: 1, name: 'A', is_active: true, contracts: [] },
+      { id: 2, name: 'B', is_active: true, contracts: [] },
+    ] as never)
     const { result } = renderHook(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    act(() => result.current.updateClientContracts(1, [{ id: 99 }] as any))
+    act(() => result.current.updateClientContracts(1, [{ id: 99 }] as never))
 
     expect(result.current.clients[1].contracts).toEqual([])
   })
@@ -160,12 +160,12 @@ describe('updateClientContracts', () => {
 
 describe('updateClientPayers', () => {
   it('replaces payers for the target client without re-fetching', async () => {
-    mockGetAll.mockResolvedValue([{ id: 1, name: 'Cliente', is_active: true, payers: [] } as any])
+    mockGetAll.mockResolvedValue([{ id: 1, name: 'Cliente', is_active: true, payers: [] }] as never)
     const { result } = renderHook(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    const newPayers = [{ id: 55, name: 'Transferencia' }] as any
+    const newPayers = [{ id: 55, name: 'Transferencia' }] as never
     act(() => result.current.updateClientPayers(1, newPayers))
 
     expect(result.current.clients[0].payers).toEqual(newPayers)

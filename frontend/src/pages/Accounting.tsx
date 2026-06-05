@@ -48,10 +48,10 @@ export function Accounting() {
     try {
       const blob = await accountingService.getReport(month, year, client)
       const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `contabilidad_${monthsLower[month - 1]}_${year}.xlsx`
-      a.click()
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `contabilidad_${monthsLower[month - 1]}_${year}.xlsx`
+      anchor.click()
       URL.revokeObjectURL(url)
     } finally {
       setIsExporting(false)

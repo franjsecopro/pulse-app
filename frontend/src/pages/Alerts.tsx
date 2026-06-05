@@ -41,7 +41,7 @@ export function Alerts() {
             className='border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none'
           >
             {months.map((m, i) => (
-              <option key={i} value={i + 1}>
+              <option key={m} value={i + 1}>
                 {m}
               </option>
             ))}
@@ -85,7 +85,7 @@ export function Alerts() {
               <div className='space-y-3'>
                 {systemAlerts.map((alert, i) => (
                   <div
-                    key={i}
+                    key={alert.id ?? i}
                     className='rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-center gap-3'
                   >
                     <span className='material-symbols-outlined text-amber-500'>warning</span>

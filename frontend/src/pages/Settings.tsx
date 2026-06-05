@@ -140,8 +140,8 @@ export function Settings() {
                   t('settings.gcal.featuresConnected', {
                     returnObjects: true,
                   }) as unknown as string[]
-                ).map((item, i) => (
-                  <li key={i}>{item}</li>
+                ).map((item) => (
+                  <li key={item}>{item}</li>
                 ))}
               </ul>
               <button
@@ -169,8 +169,8 @@ export function Settings() {
                   t('settings.gcal.featuresNotConnected', {
                     returnObjects: true,
                   }) as unknown as string[]
-                ).map((item, i) => (
-                  <li key={i}>{item}</li>
+                ).map((item) => (
+                  <li key={item}>{item}</li>
                 ))}
               </ul>
               <button

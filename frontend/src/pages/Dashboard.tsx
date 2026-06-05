@@ -47,11 +47,11 @@ export function Dashboard() {
       paymentService.getAll({ limit: 5 }),
       dashboardService.getUpcoming(),
     ])
-      .then(([s, a, p, u]) => {
-        if (s.status === 'fulfilled') setSummary(s.value)
-        if (a.status === 'fulfilled') setAlerts(a.value)
-        if (p.status === 'fulfilled') setRecentPayments(p.value.data)
-        if (u.status === 'fulfilled') setUpcoming(u.value)
+      .then(([summaryResult, alertsResult, paymentsResult, upcomingResult]) => {
+        if (summaryResult.status === 'fulfilled') setSummary(summaryResult.value)
+        if (alertsResult.status === 'fulfilled') setAlerts(alertsResult.value)
+        if (paymentsResult.status === 'fulfilled') setRecentPayments(paymentsResult.value.data)
+        if (upcomingResult.status === 'fulfilled') setUpcoming(upcomingResult.value)
       })
       .finally(() => setIsLoading(false))
   }, [])
