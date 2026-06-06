@@ -1,6 +1,7 @@
 import { useAuth } from '../../context/AuthContext'
 import { useTranslation } from '../../i18n'
 import { adminService } from '../../services/admin.service'
+import { Button } from '../ui/Button'
 
 /**
  * Fixed 25px orange strip on the left edge of the viewport, visible only
@@ -32,14 +33,14 @@ export function DemoSidebar() {
       </span>
 
       {/* Exit button */}
-      <button
+      <Button
         type='button'
         onClick={handleExit}
         title={t('demoSidebar.exitTooltip', { email: realEmail ?? '' })}
         className='text-white hover:bg-orange-600 rounded p-0.5 transition-colors'
       >
         <span className='material-symbols-outlined text-[14px]'>logout</span>
-      </button>
+      </Button>
     </div>
   )
 }

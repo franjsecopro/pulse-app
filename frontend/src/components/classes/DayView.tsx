@@ -1,5 +1,6 @@
 import { useTranslation } from '../../i18n'
 import type { ClassSession } from '../../types'
+import { Button } from '../ui/Button'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -126,22 +127,22 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                 </span>
               </div>
               <div className='flex items-center gap-1'>
-                <button
+                <Button
                   type='button'
                   onClick={() => onEdit(c)}
                   className='p-1 rounded hover:bg-black/10 transition-colors text-slate-500 hover:text-slate-800'
                   title={t('classes.edit')}
                 >
                   <span className='material-symbols-outlined text-sm'>edit</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   type='button'
                   onClick={() => onDelete(c.id)}
                   className='p-1 rounded hover:bg-black/10 transition-colors text-red-400 hover:text-red-600'
                   title={t('classes.delete')}
                 >
                   <span className='material-symbols-outlined text-sm'>delete</span>
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -189,7 +190,7 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                   width: `calc(${widthPct}% - 4px)`,
                 }}
               >
-                <button
+                <Button
                   type='button'
                   onClick={() => onEdit(classItem)}
                   className='cursor-pointer h-full pr-10 border-0 bg-transparent w-full text-left'
@@ -203,25 +204,25 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                       {(classItem.total_amount ?? 0).toFixed(0)}
                     </p>
                   )}
-                </button>
+                </Button>
 
                 <div className='absolute top-0.5 right-0.5 flex items-center gap-0.5 opacity-0 group-hover/block:opacity-100 transition-opacity'>
-                  <button
+                  <Button
                     type='button'
                     onClick={() => onEdit(classItem)}
                     title={t('classes.edit')}
                     className='p-0.5 rounded text-slate-500 hover:text-slate-800 hover:bg-black/10 transition-colors'
                   >
                     <span className='material-symbols-outlined text-[13px]'>edit</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type='button'
                     onClick={() => onDelete(classItem.id)}
                     title={t('classes.delete')}
                     className='p-0.5 rounded text-red-400 hover:text-red-600 hover:bg-black/10 transition-colors'
                   >
                     <span className='material-symbols-outlined text-[13px]'>delete</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             )
@@ -235,14 +236,14 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
         </div>
       </div>
 
-      <button
+      <Button
         type='button'
         onClick={() => onNewClass(date)}
         className='w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-primary/30 text-primary text-sm font-semibold hover:bg-primary/5 transition-colors'
       >
         <span className='material-symbols-outlined text-base'>add</span>
         {t('classes.newOnDay')}
-      </button>
+      </Button>
     </div>
   )
 }

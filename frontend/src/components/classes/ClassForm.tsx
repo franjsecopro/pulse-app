@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from '../../i18n'
 import type { ClassSession, ClassStatus, Client, Contract } from '../../types'
+import { Button } from '../ui/Button'
 
 interface ClassFormProps {
   initial?: Partial<ClassSession>
@@ -238,36 +239,36 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
       )}
       <div className='flex items-center justify-between gap-3 pt-2'>
         {onDelete ? (
-          <button
+          <Button
             type='button'
             onClick={onDelete}
-            disabled={isSubmitting}
+            loading={isSubmitting}
             className='px-4 py-2 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60 flex items-center gap-1.5'
           >
             <span className='material-symbols-outlined text-base'>delete</span>
             {t('classes.delete')}
-          </button>
+          </Button>
         ) : (
           <span />
         )}
         <div className='flex gap-3'>
-          <button
+          <Button
             type='button'
             onClick={onCancel}
             className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
           >
             {t('actions.cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
             type='submit'
-            disabled={isSubmitting}
+            loading={isSubmitting}
             className='px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20 flex items-center gap-2'
           >
             {isSubmitting && (
               <span className='material-symbols-outlined text-base animate-spin'>sync</span>
             )}
             {t('classes.save')}
-          </button>
+          </Button>
         </div>
       </div>
     </form>

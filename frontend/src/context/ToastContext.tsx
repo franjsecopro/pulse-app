@@ -1,4 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react'
+import { Button } from '../components/ui/Button'
 import { useTranslation } from '../i18n'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -59,14 +60,14 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
         {t(toast.message, { count: toast.count })}
       </p>
 
-      <button
+      <Button
         type='button'
         onClick={() => onDismiss(toast.id)}
         className='shrink-0 text-slate-400 hover:text-slate-600 transition-colors mt-0.5'
         aria-label={t('actions.close')}
       >
         <span className='material-symbols-outlined text-base'>close</span>
-      </button>
+      </Button>
     </div>
   )
 }

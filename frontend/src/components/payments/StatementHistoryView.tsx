@@ -1,5 +1,6 @@
 import { useTranslation } from '../../i18n'
 import type { StatementImportRecord } from '../../types'
+import { Button } from '../ui/Button'
 
 interface StatementHistoryViewProps {
   records: StatementImportRecord[]
@@ -96,14 +97,14 @@ export function StatementHistoryView({
               </td>
               {isAdmin && (
                 <td className='px-4 py-4 text-right'>
-                  <button
+                  <Button
                     type='button'
                     onClick={() => onDelete?.(record.id)}
                     title={t('statements.deleteTooltip')}
                     className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                   >
                     <span className='material-symbols-outlined text-base'>delete</span>
-                  </button>
+                  </Button>
                 </td>
               )}
             </tr>

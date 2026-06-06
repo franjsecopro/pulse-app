@@ -2,6 +2,7 @@ import { type ChangeEvent, useRef, useState } from 'react'
 import { useTranslation } from '../../i18n'
 import { api } from '../../services/api'
 import type { Client } from '../../types'
+import { Button } from '../ui/Button'
 
 interface ParsedTransaction {
   date: string
@@ -165,7 +166,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
   return (
     <div className='space-y-5'>
       {rows.length === 0 && (
-        <button
+        <Button
           type='button'
           onClick={() => fileRef.current?.click()}
           className='border-2 border-dashed border-slate-200 rounded-xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors w-full'
@@ -185,7 +186,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
             className='hidden'
             onChange={handleFileChange}
           />
-        </button>
+        </Button>
       )}
 
       {isParsing && (
@@ -198,9 +199,9 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
       {parseError && (
         <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm'>
           {parseError}
-          <button type='button' onClick={resetFile} className='ml-2 text-red-500 underline text-xs'>
+          <Button type='button' onClick={resetFile} className='ml-2 text-red-500 underline text-xs'>
             {t('actions.retry')}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -214,13 +215,13 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                 filename: fileName ?? '',
               })}
             </p>
-            <button
+            <Button
               type='button'
               onClick={resetFile}
               className='text-xs text-slate-400 hover:text-slate-600 underline'
             >
               {t('import.changeFile')}
-            </button>
+            </Button>
           </div>
 
           {period.month && (
@@ -391,24 +392,25 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
               })}
             </div>
             <div className='flex gap-2'>
-              <button
+              <Button
                 type='button'
                 onClick={onClose}
                 className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
               >
                 {t('actions.cancel')}
-              </button>
-              <button
+              </Button>
+              <Button
                 type='button'
                 onClick={handleConfirm}
-                disabled={isConfirming || toImportCount === 0}
+                loading={isConfirming}
+                disabled={toImportCount === 0}
                 className='px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 flex items-center gap-2'
               >
                 {isConfirming && (
                   <span className='material-symbols-outlined text-base animate-spin'>sync</span>
                 )}
                 {t('import.confirm', { count: toImportCount })}
-              </button>
+              </Button>
             </div>
           </div>
         </>

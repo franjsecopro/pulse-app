@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { useTranslation } from '../../i18n'
 import type { Contract, DaySchedule } from '../../types'
 import { calcDuration, formatHours } from '../../utils/formatters'
+import { Button } from '../ui/Button'
 
 interface ContractFormProps {
   initial?: Partial<Contract>
@@ -234,7 +235,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           {weekdays.map(({ index, label }) => {
             const active = index in scheduleDays
             return (
-              <button
+              <Button
                 key={index}
                 type='button'
                 onClick={() => toggleDay(index)}
@@ -245,7 +246,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
                 }`}
               >
                 {label}
-              </button>
+              </Button>
             )
           })}
         </div>
@@ -393,23 +394,23 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
       </div>
 
       <div className='flex justify-end gap-3 pt-2'>
-        <button
+        <Button
           type='button'
           onClick={onCancel}
           className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
         >
           {t('actions.cancel')}
-        </button>
-        <button
+        </Button>
+        <Button
           type='submit'
-          disabled={isSubmitting}
+          loading={isSubmitting}
           className='px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20 flex items-center gap-2'
         >
           {isSubmitting && (
             <span className='material-symbols-outlined text-base animate-spin'>sync</span>
           )}
           {t('contracts.save')}
-        </button>
+        </Button>
       </div>
     </form>
   )

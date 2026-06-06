@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Button } from '../components/ui/Button'
 import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { DoubleConfirmModal } from '../components/ui/DoubleConfirmModal'
 import { useAuth } from '../context/AuthContext'
@@ -134,10 +135,10 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
                     {syncResult[user.id] && (
                       <span className='text-xs text-emerald-600'>{syncResult[user.id]}</span>
                     )}
-                    <button
+                    <Button
                       type='button'
                       onClick={() => handleSyncGCal(user)}
-                      disabled={syncingId === user.id}
+                      loading={syncingId === user.id}
                       title={t('admin.users.syncTooltip')}
                       className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors'
                     >
@@ -145,8 +146,8 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
                         {syncingId === user.id ? 'hourglass_empty' : 'calendar_month'}
                       </span>
                       {syncingId === user.id ? t('admin.users.syncing') : t('admin.users.syncGCal')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type='button'
                       onClick={() => setDeleteTarget(user)}
                       title={t('admin.users.deleteTooltip')}
@@ -154,7 +155,7 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
                     >
                       <span className='material-symbols-outlined text-[14px]'>delete</span>
                       {t('actions.delete')}
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -326,31 +327,31 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                   <td className='px-4 py-3 text-right'>
                     <div className='flex items-center justify-end gap-2'>
                       {showDemoOnly ? (
-                        <button
+                        <Button
                           type='button'
                           onClick={() => handleMoveFromDemo(client)}
-                          disabled={movingFromDemo === client.id}
+                          loading={movingFromDemo === client.id}
                           className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-indigo-200 rounded-lg text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 transition-colors'
                         >
                           <span className='material-symbols-outlined text-[14px]'>move_up</span>
                           {movingFromDemo === client.id
                             ? t('admin.clients.moving')
                             : t('admin.clients.moveToProd')}
-                        </button>
+                        </Button>
                       ) : (
-                        <button
+                        <Button
                           type='button'
                           onClick={() => handleMoveToDemo(client)}
-                          disabled={movingToDemo === client.id}
+                          loading={movingToDemo === client.id}
                           className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-orange-200 rounded-lg text-xs font-medium text-orange-600 hover:bg-orange-50 disabled:opacity-50 transition-colors'
                         >
                           <span className='material-symbols-outlined text-[14px]'>science</span>
                           {movingToDemo === client.id
                             ? t('admin.clients.moving')
                             : t('admin.clients.moveToDemo')}
-                        </button>
+                        </Button>
                       )}
-                      <button
+                      <Button
                         type='button'
                         onClick={() => setDeleteTarget(client)}
                         className='inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors'
@@ -359,7 +360,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                           delete_forever
                         </span>
                         {t('actions.delete')}
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -446,36 +447,36 @@ function DemoTab({ t }: { t: (key: string, options?: Record<string, unknown>) =>
 
         <div className='flex flex-wrap gap-2'>
           {isDemoActive ? (
-            <button
+            <Button
               type='button'
               onClick={handleExit}
-              disabled={isWorking}
+              loading={isWorking}
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white text-sm font-medium transition-colors'
             >
               <span className='material-symbols-outlined text-[16px]'>logout</span>
               {t('admin.demo.exit')}
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type='button'
               onClick={handleEnter}
-              disabled={isWorking}
+              loading={isWorking}
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-medium transition-colors'
             >
               <span className='material-symbols-outlined text-[16px]'>science</span>
               {t('admin.demo.enter')}
-            </button>
+            </Button>
           )}
 
-          <button
+          <Button
             type='button'
             onClick={() => setConfirmReset(true)}
-            disabled={isWorking}
+            loading={isWorking}
             className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 hover:bg-red-50 disabled:opacity-50 text-red-600 text-sm font-medium transition-colors'
           >
             <span className='material-symbols-outlined text-[16px]'>restart_alt</span>
             {t('admin.demo.reset')}
-          </button>
+          </Button>
         </div>
 
         {resetResult && <p className='text-sm text-emerald-600 font-medium'>{resetResult}</p>}
@@ -514,7 +515,7 @@ export function Admin() {
 
       <div className='flex gap-1 border-b border-slate-200'>
         {tabs.map((t) => (
-          <button
+          <Button
             type='button'
             key={t.id}
             onClick={() => setTab(t.id)}
@@ -526,7 +527,7 @@ export function Admin() {
           >
             <span className='material-symbols-outlined text-[16px]'>{t.icon}</span>
             {t.label}
-          </button>
+          </Button>
         ))}
       </div>
 

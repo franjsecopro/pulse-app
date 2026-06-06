@@ -4,6 +4,7 @@ import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
 import { ImportStatementModal } from '../components/payments/ImportStatementModal'
 import { PaymentForm } from '../components/payments/PaymentForm'
 import { StatementHistoryView } from '../components/payments/StatementHistoryView'
+import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
@@ -73,29 +74,29 @@ export function Payments() {
           <p className='text-slate-500 text-sm mt-1'>{t('payments.subtitle')}</p>
         </div>
         <div className='flex gap-2'>
-          <button
+          <Button
             type='button'
             onClick={() => setShowImportModal(true)}
             className='flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200'
           >
             <span className='material-symbols-outlined text-base'>upload_file</span>
             {t('payments.importStatement')}
-          </button>
-          <button
+          </Button>
+          <Button
             type='button'
             onClick={() => setShowCreateModal(true)}
             className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
           >
             <span className='material-symbols-outlined'>add</span>
             {t('payments.newPayment')}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Tabs */}
       <div className='flex gap-1 bg-slate-100 rounded-xl p-1 w-fit'>
         {(['payments', 'history'] as const).map((tab) => (
-          <button
+          <Button
             type='button'
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -106,7 +107,7 @@ export function Payments() {
             }`}
           >
             {tab === 'payments' ? t('payments.tab.payments') : t('payments.tab.history')}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -154,13 +155,13 @@ export function Payments() {
                 payments
               </span>
               <p className='text-slate-500 font-medium'>{t('payments.empty')}</p>
-              <button
+              <Button
                 type='button'
                 onClick={() => setShowCreateModal(true)}
                 className='mt-4 text-primary text-sm font-semibold hover:underline'
               >
                 {t('payments.registerFirst')}
-              </button>
+              </Button>
             </div>
           ) : (
             <div className='bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden'>
@@ -221,20 +222,20 @@ export function Payments() {
                           </td>
                           <td className='px-6 py-4 text-right'>
                             <div className='flex items-center justify-end gap-1'>
-                              <button
+                              <Button
                                 type='button'
                                 onClick={() => setEditingPayment(p)}
                                 className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
                               >
                                 <span className='material-symbols-outlined text-base'>edit</span>
-                              </button>
-                              <button
+                              </Button>
+                              <Button
                                 type='button'
                                 onClick={() => requestDelete(p.id)}
                                 className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                               >
                                 <span className='material-symbols-outlined text-base'>delete</span>
-                              </button>
+                              </Button>
                             </div>
                           </td>
                         </tr>

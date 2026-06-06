@@ -3,6 +3,7 @@ import { CalendarView } from '../components/classes/CalendarView'
 import { ClassForm } from '../components/classes/ClassForm'
 import { CLASS_STATUS_CONFIG } from '../components/classes/constants'
 import { DayView } from '../components/classes/DayView'
+import { Button } from '../components/ui/Button'
 import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
@@ -93,7 +94,7 @@ export function Classes() {
         </div>
         <div className='flex items-center gap-3'>
           <div className='flex items-center bg-slate-100 rounded-xl p-1 gap-1'>
-            <button
+            <Button
               type='button'
               onClick={() => handleViewMode('list')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all
@@ -101,8 +102,8 @@ export function Classes() {
             >
               <span className='material-symbols-outlined text-base'>view_list</span>
               {t('classes.view.list')}
-            </button>
-            <button
+            </Button>
+            <Button
               type='button'
               onClick={() => handleViewMode('calendar')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all
@@ -110,12 +111,12 @@ export function Classes() {
             >
               <span className='material-symbols-outlined text-base'>calendar_month</span>
               {t('classes.view.calendar')}
-            </button>
+            </Button>
           </div>
-          <button
+          <Button
             type='button'
             onClick={() => syncGCal()}
-            disabled={isSyncing}
+            loading={isSyncing}
             title={t('classes.gcalSynced')}
             className='flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50'
           >
@@ -125,8 +126,8 @@ export function Classes() {
               {isSyncing ? 'refresh' : 'calendar_month'}
             </span>
             {isSyncing ? t('classes.syncing') : t('classes.syncGCal')}
-          </button>
-          <button
+          </Button>
+          <Button
             type='button'
             onClick={() => {
               setNewClassDate(null)
@@ -136,7 +137,7 @@ export function Classes() {
           >
             <span className='material-symbols-outlined'>add</span>
             {t('classes.newClass')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -206,7 +207,7 @@ export function Classes() {
             event
           </span>
           <p className='text-slate-500 font-medium'>{t('classes.empty.list')}</p>
-          <button
+          <Button
             type='button'
             onClick={() => {
               setNewClassDate(null)
@@ -215,7 +216,7 @@ export function Classes() {
             className='mt-4 text-primary text-sm font-semibold hover:underline'
           >
             {t('classes.registerFirst')}
-          </button>
+          </Button>
         </div>
       ) : (
         viewMode === 'list' && (
@@ -307,20 +308,20 @@ export function Classes() {
                             >
                               {c.google_calendar_id ? 'event_available' : 'calendar_month'}
                             </span>
-                            <button
+                            <Button
                               type='button'
                               onClick={() => setEditingClass(c)}
                               className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
                             >
                               <span className='material-symbols-outlined text-base'>edit</span>
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               type='button'
                               onClick={() => requestDelete(c.id)}
                               className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                             >
                               <span className='material-symbols-outlined text-base'>delete</span>
-                            </button>
+                            </Button>
                           </div>
                         </td>
                       </tr>

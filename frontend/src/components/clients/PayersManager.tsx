@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from 'react'
 import { useTranslation } from '../../i18n'
 import { clientService } from '../../services/client.service'
 import type { Client, PaymentIdentifier } from '../../types'
+import { Button } from '../ui/Button'
 
 interface PayersManagerProps {
   client: Client
@@ -70,13 +71,13 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
           >
             {p.name}
             {p.info && <span className='text-blue-400'>· {p.info}</span>}
-            <button
+            <Button
               onClick={() => handleDelete(p.id)}
               type='button'
               className='text-blue-400 hover:text-red-500 transition-colors ml-0.5'
             >
               <span className='material-symbols-outlined text-sm'>close</span>
-            </button>
+            </Button>
           </span>
         ))}
         {payers.length === 0 && (
@@ -97,13 +98,13 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
           placeholder={t('payers.infoPlaceholder')}
           className='w-28 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none'
         />
-        <button
+        <Button
           type='submit'
           disabled={isAdding || !newName.trim()}
           className='px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-hover transition-colors disabled:opacity-60'
         >
           {t('actions.add')}
-        </button>
+        </Button>
       </form>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useTranslation } from '../../i18n'
 import type { Client } from '../../types'
+import { Button } from '../ui/Button'
 
 interface ClientCardProps {
   client: Client
@@ -86,53 +87,53 @@ export function ClientCard({
 
       <div className='flex items-center gap-2 shrink-0'>
         {!isArchived && (
-          <button
+          <Button
             type='button'
             onClick={onManageContracts}
             className='p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
             title={t('clients.manageContracts')}
           >
             <span className='material-symbols-outlined'>description</span>
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           type='button'
           onClick={onEdit}
           className='p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
           title={isArchived ? t('clients.viewData') : t('clients.edit')}
         >
           <span className='material-symbols-outlined'>edit</span>
-        </button>
+        </Button>
         {isArchived ? (
           <>
-            <button
+            <Button
               type='button'
               onClick={onActivate}
               className='p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors'
               title={t('clients.activateTooltip')}
             >
               <span className='material-symbols-outlined'>restore</span>
-            </button>
+            </Button>
             {onHardDelete && (
-              <button
+              <Button
                 type='button'
                 onClick={onHardDelete}
                 className='p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                 title={t('clients.hardDeleteTooltip')}
               >
                 <span className='material-symbols-outlined'>delete_forever</span>
-              </button>
+              </Button>
             )}
           </>
         ) : (
-          <button
+          <Button
             type='button'
             onClick={onDelete}
             className='p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors'
             title={t('clients.archiveTooltip')}
           >
             <span className='material-symbols-outlined'>archive</span>
-          </button>
+          </Button>
         )}
       </div>
     </div>

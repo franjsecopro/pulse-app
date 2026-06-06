@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTranslation } from '../../i18n'
+import { Button } from '../ui/Button'
 
 export function Header() {
   const { pathname } = useLocation()
@@ -64,7 +65,7 @@ export function Header() {
               </nav>
             </div>
             <div className='flex items-center gap-3'>
-              <button
+              <Button
                 type='button'
                 onClick={handleLogout}
                 title={t('nav.logoutTooltip')}
@@ -75,7 +76,7 @@ export function Header() {
                 </div>
                 <span className='hidden lg:inline'>{displayEmail}</span>
                 <span className='material-symbols-outlined text-base text-slate-400'>logout</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

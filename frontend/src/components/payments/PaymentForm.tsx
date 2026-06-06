@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from '../../i18n'
 import type { Client, Payment } from '../../types'
+import { Button } from '../ui/Button'
 
 interface PaymentFormProps {
   initial?: Partial<Payment>
@@ -80,6 +81,7 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
             </span>
             <input
               required
+              id='payment-amount'
               type='number'
               step='0.01'
               min='0.01'
@@ -151,23 +153,23 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
         </div>
       </div>
       <div className='flex justify-end gap-3 pt-2'>
-        <button
+        <Button
           type='button'
           onClick={onCancel}
           className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
         >
           {t('actions.cancel')}
-        </button>
-        <button
+        </Button>
+        <Button
           type='submit'
-          disabled={isSubmitting}
+          loading={isSubmitting}
           className='px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20 flex items-center gap-2'
         >
           {isSubmitting && (
             <span className='material-symbols-outlined text-base animate-spin'>sync</span>
           )}
           {t('payments.create')}
-        </button>
+        </Button>
       </div>
     </form>
   )

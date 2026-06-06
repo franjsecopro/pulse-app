@@ -1,4 +1,5 @@
 import { useTranslation } from '../../i18n'
+import { Button } from './Button'
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -38,18 +39,18 @@ export function ConfirmDialog({
           <p className='text-sm text-slate-600'>{message}</p>
         </div>
         <div className='flex gap-3 p-6 border-t border-slate-100 justify-end'>
-          <button
+          <Button
             type='button'
             onClick={onCancel}
-            disabled={isLoading}
+            loading={isLoading}
             className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-60'
           >
             {resolvedCancelText}
-          </button>
-          <button
+          </Button>
+          <Button
             type='button'
             onClick={onConfirm}
-            disabled={isLoading}
+            loading={isLoading}
             className={`px-4 py-2 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-60 ${
               isDangerous ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary-hover'
             }`}
@@ -59,7 +60,7 @@ export function ConfirmDialog({
             ) : (
               resolvedConfirmText
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

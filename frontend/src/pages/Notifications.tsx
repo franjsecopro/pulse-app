@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
 import i18n, { useTranslation } from '../i18n'
 import { notificationsService } from '../services/notifications.service'
 import type { AppNotification, NotificationSettings } from '../types'
@@ -124,17 +125,17 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
         <p className='text-sm text-slate-500'>
           {t('notifications.classesForDate', { date: formatDateEs(tomorrowDate) })}
         </p>
-        <button
+        <Button
           type='button'
           onClick={handleGenerate}
-          disabled={isGenerating}
+          loading={isGenerating}
           className='inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors'
         >
           <span className='material-symbols-outlined text-[16px]'>
             {isGenerating ? 'hourglass_empty' : 'refresh'}
           </span>
           {isGenerating ? t('notifications.updating') : t('notifications.update')}
-        </button>
+        </Button>
       </div>
 
       {isLoading ? (
@@ -189,14 +190,14 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                     </td>
                     <td className='px-4 py-3 text-right'>
                       {!isSent && n.status === 'pending' && n.whatsapp_url && (
-                        <button
+                        <Button
                           type='button'
                           onClick={() => handleSend(n)}
                           className='inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors'
                         >
                           <span className='material-symbols-outlined text-[14px]'>send</span>{' '}
                           {t('notifications.send')}
-                        </button>
+                        </Button>
                       )}
                     </td>
                   </tr>
@@ -422,10 +423,10 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
         )}
       </div>
 
-      <button
+      <Button
         type='button'
         onClick={handleSave}
-        disabled={isSaving}
+        loading={isSaving}
         className='inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors'
       >
         <span className='material-symbols-outlined text-[16px]'>{saved ? 'check' : 'save'}</span>
@@ -434,7 +435,7 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
           : isSaving
             ? t('notifications.settings.saving')
             : t('actions.save')}
-      </button>
+      </Button>
     </div>
   )
 }
@@ -461,7 +462,7 @@ export function Notifications() {
 
       <div className='flex gap-1 bg-slate-100 p-1 rounded-lg w-fit'>
         {tabs.map((tab) => (
-          <button
+          <Button
             type='button'
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -473,7 +474,7 @@ export function Notifications() {
           >
             <span className='material-symbols-outlined text-[16px]'>{tab.icon}</span>
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 

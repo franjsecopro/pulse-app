@@ -1,4 +1,5 @@
 import { useTranslation } from '../../i18n'
+import { Button } from './Button'
 
 interface PaginationProps {
   page: number
@@ -22,7 +23,7 @@ export function Pagination({ page, pageCount, totalCount, onPage }: PaginationPr
         </span>
       </p>
       <div className='flex items-center gap-1'>
-        <button
+        <Button
           type='button'
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
@@ -30,8 +31,8 @@ export function Pagination({ page, pageCount, totalCount, onPage }: PaginationPr
         >
           <span className='material-symbols-outlined text-base'>chevron_left</span>
           {t('pagination.previous')}
-        </button>
-        <button
+        </Button>
+        <Button
           type='button'
           onClick={() => onPage(page + 1)}
           disabled={page >= pageCount}
@@ -39,7 +40,7 @@ export function Pagination({ page, pageCount, totalCount, onPage }: PaginationPr
         >
           {t('pagination.next')}
           <span className='material-symbols-outlined text-base'>chevron_right</span>
-        </button>
+        </Button>
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import { ClientCard } from '../components/clients/ClientCard'
 import { ClientForm } from '../components/clients/ClientForm'
 import { ContractsManager } from '../components/clients/ContractsManager'
 import { PayersManager } from '../components/clients/PayersManager'
+import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { Modal } from '../components/ui/Modal'
 import { useAuth } from '../context/AuthContext'
@@ -94,14 +95,14 @@ export function Clients() {
           <h1 className='text-2xl font-black text-slate-900'>{t('clients.title')}</h1>
           <p className='text-slate-500 text-sm mt-1'>{t('clients.subtitle')}</p>
         </div>
-        <button
+        <Button
           type='button'
           onClick={() => setShowCreateModal(true)}
           className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
         >
           <span className='material-symbols-outlined'>add</span>
           {t('clients.newClient')}
-        </button>
+        </Button>
       </div>
 
       <div className='bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap items-center gap-3'>
@@ -137,13 +138,13 @@ export function Clients() {
             group
           </span>
           <p className='text-slate-500 font-medium'>{t('clients.empty')}</p>
-          <button
+          <Button
             type='button'
             onClick={() => setShowCreateModal(true)}
             className='mt-4 text-primary text-sm font-semibold hover:underline'
           >
             {t('clients.addFirst')}
-          </button>
+          </Button>
         </div>
       ) : (
         <div className='space-y-3'>

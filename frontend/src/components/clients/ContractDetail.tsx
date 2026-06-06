@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from '../../i18n'
 import { clientService } from '../../services/client.service'
-import type { Contract } from '../../types'
+import type { Contract, DaySchedule } from '../../types'
 import { calcDuration, formatDate, formatHours } from '../../utils/formatters'
+import { Button } from '../ui/Button'
 import { ContractForm } from './ContractForm'
 
 interface ContractDetailProps {
@@ -130,9 +131,16 @@ export function ContractDetail({
               </p>
               <div className='flex gap-1.5 flex-wrap mb-1'>
                 {weekdays
-                  .filter((d) => d.index in (contract.schedule_days ?? {}))
-                  .map(({ index, label }) => {
-                    const day = contract.schedule_days?.[index]
+                  .map(({ index, label }) => ({
+                    index,
+                    label,
+                    day: contract.schedule_days?.[index],
+                  }))
+                  .filter(
+                    (entry): entry is { index: string; label: string; day: DaySchedule } =>
+                      entry.day !== undefined,
+                  )
+                  .map(({ index, label, day }) => {
                     const duration = calcDuration(day.start, day.end)
                     return (
                       <span
@@ -207,10 +215,11 @@ export function ContractDetail({
         </p>
         <div className='flex flex-wrap gap-2'>
           {hasSchedule && (
-            <button
+            <Button
               type='button'
               onClick={handleGenerate}
-              disabled={isEditMode || isGenerating}
+              loading={isGenerating}
+              disabled={isEditMode}
               title={actionDisabledTitle}
               className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
             >
@@ -220,16 +229,17 @@ export function ContractDetail({
                 <span className='material-symbols-outlined text-sm'>calendar_add_on</span>
               )}
               {t('contracts.generateClasses')}
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type='button'
             onClick={() => {
               setPendingDeleteFuture(true)
               setDeleteResult(null)
               setDeleteError(null)
             }}
-            disabled={isEditMode || isDeletingFuture}
+            loading={isDeletingFuture}
+            disabled={isEditMode}
             title={actionDisabledTitle}
             className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
           >
@@ -239,7 +249,7 @@ export function ContractDetail({
               <span className='material-symbols-outlined text-sm'>event_busy</span>
             )}
             {t('contracts.deleteFutureClasses')}
-          </button>
+          </Button>
         </div>
 
         {pendingDeleteFuture && (
@@ -248,20 +258,20 @@ export function ContractDetail({
             <p className='text-xs text-red-700 font-semibold flex-1'>
               {t('contracts.deleteFutureConfirm')}
             </p>
-            <button
+            <Button
               type='button'
               onClick={() => setPendingDeleteFuture(false)}
               className='text-xs text-slate-500 hover:text-slate-700 font-semibold px-2 py-1 rounded hover:bg-slate-100 transition-colors'
             >
               {t('actions.cancel')}
-            </button>
-            <button
+            </Button>
+            <Button
               type='button'
               onClick={handleConfirmDeleteFuture}
               className='text-xs text-white font-bold bg-red-500 hover:bg-red-600 px-2 py-1 rounded transition-colors'
             >
               {t('actions.delete')}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -300,14 +310,14 @@ export function ContractDetail({
 
       {!isEditMode && (
         <div className='pt-2 border-t border-slate-100'>
-          <button
+          <Button
             type='button'
             onClick={onStartEdit}
             className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors'
           >
             <span className='material-symbols-outlined text-base'>edit</span>
             {t('contracts.edit')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

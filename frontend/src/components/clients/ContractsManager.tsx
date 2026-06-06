@@ -3,6 +3,7 @@ import { useTranslation } from '../../i18n'
 import { clientService } from '../../services/client.service'
 import type { Client, Contract } from '../../types'
 import { calcDuration, formatDate, formatHours } from '../../utils/formatters'
+import { Button } from '../ui/Button'
 import { ConfirmModal } from '../ui/ConfirmModal'
 import { ContractDetail } from './ContractDetail'
 import { ContractForm } from './ContractForm'
@@ -77,7 +78,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
         <p className='text-slate-500 text-sm'>
           {t('contracts.manager.title', { name: client.name })}
         </p>
-        <button
+        <Button
           type='button'
           onClick={() => {
             setShowNewForm(true)
@@ -86,7 +87,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
           className='flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-hover transition-colors'
         >
           <span className='material-symbols-outlined text-base'>add</span> {t('actions.new')}
-        </button>
+        </Button>
       </div>
 
       {showNewForm && (
@@ -152,7 +153,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                       {t('contracts.status.inactive')}
                     </span>
                   )}
-                  <button
+                  <Button
                     type='button'
                     onClick={() => (viewingContractId === c.id ? closeDetail() : openDetail(c.id))}
                     className={`p-1.5 rounded-lg transition-colors ${
@@ -165,15 +166,15 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                     <span className='material-symbols-outlined text-base'>
                       {viewingContractId === c.id ? 'expand_less' : 'expand_more'}
                     </span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type='button'
                     onClick={() => setPendingDeleteContractId(c.id)}
                     className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                     title={t('contracts.deleteTooltip')}
                   >
                     <span className='material-symbols-outlined text-base'>delete</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -196,13 +197,13 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
       )}
 
       <div className='flex justify-end pt-2'>
-        <button
+        <Button
           type='button'
           onClick={onClose}
           className='px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors'
         >
           {t('actions.close')}
-        </button>
+        </Button>
       </div>
 
       <ConfirmModal

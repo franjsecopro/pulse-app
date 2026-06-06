@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
+import { Button } from '../components/ui/Button'
 import { useTranslation } from '../i18n'
 import { accountingService } from '../services/accounting.service'
 import { clientService } from '../services/client.service'
@@ -66,10 +67,11 @@ export function Accounting() {
           <h1 className='text-2xl font-black text-slate-900'>{t('accounting.title')}</h1>
           <p className='text-slate-500 text-sm mt-1'>{t('accounting.subtitle')}</p>
         </div>
-        <button
+        <Button
           type='button'
           onClick={exportExcel}
-          disabled={visibleSummary.length === 0 || isExporting}
+          loading={isExporting}
+          disabled={visibleSummary.length === 0}
           className='flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary/90 transition-colors'
         >
           <span
@@ -78,7 +80,7 @@ export function Accounting() {
             {isExporting ? 'sync' : 'download'}
           </span>
           {isExporting ? t('accounting.exporting') : t('accounting.exportExcel')}
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}

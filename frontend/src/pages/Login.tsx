@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from '../i18n'
 import { ApiError } from '../services/api'
@@ -111,7 +112,7 @@ export function Login() {
                     placeholder='••••••••'
                     className='w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400'
                   />
-                  <button
+                  <Button
                     type='button'
                     onClick={() => setShowPassword(!showPassword)}
                     className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary'
@@ -119,16 +120,16 @@ export function Login() {
                     <span className='material-symbols-outlined text-lg'>
                       {showPassword ? 'visibility_off' : 'visibility'}
                     </span>
-                  </button>
+                  </Button>
                 </div>
                 {mode === 'register' && (
                   <p className='mt-2 text-xs text-slate-500'>{t('auth.passwordHint')}</p>
                 )}
               </div>
 
-              <button
+              <Button
                 type='submit'
-                disabled={isSubmitting}
+                loading={isSubmitting}
                 className='w-full py-3.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-60'
               >
                 {isSubmitting ? (
@@ -139,11 +140,11 @@ export function Login() {
                     <span className='material-symbols-outlined'>arrow_forward</span>
                   </>
                 )}
-              </button>
+              </Button>
             </form>
 
             <div className='mt-6 text-center'>
-              <button
+              <Button
                 type='button'
                 onClick={() => {
                   setMode(mode === 'login' ? 'register' : 'login')
@@ -152,7 +153,7 @@ export function Login() {
                 className='text-sm text-primary hover:underline font-medium'
               >
                 {mode === 'login' ? t('auth.toggleToRegister') : t('auth.toggleToLogin')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

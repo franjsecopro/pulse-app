@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { LanguageSelector } from '../components/settings/LanguageSelector'
+import { Button } from '../components/ui/Button'
 import { useTranslation } from '../i18n'
 import { businessProfileService } from '../services/business_profile.service'
 import { googleCalendarService } from '../services/google_calendar.service'
@@ -144,10 +145,10 @@ export function Settings() {
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-              <button
+              <Button
                 type='button'
                 onClick={handleDisconnect}
-                disabled={isDisconnecting}
+                loading={isDisconnecting}
                 className='flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50'
               >
                 {isDisconnecting ? (
@@ -156,7 +157,7 @@ export function Settings() {
                   <span className='material-symbols-outlined text-base'>link_off</span>
                 )}
                 {t('settings.gcal.disconnect')}
-              </button>
+              </Button>
             </>
           ) : (
             <>
@@ -173,10 +174,10 @@ export function Settings() {
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-              <button
+              <Button
                 type='button'
                 onClick={handleConnect}
-                disabled={isConnecting}
+                loading={isConnecting}
                 className='flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20'
               >
                 {isConnecting ? (
@@ -185,7 +186,7 @@ export function Settings() {
                   <span className='material-symbols-outlined text-base'>add_link</span>
                 )}
                 {t('settings.gcal.connect')}
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -244,10 +245,10 @@ export function Settings() {
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>
-          <button
+          <Button
             type='button'
             onClick={handleSaveFiscal}
-            disabled={isSavingFiscal}
+            loading={isSavingFiscal}
             className='flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20'
           >
             {isSavingFiscal ? (
@@ -256,7 +257,7 @@ export function Settings() {
               <span className='material-symbols-outlined text-base'>save</span>
             )}
             {t('settings.fiscal.save')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

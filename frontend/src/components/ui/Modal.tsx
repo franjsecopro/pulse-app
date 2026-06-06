@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { Button } from './Button'
 
 interface ModalProps {
   isOpen: boolean
@@ -30,7 +31,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
 
   return createPortal(
     <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
-      <button
+      <Button
         type='button'
         className='absolute inset-0 bg-black/50 backdrop-blur-sm border-0 cursor-default w-full'
         onClick={onClose}
@@ -41,13 +42,13 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       >
         <div className='flex items-center justify-between p-6 border-b border-slate-200'>
           <h2 className='text-lg font-bold text-slate-900'>{title}</h2>
-          <button
+          <Button
             type='button'
             onClick={onClose}
             className='p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors'
           >
             <span className='material-symbols-outlined'>close</span>
-          </button>
+          </Button>
         </div>
         <div className='p-6'>{children}</div>
       </div>
