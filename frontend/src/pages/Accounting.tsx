@@ -40,9 +40,9 @@ export function Accounting() {
 
   // Client filter is applied on the client side (the summary endpoint is per-month).
   const visibleSummary = client === '' ? summary : summary.filter((e) => e.client_id === client)
-  const totalExpected = visibleSummary.reduce((s, e) => s + e.expected, 0)
-  const totalPaid = visibleSummary.reduce((s, e) => s + e.paid, 0)
-  const totalBalance = visibleSummary.reduce((s, e) => s + e.balance, 0)
+  const totalExpected = visibleSummary.reduce((sum, e) => sum + e.expected, 0)
+  const totalPaid = visibleSummary.reduce((sum, e) => sum + e.paid, 0)
+  const totalBalance = visibleSummary.reduce((sum, e) => sum + e.balance, 0)
 
   async function exportExcel() {
     setIsExporting(true)

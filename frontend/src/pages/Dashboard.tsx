@@ -64,7 +64,7 @@ export function Dashboard() {
     )
   }
 
-  const debtAlerts = alerts.filter((a) => a.type === 'debt')
+  const debtAlerts = alerts.filter((alert) => alert.type === 'debt')
 
   return (
     <div className='space-y-8'>
@@ -129,30 +129,30 @@ export function Dashboard() {
                   </div>
                 ) : (
                   <ul className='divide-y divide-slate-100'>
-                    {classes.map((c) => (
-                      <li key={c.id} className='px-5 py-3 flex items-center justify-between gap-3'>
+                    {classes.map((classSession) => (
+                      <li key={classSession.id} className='px-5 py-3 flex items-center justify-between gap-3'>
                         <div className='flex items-center gap-3 min-w-0'>
                           <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0'>
-                            {(c.client_name ?? '?').slice(0, 2).toUpperCase()}
+                            {(classSession.client_name ?? '?').slice(0, 2).toUpperCase()}
                           </div>
                           <div className='min-w-0'>
                             <p className='text-sm font-semibold text-slate-900 truncate'>
-                              {c.client_name ?? t('dashboard.upcoming.noClient')}
+                              {classSession.client_name ?? t('dashboard.upcoming.noClient')}
                             </p>
-                            {c.contract_description && (
+                            {classSession.contract_description && (
                               <p className='text-xs text-slate-400 truncate'>
-                                {c.contract_description}
+                                {classSession.contract_description}
                               </p>
                             )}
                           </div>
                         </div>
                         <div className='text-right shrink-0'>
                           <p className='text-sm font-bold text-slate-900'>
-                            {c.class_time ? c.class_time.slice(0, 5) : '—'}
+                            {classSession.class_time ? classSession.class_time.slice(0, 5) : '—'}
                           </p>
                           <p className='text-xs text-slate-400'>
-                            {c.duration_hours}
-                            {t('common.units.hoursShort')} · €{c.total_amount.toFixed(2)}
+                            {classSession.duration_hours}
+                            {t('common.units.hoursShort')} · €{classSession.total_amount.toFixed(2)}
                           </p>
                         </div>
                       </li>
@@ -227,24 +227,24 @@ export function Dashboard() {
                 </tr>
               </thead>
               <tbody className='divide-y divide-slate-100'>
-                {recentPayments.map((p) => (
-                  <tr key={p.id} className='hover:bg-slate-50 transition-colors'>
+                {recentPayments.map((payment) => (
+                  <tr key={payment.id} className='hover:bg-slate-50 transition-colors'>
                     <td className='px-6 py-4'>
                       <div className='flex items-center gap-3'>
                         <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
-                          {(p.client_name ?? '?').slice(0, 2).toUpperCase()}
+                          {(payment.client_name ?? '?').slice(0, 2).toUpperCase()}
                         </div>
                         <span className='font-medium text-slate-900'>
-                          {p.client_name ?? t('dashboard.upcoming.noClient')}
+                          {payment.client_name ?? t('dashboard.upcoming.noClient')}
                         </span>
                       </div>
                     </td>
                     <td className='px-6 py-4 font-semibold text-slate-900'>
-                      €{p.amount.toFixed(2)}
+                      €{payment.amount.toFixed(2)}
                     </td>
-                    <td className='px-6 py-4 text-slate-500'>{p.payment_date}</td>
+                    <td className='px-6 py-4 text-slate-500'>{payment.payment_date}</td>
                     <td className='px-6 py-4'>
-                      {p.status === 'confirmed' ? (
+                      {payment.status === 'confirmed' ? (
                         <span className='inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700'>
                           <span className='material-symbols-outlined text-[12px]'>
                             check_circle

@@ -59,9 +59,9 @@ export function FinanceFilters({
           onChange={(e) => onYearChange(parseInt(e.target.value, 10))}
           className={SELECT_CLASS}
         >
-          {years.map((y) => (
-            <option key={y} value={y}>
-              {y}
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
             </option>
           ))}
         </select>
@@ -73,9 +73,9 @@ export function FinanceFilters({
         className={SELECT_CLASS}
       >
         <option value=''>{t('filters.allClients')}</option>
-        {clients.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
+        {clients.map((client) => (
+          <option key={client.id} value={client.id}>
+            {client.name}
           </option>
         ))}
       </select>

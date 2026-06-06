@@ -46,7 +46,7 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
   const handleDelete = async (payerId: number) => {
     try {
       await clientService.deletePayer(client.id, payerId)
-      const updated = payers.filter((p) => p.id !== payerId)
+      const updated = payers.filter((payer) => payer.id !== payerId)
       setPayers(updated)
       onPayersChanged(client.id, updated)
     } catch (err: unknown) {
@@ -64,15 +64,15 @@ export function PayersManager({ client, onPayersChanged }: PayersManagerProps) {
       {error && <p className='text-xs text-red-600'>{error}</p>}
 
       <div className='flex flex-wrap gap-2 min-h-[28px]'>
-        {payers.map((p) => (
+        {payers.map((payer) => (
           <span
-            key={p.id}
+            key={payer.id}
             className='flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full text-xs font-medium'
           >
-            {p.name}
-            {p.info && <span className='text-blue-400'>· {p.info}</span>}
+            {payer.name}
+            {payer.info && <span className='text-blue-400'>· {payer.info}</span>}
             <Button
-              onClick={() => handleDelete(p.id)}
+              onClick={() => handleDelete(payer.id)}
               type='button'
               className='text-blue-400 hover:text-red-500 transition-colors ml-0.5'
             >

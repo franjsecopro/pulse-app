@@ -49,7 +49,7 @@ export function Classes() {
   } = useClasses({ filterMonth, filterYear, filterClient })
 
   const dayDetailClasses = dayDetailDate
-    ? classes.filter((c) => c.class_date === dayDetailDate)
+    ? classes.filter((classSession) => classSession.class_date === dayDetailDate)
     : []
 
   const handleViewMode = (mode: ViewMode) => {
@@ -159,9 +159,9 @@ export function Classes() {
           onChange={(e) => setFilterYear(parseInt(e.target.value, 10))}
           className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
         >
-          {years.map((y) => (
-            <option key={y} value={y}>
-              {y}
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
             </option>
           ))}
         </select>
@@ -171,9 +171,9 @@ export function Classes() {
           className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
         >
           <option value=''>{t('classes.filter.allClients')}</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
+          {clients.map((client) => (
+            <option key={client.id} value={client.id}>
+              {client.name}
             </option>
           ))}
         </select>
@@ -252,38 +252,38 @@ export function Classes() {
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-slate-100'>
-                  {classes.map((c) => {
-                    const cfg = CLASS_STATUS_CONFIG[c.status] ?? CLASS_STATUS_CONFIG.normal
+                  {classes.map((classSession) => {
+                    const cfg = CLASS_STATUS_CONFIG[classSession.status] ?? CLASS_STATUS_CONFIG.normal
                     return (
-                      <tr key={c.id} className='hover:bg-slate-50 transition-colors'>
+                      <tr key={classSession.id} className='hover:bg-slate-50 transition-colors'>
                         <td className='px-6 py-4'>
-                          <p className='font-medium text-slate-900'>{c.class_date}</p>
-                          {c.class_time && (
-                            <p className='text-xs text-slate-400'>{c.class_time.slice(0, 5)}</p>
+                          <p className='font-medium text-slate-900'>{classSession.class_date}</p>
+                          {classSession.class_time && (
+                            <p className='text-xs text-slate-400'>{classSession.class_time.slice(0, 5)}</p>
                           )}
                         </td>
                         <td className='px-6 py-4'>
                           <div className='flex items-center gap-2'>
                             <div className='w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
-                              {(c.client_name ?? '?').slice(0, 2).toUpperCase()}
+                              {(classSession.client_name ?? '?').slice(0, 2).toUpperCase()}
                             </div>
                             <span className='font-medium text-slate-900'>
-                              {c.client_name ?? '—'}
+                              {classSession.client_name ?? '—'}
                             </span>
                           </div>
                         </td>
                         <td className='px-6 py-4 text-slate-700'>
-                          {c.duration_hours}
+                          {classSession.duration_hours}
                           {t('common.units.hoursShort')}
                         </td>
                         <td className='px-6 py-4 text-slate-700'>
-                          €{c.hourly_rate}/{t('common.units.hoursShort')}
+                          €{classSession.hourly_rate}/{t('common.units.hoursShort')}
                         </td>
                         <td className='px-6 py-4 font-bold text-slate-900'>
-                          €{(c.total_amount ?? 0).toFixed(2)}
+                          €{(classSession.total_amount ?? 0).toFixed(2)}
                         </td>
                         <td className='px-6 py-4'>
-                          {c.status !== 'normal' ? (
+                          {classSession.status !== 'normal' ? (
                             <span
                               className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${cfg.className}`}
                             >
@@ -294,30 +294,30 @@ export function Classes() {
                           )}
                         </td>
                         <td className='px-6 py-4 text-slate-500 text-sm max-w-[160px] truncate'>
-                          {c.notes ?? '—'}
+                          {classSession.notes ?? '—'}
                         </td>
                         <td className='px-6 py-4 text-right'>
                           <div className='flex items-center justify-end gap-1'>
                             <span
                               title={
-                                c.google_calendar_id
+                                classSession.google_calendar_id
                                   ? t('classes.gcalSynced')
                                   : t('classes.gcalNotSynced')
                               }
-                              className={`material-symbols-outlined text-base ${c.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
+                              className={`material-symbols-outlined text-base ${classSession.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
                             >
-                              {c.google_calendar_id ? 'event_available' : 'calendar_month'}
+                              {classSession.google_calendar_id ? 'event_available' : 'calendar_month'}
                             </span>
                             <Button
                               type='button'
-                              onClick={() => setEditingClass(c)}
+                              onClick={() => setEditingClass(classSession)}
                               className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
                             >
                               <span className='material-symbols-outlined text-base'>edit</span>
                             </Button>
                             <Button
                               type='button'
-                              onClick={() => requestDelete(c.id)}
+                              onClick={() => requestDelete(classSession.id)}
                               className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                             >
                               <span className='material-symbols-outlined text-base'>delete</span>
@@ -351,7 +351,7 @@ export function Classes() {
           <DayView
             date={dayDetailDate}
             classes={dayDetailClasses}
-            onEdit={(c) => setEditingClass(c)}
+            onEdit={(classSession) => setEditingClass(classSession)}
             onNewClass={handleNewClassFromCalendar}
             onDelete={async (id) => {
               requestDelete(id)

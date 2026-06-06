@@ -56,7 +56,7 @@ describe('PaymentForm', () => {
     it('renders the clients as options in the select', () => {
       renderForm()
       const select = document.getElementById('payment-client') as HTMLSelectElement
-      const optionTexts = Array.from(select.options).map((o) => o.textContent)
+      const optionTexts = Array.from(select.options).map((option) => option.textContent)
       expect(optionTexts).toContain('Alice')
       expect(optionTexts).toContain('Bob')
     })

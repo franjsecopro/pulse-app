@@ -152,7 +152,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
   }
 
   const toImportCount = rows.filter((row) => !row.skip).length
-  const totalAmount = rows.filter((row) => !row.skip).reduce((s, row) => s + row.amount, 0)
+  const totalAmount = rows.filter((row) => !row.skip).reduce((sum, row) => sum + row.amount, 0)
   const period = detectPeriod(rows)
 
   const allSelected = rows.length > 0 && rows.every((row) => !row.skip)
@@ -290,8 +290,8 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                       <input
                         type='checkbox'
                         checked={allSelected}
-                        ref={(el) => {
-                          if (el) el.indeterminate = someSelected && !allSelected
+                        ref={(inputRef) => {
+                          if (inputRef) inputRef.indeterminate = someSelected && !allSelected
                         }}
                         onChange={toggleAll}
                         className='w-4 h-4 accent-primary cursor-pointer'
@@ -353,9 +353,9 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                           disabled={row.skip}
                         >
                           <option value=''>{t('import.match.unassigned')}</option>
-                          {clients.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}
+                          {clients.map((client) => (
+                            <option key={client.id} value={client.id}>
+                              {client.name}
                             </option>
                           ))}
                         </select>

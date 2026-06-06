@@ -32,14 +32,16 @@ function StatusBadge({
 }
 
 function InfoNote({
-  n,
+  n: notification,
   t,
 }: {
   n: AppNotification
   t: (key: string, options?: Record<string, unknown>) => string
 }) {
-  if (n.status === 'skipped')
-    return <span className='text-xs text-slate-400 italic'>{t('notifications.skippedHint')}</span>
+  if (notification.status === 'skipped')
+    return (
+      <span className='text-xs text-slate-400 italic'>{t('notifications.skippedHint')}</span>
+    )
   return null
 }
 
@@ -94,19 +96,19 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
     }
   }
 
-  async function handleSend(n: AppNotification) {
-    if (!n.whatsapp_url) return
-    window.open(n.whatsapp_url, '_blank', 'noopener,noreferrer')
-    await notificationsService.markSent(n.id)
-    setSentIds((prev) => new Set(prev).add(n.id))
+  async function handleSend(notification: AppNotification) {
+    if (!notification.whatsapp_url) return
+    window.open(notification.whatsapp_url, '_blank', 'noopener,noreferrer')
+    await notificationsService.markSent(notification.id)
+    setSentIds((prev) => new Set(prev).add(notification.id))
     setNotifications((prev) =>
-      prev.map((item) => (item.id === n.id ? { ...item, status: 'sent' } : item)),
+      prev.map((item) => (item.id === notification.id ? { ...item, status: 'sent' } : item)),
     )
   }
 
-  const pending = notifications.filter((n) => n.status === 'pending')
-  const skipped = notifications.filter((n) => n.status === 'skipped')
-  const sent = notifications.filter((n) => n.status === 'sent')
+  const pending = notifications.filter((notification) => notification.status === 'pending')
+  const skipped = notifications.filter((notification) => notification.status === 'skipped')
+  const sent = notifications.filter((notification) => notification.status === 'sent')
 
   const tomorrowDate = (() => {
     const d = new Date()
@@ -172,27 +174,27 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
               </tr>
             </thead>
             <tbody className='divide-y divide-slate-100'>
-              {notifications.map((n) => {
-                const isSent = sentIds.has(n.id) || n.status === 'sent'
+              {notifications.map((notification) => {
+                const isSent = sentIds.has(notification.id) || notification.status === 'sent'
                 return (
-                  <tr key={n.id} className={isSent ? 'bg-emerald-50' : ''}>
+                  <tr key={notification.id} className={isSent ? 'bg-emerald-50' : ''}>
                     <td className='px-4 py-3 font-medium'>
                       <Link to='/clients' className='text-indigo-600 hover:underline'>
-                        {n.client_name}
+                        {notification.client_name}
                       </Link>
                     </td>
-                    <td className='px-4 py-3 text-slate-600'>{n.class_time ?? '—'}</td>
+                    <td className='px-4 py-3 text-slate-600'>{notification.class_time ?? '—'}</td>
                     <td className='px-4 py-3'>
-                      <StatusBadge status={isSent ? 'sent' : n.status} t={t} />
+                      <StatusBadge status={isSent ? 'sent' : notification.status} t={t} />
                     </td>
                     <td className='px-4 py-3 hidden md:table-cell'>
-                      <InfoNote n={isSent ? { ...n, status: 'sent' } : n} t={t} />
+                      <InfoNote n={isSent ? { ...notification, status: 'sent' } : notification} t={t} />
                     </td>
                     <td className='px-4 py-3 text-right'>
-                      {!isSent && n.status === 'pending' && n.whatsapp_url && (
+                      {!isSent && notification.status === 'pending' && notification.whatsapp_url && (
                         <Button
                           type='button'
-                          onClick={() => handleSend(n)}
+                          onClick={() => handleSend(notification)}
                           className='inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors'
                         >
                           <span className='material-symbols-outlined text-[14px]'>send</span>{' '}
@@ -254,7 +256,7 @@ function HistoryTab({
     setIsLoading(true)
     notificationsService
       .getLog()
-      .then((all) => setLog(filter === 'sent' ? all.filter((n) => n.status === 'sent') : all))
+      .then((all) => setLog(filter === 'sent' ? all.filter((notification) => notification.status === 'sent') : all))
       .finally(() => setIsLoading(false))
   }, [filter])
 
@@ -296,16 +298,16 @@ function HistoryTab({
               </tr>
             </thead>
             <tbody className='divide-y divide-slate-100'>
-              {log.map((n) => (
-                <tr key={n.id}>
-                  <td className='px-4 py-3 font-medium text-slate-800'>{n.client_name}</td>
-                  <td className='px-4 py-3 text-slate-600'>{formatDateEs(n.class_date)}</td>
-                  <td className='px-4 py-3 text-slate-600'>{n.class_time ?? '—'}</td>
+              {log.map((notification) => (
+                <tr key={notification.id}>
+                  <td className='px-4 py-3 font-medium text-slate-800'>{notification.client_name}</td>
+                  <td className='px-4 py-3 text-slate-600'>{formatDateEs(notification.class_date)}</td>
+                  <td className='px-4 py-3 text-slate-600'>{notification.class_time ?? '—'}</td>
                   <td className='px-4 py-3'>
-                    <StatusBadge status={n.status} t={t} />
+                    <StatusBadge status={notification.status} t={t} />
                   </td>
                   <td className='px-4 py-3 text-slate-500 hidden md:table-cell'>
-                    {n.sent_at ? formatTime(n.sent_at) : '—'}
+                    {notification.sent_at ? formatTime(notification.sent_at) : '—'}
                   </td>
                 </tr>
               ))}
@@ -383,7 +385,7 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
                 name='channel'
                 value={channel}
                 checked={settings.default_channel === channel}
-                onChange={() => setSettings((s) => ({ ...s, default_channel: channel }))}
+                onChange={() => setSettings((prev) => ({ ...prev, default_channel: channel }))}
                 className='accent-indigo-600'
               />
               <span className='text-sm font-medium text-slate-700'>
@@ -410,7 +412,7 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
         <textarea
           rows={4}
           value={settings.message_template}
-          onChange={(e) => setSettings((s) => ({ ...s, message_template: e.target.value }))}
+          onChange={(e) => setSettings((prev) => ({ ...prev, message_template: e.target.value }))}
           className='w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none'
         />
         {settings.message_template && (

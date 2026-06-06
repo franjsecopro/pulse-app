@@ -215,7 +215,7 @@ export function Settings() {
             <input
               id='business-name'
               value={fiscal.business_name}
-              onChange={(e) => setFiscal((f) => ({ ...f, business_name: e.target.value }))}
+              onChange={(e) => setFiscal((prev) => ({ ...prev, business_name: e.target.value }))}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>
@@ -227,7 +227,7 @@ export function Settings() {
               id='tax-id'
               placeholder={t('settings.fiscal.taxIdPlaceholder')}
               value={fiscal.tax_id}
-              onChange={(e) => setFiscal((f) => ({ ...f, tax_id: e.target.value }))}
+              onChange={(e) => setFiscal((prev) => ({ ...prev, tax_id: e.target.value }))}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>
@@ -241,7 +241,7 @@ export function Settings() {
             <input
               id='fiscal-address'
               value={fiscal.fiscal_address}
-              onChange={(e) => setFiscal((f) => ({ ...f, fiscal_address: e.target.value }))}
+              onChange={(e) => setFiscal((prev) => ({ ...prev, fiscal_address: e.target.value }))}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>

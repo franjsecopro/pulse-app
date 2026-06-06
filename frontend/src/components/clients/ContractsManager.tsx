@@ -22,7 +22,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
   const [isEditMode, setIsEditMode] = useState(false)
   const [pendingDeleteContractId, setPendingDeleteContractId] = useState<number | null>(null)
 
-  const viewingContract = contracts.find((c) => c.id === viewingContractId) ?? null
+  const viewingContract = contracts.find((contract) => contract.id === viewingContractId) ?? null
 
   const weekdays = (t('common.weekdays.short', { returnObjects: true }) as string[]).map(
     (label, i) => ({
@@ -106,36 +106,36 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
         </div>
       ) : (
         <div className='space-y-2'>
-          {contracts.map((c) => (
-            <div key={c.id}>
+          {contracts.map((contract) => (
+            <div key={contract.id}>
               <div
                 className={`flex items-center justify-between gap-4 p-4 border transition-colors ${
-                  viewingContractId === c.id
+                  viewingContractId === contract.id
                     ? 'rounded-t-xl border-primary/30 bg-primary/5'
-                    : c.is_active
+                    : contract.is_active
                       ? 'rounded-xl border-slate-200 bg-white'
                       : 'rounded-xl border-slate-100 bg-slate-50 opacity-60'
                 }`}
               >
                 <div className='min-w-0 flex-1'>
-                  <p className='font-semibold text-slate-900 text-sm'>{c.description}</p>
+                  <p className='font-semibold text-slate-900 text-sm'>{contract.description}</p>
                   <p className='text-xs text-slate-500'>
-                    €{c.hourly_rate}/h ·{' '}
-                    {t('contracts.manager.since', { date: formatDate(c.start_date) })}
-                    {c.end_date
-                      ? ` ${t('contracts.manager.until', { date: formatDate(c.end_date) })}`
+                    €{contract.hourly_rate}/h ·{' '}
+                    {t('contracts.manager.since', { date: formatDate(contract.start_date) })}
+                    {contract.end_date
+                      ? ` ${t('contracts.manager.until', { date: formatDate(contract.end_date) })}`
                       : ''}
                   </p>
-                  {c.schedule_days && Object.keys(c.schedule_days).length > 0 && (
+                  {contract.schedule_days && Object.keys(contract.schedule_days).length > 0 && (
                     <p className='text-xs text-primary/70 mt-0.5'>
                       {weekdays
-                        .filter((d) => d.index in (c.schedule_days ?? {}))
+                        .filter((d) => d.index in (contract.schedule_days ?? {}))
                         .map((d) => d.label)
                         .join(', ')}
                       {' · '}
                       {formatHours(
-                        Object.values(c.schedule_days).reduce(
-                          (s, d) => s + calcDuration(d.start, d.end),
+                        Object.values(contract.schedule_days).reduce(
+                          (sum, d) => sum + calcDuration(d.start, d.end),
                           0,
                         ),
                       )}
@@ -144,7 +144,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                   )}
                 </div>
                 <div className='flex items-center gap-2 shrink-0'>
-                  {c.is_active ? (
+                  {contract.is_active ? (
                     <span className='text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full'>
                       {t('contracts.status.active')}
                     </span>
@@ -155,21 +155,23 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                   )}
                   <Button
                     type='button'
-                    onClick={() => (viewingContractId === c.id ? closeDetail() : openDetail(c.id))}
+                    onClick={() =>
+                      viewingContractId === contract.id ? closeDetail() : openDetail(contract.id)
+                    }
                     className={`p-1.5 rounded-lg transition-colors ${
-                      viewingContractId === c.id
+                      viewingContractId === contract.id
                         ? 'text-primary bg-primary/10'
                         : 'text-slate-400 hover:text-primary hover:bg-primary/5'
                     }`}
                     title={t('contracts.viewDetail')}
                   >
                     <span className='material-symbols-outlined text-base'>
-                      {viewingContractId === c.id ? 'expand_less' : 'expand_more'}
+                      {viewingContractId === contract.id ? 'expand_less' : 'expand_more'}
                     </span>
                   </Button>
                   <Button
                     type='button'
-                    onClick={() => setPendingDeleteContractId(c.id)}
+                    onClick={() => setPendingDeleteContractId(contract.id)}
                     className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                     title={t('contracts.deleteTooltip')}
                   >
@@ -178,7 +180,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                 </div>
               </div>
 
-              {viewingContractId === c.id && viewingContract && (
+              {viewingContractId === contract.id && viewingContract && (
                 <div className='bg-slate-50 rounded-b-xl border-x border-b border-primary/30 p-4'>
                   <ContractDetail
                     contract={viewingContract}

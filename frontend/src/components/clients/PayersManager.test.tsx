@@ -74,7 +74,7 @@ describe('PayersManager', () => {
       })
       const allButtons = document.querySelectorAll('button')
       const deleteButtons = Array.from(allButtons).filter(
-        (b) => b.getAttribute('type') === 'button',
+        (button) => button.getAttribute('type') === 'button',
       )
       expect(deleteButtons.length).toBe(2)
       deleteButtons.forEach((btn) => {

@@ -48,10 +48,10 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
 
   const startOffset = (firstDay.getDay() + 6) % 7
 
-  const byDate = classes.reduce<Record<string, ClassSession[]>>((acc, c) => {
-    const key = c.class_date
+  const byDate = classes.reduce<Record<string, ClassSession[]>>((acc, classSession) => {
+    const key = classSession.class_date
     if (!acc[key]) acc[key] = []
-    acc[key].push(c)
+    acc[key].push(classSession)
     return acc
   }, {})
 
@@ -103,7 +103,10 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           const dayClasses = byDate[key] ?? []
           const visibleClasses = dayClasses.slice(0, MAX_VISIBLE)
           const hiddenCount = dayClasses.length - MAX_VISIBLE
-          const total = dayClasses.reduce((s, c) => s + (c.total_amount ?? 0), 0)
+          const total = dayClasses.reduce(
+            (sum, classSession) => sum + (classSession.total_amount ?? 0),
+            0,
+          )
 
           return (
             <div
@@ -129,17 +132,17 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
               </div>
 
               <div className='flex flex-col gap-0.5'>
-                {visibleClasses.map((c) => (
+                {visibleClasses.map((classSession) => (
                   <Button
                     type='button'
-                    key={c.id}
-                    onClick={() => onEdit(c)}
-                    onMouseEnter={(e) => handleChipEnter(e, c)}
+                    key={classSession.id}
+                    onClick={() => onEdit(classSession)}
+                    onMouseEnter={(e) => handleChipEnter(e, classSession)}
                     onMouseLeave={() => setTooltip(null)}
                     className={`w-full text-left text-[10px] font-semibold px-1.5 py-0.5 rounded border truncate
-                      hover:opacity-80 transition-opacity ${clientColor(c.client_id)}`}
+                      hover:opacity-80 transition-opacity ${clientColor(classSession.client_id)}`}
                   >
-                    {c.contract_description ?? c.client_name ?? '?'}
+                    {classSession.contract_description ?? classSession.client_name ?? '?'}
                   </Button>
                 ))}
 

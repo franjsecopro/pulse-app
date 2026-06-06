@@ -62,7 +62,7 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
     if (!deleteTarget) return
     try {
       await adminService.deleteUser(deleteTarget.id)
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id))
+      setUsers((prev) => prev.filter((user) => user.id !== deleteTarget.id))
     } finally {
       setDeleteTarget(null)
     }
@@ -75,7 +75,7 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
     setRoleChanging(user.id)
     try {
       const updated = await adminService.setUserRole(user.id, newRole)
-      setUsers((prev) => prev.map((u) => (u.id === updated.id ? { ...u, role: updated.role } : u)))
+      setUsers((prev) => prev.map((user) => (user.id === updated.id ? { ...user, role: updated.role } : user)))
     } finally {
       setRoleChanging(null)
     }
@@ -219,7 +219,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
     if (!deleteTarget) return
     try {
       await adminService.hardDeleteClient(deleteTarget.id)
-      setClients((prev) => prev.filter((c) => c.id !== deleteTarget.id))
+      setClients((prev) => prev.filter((client) => client.id !== deleteTarget.id))
     } finally {
       setDeleteTarget(null)
     }
@@ -229,7 +229,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
     setMovingToDemo(client.id)
     try {
       await adminService.moveClientToDemo(client.id)
-      setClients((prev) => prev.filter((c) => c.id !== client.id))
+      setClients((prev) => prev.filter((existingClient) => existingClient.id !== client.id))
     } finally {
       setMovingToDemo(null)
     }
@@ -239,7 +239,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
     setMovingFromDemo(client.id)
     try {
       await adminService.moveClientFromDemo(client.id)
-      setClients((prev) => prev.filter((c) => c.id !== client.id))
+      setClients((prev) => prev.filter((existingClient) => existingClient.id !== client.id))
     } finally {
       setMovingFromDemo(null)
     }

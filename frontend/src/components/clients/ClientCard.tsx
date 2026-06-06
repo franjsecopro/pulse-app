@@ -20,7 +20,7 @@ export function ClientCard({
   onHardDelete,
 }: ClientCardProps) {
   const { t } = useTranslation()
-  const activeContracts = client.contracts?.filter((c) => c.is_active) ?? []
+  const activeContracts = client.contracts?.filter((contract) => contract.is_active) ?? []
   const isArchived = !!client.archived_at
 
   return (
@@ -71,12 +71,12 @@ export function ClientCard({
         </p>
         {activeContracts.length > 0 ? (
           <div className='flex flex-wrap gap-2'>
-            {activeContracts.map((c) => (
+            {activeContracts.map((contract) => (
               <span
-                key={c.id}
+                key={contract.id}
                 className='bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs border border-slate-200'
               >
-                {c.description} — €{c.hourly_rate}/h
+                {contract.description} — €{contract.hourly_rate}/h
               </span>
             ))}
           </div>

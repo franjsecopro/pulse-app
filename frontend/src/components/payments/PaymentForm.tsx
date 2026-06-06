@@ -56,14 +56,14 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
             id='payment-client'
             value={form.client_id ?? ''}
             onChange={(e) =>
-              setForm((f) => ({ ...f, client_id: parseInt(e.target.value, 10) || null }))
+              setForm((prev) => ({ ...prev, client_id: parseInt(e.target.value, 10) || null }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
             <option value=''>{t('payments.form.noClient')}</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
+            {clients.map((client) => (
+              <option key={client.id} value={client.id}>
+                {client.name}
               </option>
             ))}
           </select>
@@ -86,7 +86,7 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
               step='0.01'
               min='0.01'
               value={form.amount || ''}
-              onChange={(e) => setForm((f) => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
               className='w-full pl-8 pr-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>
@@ -100,7 +100,7 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
             type='date'
             id='payment-date'
             value={form.payment_date}
-            onChange={(e) => setForm((f) => ({ ...f, payment_date: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, payment_date: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -114,7 +114,7 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           <input
             id='payment-concept'
             value={form.concept}
-            onChange={(e) => setForm((f) => ({ ...f, concept: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, concept: e.target.value }))}
             placeholder={t('payments.form.conceptPlaceholder')}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
@@ -129,7 +129,7 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           <select
             id='payment-status'
             value={form.status}
-            onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
             <option value='confirmed'>{t('payments.status.confirmed')}</option>
@@ -147,7 +147,7 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           <input
             id='payment-notes'
             value={form.notes}
-            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>

@@ -26,30 +26,35 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const selectedClient = clients.find((c) => c.id === selectedClientId)
-  const activeContracts: Contract[] = selectedClient?.contracts?.filter((c) => c.is_active) ?? []
+  const selectedClient = clients.find((client) => client.id === selectedClientId)
+  const activeContracts: Contract[] =
+    selectedClient?.contracts?.filter((contract) => contract.is_active) ?? []
 
   const handleClientChange = (clientId: string) => {
     const cid = parseInt(clientId, 10) || ''
     setSelectedClientId(cid)
-    const client = clients.find((c) => c.id === cid)
-    const contracts = client?.contracts?.filter((c) => c.is_active) ?? []
+    const client = clients.find((entry) => entry.id === cid)
+    const contracts = client?.contracts?.filter((contract) => contract.is_active) ?? []
     if (contracts.length === 1) {
-      setForm((f) => ({
-        ...f,
+      setForm((prev) => ({
+        ...prev,
         contract_id: contracts[0].id,
         hourly_rate: contracts[0].hourly_rate,
       }))
     } else {
-      setForm((f) => ({ ...f, contract_id: null }))
+      setForm((prev) => ({ ...prev, contract_id: null }))
     }
   }
 
   const handleContractChange = (contractId: string) => {
     const cid = contractId ? parseInt(contractId, 10) : null
-    setForm((f) => {
-      const contract = activeContracts.find((c) => c.id === cid)
-      return { ...f, contract_id: cid, hourly_rate: contract?.hourly_rate ?? f.hourly_rate }
+    setForm((prev) => {
+      const contract = activeContracts.find((entry) => entry.id === cid)
+      return {
+        ...prev,
+        contract_id: cid,
+        hourly_rate: contract?.hourly_rate ?? prev.hourly_rate,
+      }
     })
   }
 
@@ -101,10 +106,10 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           >
             <option value=''>{t('classes.form.selectClientPlaceholder')}</option>
             {clients
-              .filter((c) => c.is_active)
-              .map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
+              .filter((client) => client.is_active)
+              .map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.name}
                 </option>
               ))}
           </select>
@@ -132,9 +137,9 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
             >
               <option value=''>{t('classes.form.selectContractPlaceholder')}</option>
-              {activeContracts.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.description} — €{c.hourly_rate}/h
+              {activeContracts.map((contract) => (
+                <option key={contract.id} value={contract.id}>
+                  {contract.description} — €{contract.hourly_rate}/h
                 </option>
               ))}
             </select>
@@ -150,7 +155,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             lang='es-ES'
             id='class-date'
             value={form.class_date}
-            onChange={(e) => setForm((f) => ({ ...f, class_date: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, class_date: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -162,7 +167,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             type='time'
             id='class-time'
             value={form.class_time}
-            onChange={(e) => setForm((f) => ({ ...f, class_time: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, class_time: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -178,7 +183,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             min='0.5'
             value={form.duration_hours}
             onChange={(e) =>
-              setForm((f) => ({ ...f, duration_hours: parseFloat(e.target.value) || 0 }))
+              setForm((prev) => ({ ...prev, duration_hours: parseFloat(e.target.value) || 0 }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
@@ -195,7 +200,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             min='0'
             value={form.hourly_rate}
             onChange={(e) =>
-              setForm((f) => ({ ...f, hourly_rate: parseFloat(e.target.value) || 0 }))
+              setForm((prev) => ({ ...prev, hourly_rate: parseFloat(e.target.value) || 0 }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
@@ -207,7 +212,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           <select
             id='status'
             value={form.status}
-            onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ClassStatus }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as ClassStatus }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
             <option value='normal'>{t('classes.status.normalDesc')}</option>
@@ -226,7 +231,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           <input
             id='notes'
             value={form.notes}
-            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>

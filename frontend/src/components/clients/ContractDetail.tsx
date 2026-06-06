@@ -37,7 +37,7 @@ export function ContractDetail({
   const hasSchedule = !!(contract.schedule_days && Object.keys(contract.schedule_days).length > 0)
   const weeklyHours = hasSchedule
     ? Object.values(contract.schedule_days ?? {}).reduce(
-        (s, d) => s + calcDuration(d.start, d.end),
+        (sum, d) => sum + calcDuration(d.start, d.end),
         0,
       )
     : 0

@@ -65,7 +65,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
             required
             id='client-name'
             value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -77,7 +77,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
             type='email'
             id='client-email'
             value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -88,7 +88,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <input
             id='client-phone'
             value={form.phone}
-            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -103,7 +103,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
             id='client-whatsapp'
             placeholder={t('clients.form.whatsappPlaceholder')}
             value={form.whatsapp_phone}
-            onChange={(e) => setForm((f) => ({ ...f, whatsapp_phone: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, whatsapp_phone: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.whatsappHint')}</p>
@@ -118,7 +118,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <input
             id='client-address'
             value={form.address}
-            onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -133,7 +133,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
             id='client-tax-id'
             placeholder={t('clients.form.taxIdPlaceholder')}
             value={form.tax_id}
-            onChange={(e) => setForm((f) => ({ ...f, tax_id: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, tax_id: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.taxIdHint')}</p>
@@ -149,7 +149,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
             id='client-payment-timing'
             value={form.payment_timing}
             onChange={(e) =>
-              setForm((f) => ({ ...f, payment_timing: e.target.value as PaymentTiming }))
+              setForm((prev) => ({ ...prev, payment_timing: e.target.value as PaymentTiming }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
@@ -163,7 +163,7 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
             type='checkbox'
             id='is_active'
             checked={form.is_active}
-            onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, is_active: e.target.checked }))}
             className='w-4 h-4 accent-primary'
           />
           <label htmlFor='is_active' className='text-sm font-medium text-slate-700'>

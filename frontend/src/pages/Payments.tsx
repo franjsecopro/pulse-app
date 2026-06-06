@@ -190,26 +190,26 @@ export function Payments() {
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-slate-100'>
-                    {payments.map((p) => {
+                    {payments.map((payment) => {
                       const status =
-                        PAYMENT_STATUS_CONFIG[p.status] ?? PAYMENT_STATUS_CONFIG.pending
+                        PAYMENT_STATUS_CONFIG[payment.status] ?? PAYMENT_STATUS_CONFIG.pending
                       return (
-                        <tr key={p.id} className='hover:bg-slate-50 transition-colors'>
+                        <tr key={payment.id} className='hover:bg-slate-50 transition-colors'>
                           <td className='px-6 py-4'>
                             <div className='flex items-center gap-3'>
                               <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
-                                {(p.client_name ?? '?').slice(0, 2).toUpperCase()}
+                                {(payment.client_name ?? '?').slice(0, 2).toUpperCase()}
                               </div>
                               <span className='font-medium text-slate-900'>
-                                {p.client_name ?? t('payments.table.noClient')}
+                                {payment.client_name ?? t('payments.table.noClient')}
                               </span>
                             </div>
                           </td>
-                          <td className='px-6 py-4 text-slate-600'>{p.concept ?? '—'}</td>
+                          <td className='px-6 py-4 text-slate-600'>{payment.concept ?? '—'}</td>
                           <td className='px-6 py-4 font-bold text-slate-900'>
-                            €{p.amount.toFixed(2)}
+                            €{payment.amount.toFixed(2)}
                           </td>
-                          <td className='px-6 py-4 text-slate-500'>{p.payment_date}</td>
+                          <td className='px-6 py-4 text-slate-500'>{payment.payment_date}</td>
                           <td className='px-6 py-4'>
                             <span
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status.className}`}
@@ -224,14 +224,14 @@ export function Payments() {
                             <div className='flex items-center justify-end gap-1'>
                               <Button
                                 type='button'
-                                onClick={() => setEditingPayment(p)}
+                                onClick={() => setEditingPayment(payment)}
                                 className='p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors'
                               >
                                 <span className='material-symbols-outlined text-base'>edit</span>
                               </Button>
                               <Button
                                 type='button'
-                                onClick={() => requestDelete(p.id)}
+                                onClick={() => requestDelete(payment.id)}
                                 className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
                               >
                                 <span className='material-symbols-outlined text-base'>delete</span>

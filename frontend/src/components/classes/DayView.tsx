@@ -30,12 +30,12 @@ interface ColumnedClass {
 }
 
 function assignColumns(classes: ClassSession[]): ColumnedClass[] {
-  const sorted = [...classes].sort((a, b) => {
+  const sorted = [...classes].sort((classA, classB) => {
     const toFrac = (t: string) => {
       const [h, m] = t.split(':').map(Number)
       return h + m / 60
     }
-    return toFrac(a.class_time ?? '') - toFrac(b.class_time ?? '')
+    return toFrac(classA.class_time ?? '') - toFrac(classB.class_time ?? '')
   })
 
   const result: ColumnedClass[] = []
@@ -81,13 +81,15 @@ interface DayViewProps {
 
 export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayViewProps) {
   const { t } = useTranslation()
-  const timedClasses = classes.filter((c) => c.class_time)
-  const untimedClasses = classes.filter((c) => !c.class_time)
+  const timedClasses = classes.filter((classSession) => classSession.class_time)
+  const untimedClasses = classes.filter((classSession) => !classSession.class_time)
 
-  const startHours = timedClasses.map((c) => parseInt((c.class_time ?? '').split(':')[0], 10))
-  const endHours = timedClasses.map((c) => {
-    const [h, m] = (c.class_time ?? '').split(':').map(Number)
-    return Math.ceil(h + m / 60 + c.duration_hours)
+  const startHours = timedClasses.map((classSession) =>
+    parseInt((classSession.class_time ?? '').split(':')[0], 10),
+  )
+  const endHours = timedClasses.map((classSession) => {
+    const [h, m] = (classSession.class_time ?? '').split(':').map(Number)
+    return Math.ceil(h + m / 60 + classSession.duration_hours)
   })
 
   const START_HOUR =
@@ -115,21 +117,23 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
           <p className='text-xs font-bold text-slate-400 uppercase tracking-wider'>
             {t('dayView.untimed')}
           </p>
-          {untimedClasses.map((c) => (
+          {untimedClasses.map((classSession) => (
             <div
-              key={c.id}
-              className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${clientColor(c.client_id)}`}
+              key={classSession.id}
+              className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${clientColor(classSession.client_id)}`}
             >
               <div>
-                <span className='font-semibold'>{c.contract_description ?? c.client_name}</span>
+                <span className='font-semibold'>
+                  {classSession.contract_description ?? classSession.client_name}
+                </span>
                 <span className='ml-2 opacity-60 text-xs'>
-                  {c.duration_hours}h · €{(c.total_amount ?? 0).toFixed(0)}
+                  {classSession.duration_hours}h · €{(classSession.total_amount ?? 0).toFixed(0)}
                 </span>
               </div>
               <div className='flex items-center gap-1'>
                 <Button
                   type='button'
-                  onClick={() => onEdit(c)}
+                  onClick={() => onEdit(classSession)}
                   className='p-1 rounded hover:bg-black/10 transition-colors text-slate-500 hover:text-slate-800'
                   title={t('classes.edit')}
                 >
@@ -137,7 +141,7 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                 </Button>
                 <Button
                   type='button'
-                  onClick={() => onDelete(c.id)}
+                  onClick={() => onDelete(classSession.id)}
                   className='p-1 rounded hover:bg-black/10 transition-colors text-red-400 hover:text-red-600'
                   title={t('classes.delete')}
                 >
