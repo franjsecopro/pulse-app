@@ -92,16 +92,15 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
     return Math.ceil(h + m / 60 + classSession.duration_hours)
   })
 
-  const START_HOUR =
-    timedClasses.length > 0 ? Math.min(DEFAULT_START, ...startHours) : DEFAULT_START
-  const END_HOUR = timedClasses.length > 0 ? Math.max(DEFAULT_END, ...endHours) : DEFAULT_END
+  const StartHour = timedClasses.length > 0 ? Math.min(DEFAULT_START, ...startHours) : DEFAULT_START
+  const EndHour = timedClasses.length > 0 ? Math.max(DEFAULT_END, ...endHours) : DEFAULT_END
 
-  const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => i + START_HOUR)
-  const totalHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
+  const Hours = Array.from({ length: EndHour - StartHour + 1 }, (_, i) => i + StartHour)
+  const totalHeight = (EndHour - StartHour) * HOUR_HEIGHT
 
   function getTop(classTime: string): number {
     const [h, m] = classTime.split(':').map(Number)
-    return (h + m / 60 - START_HOUR) * HOUR_HEIGHT
+    return (h + m / 60 - StartHour) * HOUR_HEIGHT
   }
 
   function getHeight(durationHours: number): number {
@@ -155,7 +154,7 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
 
       <div className='flex gap-2'>
         <div className='flex flex-col shrink-0 w-12' style={{ height: totalHeight }}>
-          {HOURS.map((h) => (
+          {Hours.map((h) => (
             <div
               key={h}
               className='shrink-0 flex items-start justify-end pr-2'
@@ -169,11 +168,11 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
         </div>
 
         <div className='relative flex-1 border-l border-slate-200' style={{ height: totalHeight }}>
-          {HOURS.map((h) => (
+          {Hours.map((h) => (
             <div
               key={h}
               className='absolute left-0 right-0 border-t border-slate-100'
-              style={{ top: (h - START_HOUR) * HOUR_HEIGHT }}
+              style={{ top: (h - StartHour) * HOUR_HEIGHT }}
             />
           ))}
 

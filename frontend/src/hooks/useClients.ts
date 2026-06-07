@@ -14,24 +14,24 @@ export function useClients(search: string, filterActive: FilterActive) {
   const loadClients = useCallback(async () => {
     setIsLoading(true)
     try {
-      let is_active: boolean | undefined
-      let deleted_filter: 'exclude' | 'include' | 'only'
+      let isActive: boolean | undefined
+      let deletedFilter: 'exclude' | 'include' | 'only'
 
       if (filterActive === 'active') {
-        is_active = true
-        deleted_filter = 'exclude'
+        isActive = true
+        deletedFilter = 'exclude'
       } else if (filterActive === 'archived') {
-        is_active = undefined
-        deleted_filter = 'only'
+        isActive = undefined
+        deletedFilter = 'only'
       } else {
-        is_active = undefined
-        deleted_filter = 'include'
+        isActive = undefined
+        deletedFilter = 'include'
       }
 
       const data = await clientService.getAll({
         search: search || undefined,
-        is_active,
-        deleted_filter,
+        is_active: isActive,
+        deleted_filter: deletedFilter,
       })
       setClients(data.sort((a, b) => Number(b.is_active) - Number(a.is_active)))
     } finally {

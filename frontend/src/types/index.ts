@@ -198,14 +198,15 @@ export interface UpcomingClasses {
   tomorrow: UpcomingClass[]
 }
 
+export type AlertType = 'debt' | 'credit' | 'statement_missing'
+export type AlertSeverity = 'error' | 'info' | 'warning'
+
 export interface Alert {
   client_id: number | null
   client_name: string | null
-  type: 'debt' | 'credit' | 'pdf_missing'
-  message: string
-  expected: number
-  paid: number
-  diff: number
+  type: AlertType
+  severity: AlertSeverity
+  amount: number
   month: number
   year: number
 }

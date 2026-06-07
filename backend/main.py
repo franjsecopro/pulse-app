@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.core.crypto import load_field_encryption_keys, load_google_token_encryption_keys
 from app.middleware.error_handler import global_error_handler
 from app.routers import auth, clients, classes, payments, dashboard, google_calendar, accounting, notifications, admin
+from app.routers import alerts
 from app.routers import imports as imports_router
 from app.routers import business_profile
 
@@ -81,6 +82,7 @@ app.include_router(google_calendar.router, prefix="/api")
 app.include_router(accounting.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(alerts.router, prefix="/api")
 app.include_router(business_profile.router, prefix="/api")
 
 

@@ -39,9 +39,7 @@ function InfoNote({
   t: (key: string, options?: Record<string, unknown>) => string
 }) {
   if (notification.status === 'skipped')
-    return (
-      <span className='text-xs text-slate-400 italic'>{t('notifications.skippedHint')}</span>
-    )
+    return <span className='text-xs text-slate-400 italic'>{t('notifications.skippedHint')}</span>
   return null
 }
 
@@ -188,19 +186,24 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                       <StatusBadge status={isSent ? 'sent' : notification.status} t={t} />
                     </td>
                     <td className='px-4 py-3 hidden md:table-cell'>
-                      <InfoNote n={isSent ? { ...notification, status: 'sent' } : notification} t={t} />
+                      <InfoNote
+                        n={isSent ? { ...notification, status: 'sent' } : notification}
+                        t={t}
+                      />
                     </td>
                     <td className='px-4 py-3 text-right'>
-                      {!isSent && notification.status === 'pending' && notification.whatsapp_url && (
-                        <Button
-                          type='button'
-                          onClick={() => handleSend(notification)}
-                          className='inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors'
-                        >
-                          <span className='material-symbols-outlined text-[14px]'>send</span>{' '}
-                          {t('notifications.send')}
-                        </Button>
-                      )}
+                      {!isSent &&
+                        notification.status === 'pending' &&
+                        notification.whatsapp_url && (
+                          <Button
+                            type='button'
+                            onClick={() => handleSend(notification)}
+                            className='inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors'
+                          >
+                            <span className='material-symbols-outlined text-[14px]'>send</span>{' '}
+                            {t('notifications.send')}
+                          </Button>
+                        )}
                     </td>
                   </tr>
                 )
@@ -256,7 +259,11 @@ function HistoryTab({
     setIsLoading(true)
     notificationsService
       .getLog()
-      .then((all) => setLog(filter === 'sent' ? all.filter((notification) => notification.status === 'sent') : all))
+      .then((all) =>
+        setLog(
+          filter === 'sent' ? all.filter((notification) => notification.status === 'sent') : all,
+        ),
+      )
       .finally(() => setIsLoading(false))
   }, [filter])
 
@@ -300,8 +307,12 @@ function HistoryTab({
             <tbody className='divide-y divide-slate-100'>
               {log.map((notification) => (
                 <tr key={notification.id}>
-                  <td className='px-4 py-3 font-medium text-slate-800'>{notification.client_name}</td>
-                  <td className='px-4 py-3 text-slate-600'>{formatDateEs(notification.class_date)}</td>
+                  <td className='px-4 py-3 font-medium text-slate-800'>
+                    {notification.client_name}
+                  </td>
+                  <td className='px-4 py-3 text-slate-600'>
+                    {formatDateEs(notification.class_date)}
+                  </td>
                   <td className='px-4 py-3 text-slate-600'>{notification.class_time ?? '—'}</td>
                   <td className='px-4 py-3'>
                     <StatusBadge status={notification.status} t={t} />

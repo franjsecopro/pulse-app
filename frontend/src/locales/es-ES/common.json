@@ -556,6 +556,22 @@
       "expected": "Esperado",
       "paid": "Pagado",
       "difference": "Diferencia"
+    },
+    "button": {
+      "label": "Alertas",
+      "tooltipOk": "Todo al día — sin alertas pendientes",
+      "tooltipWithMonths_one": "Alerta en {{months}}",
+      "tooltipWithMonths_other": "Alertas en {{months}}"
+    },
+    "drawer": {
+      "titleDebts": "Deudas y créditos",
+      "titleStatements": "Extractos pendientes",
+      "titleAll": "Todas las alertas",
+      "debtMessage": "{{name}} debe del período {{month}} {{year}}",
+      "creditMessage": "{{name}} tiene crédito a favor de {{month}} {{year}}",
+      "statementMissingMessage": "No has subido el extracto bancario de {{month}} {{year}}",
+      "empty": "No hay alertas en este momento.",
+      "emptyTitle": "Todo al día"
     }
   },
   "notifications": {

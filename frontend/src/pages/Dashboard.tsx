@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AlertButton } from '../components/alerts/AlertButton'
+import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
+import { useAlerts } from '../hooks/useAlerts'
 import { useTranslation } from '../i18n'
 import { dashboardService } from '../services/dashboard.service'
 import { paymentService } from '../services/payment.service'
-import type { Alert, DashboardSummary, Payment, UpcomingClasses } from '../types'
+import type { DashboardSummary, Payment, UpcomingClasses } from '../types'
 
 function StatCard({
   label,
@@ -31,30 +34,33 @@ export function Dashboard() {
   const { t } = useTranslation()
   const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
-  const [alerts, setAlerts] = useState<Alert[]>([])
   const [recentPayments, setRecentPayments] = useState<Payment[]>([])
   const [upcoming, setUpcoming] = useState<UpcomingClasses | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false)
+
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  const currentYear = now.getFullYear()
+  const { alerts, isLoading: isAlertsLoading } = useAlerts({
+    month: currentMonth,
+    year: currentYear,
+    types: ['debt'],
+  })
 
   useEffect(() => {
-    const now = new Date()
-    const month = now.getMonth() + 1
-    const year = now.getFullYear()
-
     Promise.allSettled([
-      dashboardService.getSummary(month, year),
-      dashboardService.getAlerts(month, year),
+      dashboardService.getSummary(currentMonth, currentYear),
       paymentService.getAll({ limit: 5 }),
       dashboardService.getUpcoming(),
     ])
-      .then(([summaryResult, alertsResult, paymentsResult, upcomingResult]) => {
+      .then(([summaryResult, paymentsResult, upcomingResult]) => {
         if (summaryResult.status === 'fulfilled') setSummary(summaryResult.value)
-        if (alertsResult.status === 'fulfilled') setAlerts(alertsResult.value)
         if (paymentsResult.status === 'fulfilled') setRecentPayments(paymentsResult.value.data)
         if (upcomingResult.status === 'fulfilled') setUpcoming(upcomingResult.value)
       })
       .finally(() => setIsLoading(false))
-  }, [])
+  }, [currentYear, currentMonth])
 
   if (isLoading) {
     return (
@@ -64,17 +70,21 @@ export function Dashboard() {
     )
   }
 
-  const debtAlerts = alerts.filter((alert) => alert.type === 'debt')
-
   return (
     <div className='space-y-8'>
-      <div>
-        <h1 className='text-2xl font-black text-slate-900'>{t('dashboard.title')}</h1>
-        <p className='text-slate-500 text-sm mt-1'>
-          {summary
-            ? t('dashboard.summary.title', { month: months[summary.month - 1], year: summary.year })
-            : ''}
-        </p>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
+        <div>
+          <h1 className='text-2xl font-black text-slate-900'>{t('dashboard.title')}</h1>
+          <p className='text-slate-500 text-sm mt-1'>
+            {summary
+              ? t('dashboard.summary.title', {
+                  month: months[summary.month - 1],
+                  year: summary.year,
+                })
+              : ''}
+          </p>
+        </div>
+        <AlertButton alerts={alerts} onClick={() => setIsAlertsOpen(true)} />
       </div>
 
       {/* Stats */}
@@ -130,7 +140,10 @@ export function Dashboard() {
                 ) : (
                   <ul className='divide-y divide-slate-100'>
                     {classes.map((classSession) => (
-                      <li key={classSession.id} className='px-5 py-3 flex items-center justify-between gap-3'>
+                      <li
+                        key={classSession.id}
+                        className='px-5 py-3 flex items-center justify-between gap-3'
+                      >
                         <div className='flex items-center gap-3 min-w-0'>
                           <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0'>
                             {(classSession.client_name ?? '?').slice(0, 2).toUpperCase()}
@@ -166,12 +179,12 @@ export function Dashboard() {
       )}
 
       {/* Debt Alerts */}
-      {debtAlerts.length > 0 && (
+      {alerts.length > 0 && (
         <div className='space-y-3'>
           <h2 className='text-base font-bold text-slate-900'>
             {t('dashboard.alerts.paymentAlerts')}
           </h2>
-          {debtAlerts.map((alert) => (
+          {alerts.map((alert) => (
             <div
               key={alert.client_id}
               className='flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-5'
@@ -180,7 +193,14 @@ export function Dashboard() {
                 <span className='material-symbols-outlined text-red-600'>error</span>
                 <div>
                   <p className='text-red-900 font-bold'>{alert.client_name}</p>
-                  <p className='text-red-700 text-sm'>{alert.message}</p>
+                  <p className='text-red-700 text-sm'>
+                    {t('alerts.drawer.debtMessage', {
+                      name: alert.client_name ?? '?',
+                      month: months[alert.month - 1],
+                      year: alert.year,
+                    })}{' '}
+                    — €{alert.amount.toFixed(2)}
+                  </p>
                 </div>
               </div>
               <Link
@@ -303,6 +323,14 @@ export function Dashboard() {
           </Link>
         ))}
       </div>
+
+      <AlertsDrawer
+        isOpen={isAlertsOpen}
+        onClose={() => setIsAlertsOpen(false)}
+        alerts={alerts}
+        isLoading={isAlertsLoading}
+        title={t('alerts.drawer.titleDebts')}
+      />
     </div>
   )
 }

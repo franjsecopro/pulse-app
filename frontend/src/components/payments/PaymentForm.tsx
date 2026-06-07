@@ -86,7 +86,9 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
               step='0.01'
               min='0.01'
               value={form.amount || ''}
-              onChange={(e) => setForm((prev) => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))
+              }
               className='w-full pl-8 pr-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>

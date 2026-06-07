@@ -26,13 +26,3 @@ async def get_upcoming(
     current_user: User = Depends(get_current_user),
 ):
     return await DashboardService(db).get_upcoming(current_user.id)
-
-
-@router.get("/alerts")
-async def get_alerts(
-    month: Optional[int] = Query(None, ge=1, le=12),
-    year: Optional[int] = Query(None, ge=2000),
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    return await DashboardService(db).get_alerts(current_user.id, month=month, year=year)

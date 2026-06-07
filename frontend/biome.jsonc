@@ -52,12 +52,12 @@
           "options": {
             "strictCase": false,
             "requireAscii": true,
-              "conventions": [
-                {
-                  "selector": { "kind": "variable" },
-                  "match": "hh|mm|sh|sm|eh|em|id|db|qs|[ijethmkvd]|(.{3,})"
-                }
-              ]
+            "conventions": [
+              {
+                "selector": { "kind": "variable" },
+                "match": "hh|mm|sh|sm|eh|em|id|db|qs|[ijethmkvd]|(.{3,})"
+              }
+            ]
           }
         }
       },

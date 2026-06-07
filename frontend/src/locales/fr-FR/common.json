@@ -598,6 +598,22 @@
       "expected": "Attendu",
       "paid": "Payé",
       "difference": "Différence"
+    },
+    "button": {
+      "label": "Alertes",
+      "tooltipOk": "Tout est en ordre — aucune alerte en attente",
+      "tooltipWithMonths_one": "Alerte en {{months}}",
+      "tooltipWithMonths_other": "Alertes en {{months}}"
+    },
+    "drawer": {
+      "titleDebts": "Dettes et crédits",
+      "titleStatements": "Relevés en attente",
+      "titleAll": "Toutes les alertes",
+      "debtMessage": "{{name}} doit pour la période {{month}} {{year}}",
+      "creditMessage": "{{name}} a un crédit en sa faveur pour {{month}} {{year}}",
+      "statementMissingMessage": "Vous n'avez pas importé le relevé bancaire de {{month}} {{year}}",
+      "empty": "Aucune alerte pour le moment.",
+      "emptyTitle": "Tout est à jour"
     }
   },
   "notifications": {

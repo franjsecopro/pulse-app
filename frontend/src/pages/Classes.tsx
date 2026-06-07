@@ -253,13 +253,16 @@ export function Classes() {
                 </thead>
                 <tbody className='divide-y divide-slate-100'>
                   {classes.map((classSession) => {
-                    const cfg = CLASS_STATUS_CONFIG[classSession.status] ?? CLASS_STATUS_CONFIG.normal
+                    const cfg =
+                      CLASS_STATUS_CONFIG[classSession.status] ?? CLASS_STATUS_CONFIG.normal
                     return (
                       <tr key={classSession.id} className='hover:bg-slate-50 transition-colors'>
                         <td className='px-6 py-4'>
                           <p className='font-medium text-slate-900'>{classSession.class_date}</p>
                           {classSession.class_time && (
-                            <p className='text-xs text-slate-400'>{classSession.class_time.slice(0, 5)}</p>
+                            <p className='text-xs text-slate-400'>
+                              {classSession.class_time.slice(0, 5)}
+                            </p>
                           )}
                         </td>
                         <td className='px-6 py-4'>
@@ -306,7 +309,9 @@ export function Classes() {
                               }
                               className={`material-symbols-outlined text-base ${classSession.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
                             >
-                              {classSession.google_calendar_id ? 'event_available' : 'calendar_month'}
+                              {classSession.google_calendar_id
+                                ? 'event_available'
+                                : 'calendar_month'}
                             </span>
                             <Button
                               type='button'

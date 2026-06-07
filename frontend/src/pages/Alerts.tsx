@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
+import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { useAlerts } from '../hooks/useAlerts'
 import { useTranslation } from '../i18n'
-import { dashboardService } from '../services/dashboard.service'
-import type { Alert } from '../types'
 
 const now = new Date()
 const CURRENT_YEAR = now.getFullYear()
@@ -12,20 +14,15 @@ export function Alerts() {
   const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
   const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1)
   const [filterYear, setFilterYear] = useState(CURRENT_YEAR)
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    setIsLoading(true)
-    dashboardService
-      .getAlerts(filterMonth, filterYear)
-      .then(setAlerts)
-      .finally(() => setIsLoading(false))
-  }, [filterMonth, filterYear])
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const { alerts, isLoading, count } = useAlerts({
+    month: filterMonth,
+    year: filterYear,
+  })
 
   const debtAlerts = alerts.filter((a) => a.type === 'debt')
   const creditAlerts = alerts.filter((a) => a.type === 'credit')
-  const systemAlerts = alerts.filter((a) => a.type === 'pdf_missing')
+  const systemAlerts = alerts.filter((a) => a.type === 'statement_missing')
 
   return (
     <div className='space-y-6'>
@@ -38,7 +35,7 @@ export function Alerts() {
           <select
             value={filterMonth}
             onChange={(e) => setFilterMonth(parseInt(e.target.value, 10))}
-            className='border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none'
+            className='border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none'
           >
             {months.map((m, i) => (
               <option key={m} value={i + 1}>
@@ -49,7 +46,7 @@ export function Alerts() {
           <select
             value={filterYear}
             onChange={(e) => setFilterYear(parseInt(e.target.value, 10))}
-            className='border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none'
+            className='border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none'
           >
             {YEARS.map((y) => (
               <option key={y} value={y}>
@@ -57,6 +54,15 @@ export function Alerts() {
               </option>
             ))}
           </select>
+          <Button
+            type='button'
+            onClick={() => setIsDrawerOpen(true)}
+            disabled={count === 0}
+            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary-hover transition-colors'
+          >
+            <span className='material-symbols-outlined text-base'>open_in_new</span>
+            Ver detalle
+          </Button>
         </div>
       </div>
 
@@ -64,8 +70,7 @@ export function Alerts() {
         <div className='flex items-center justify-center h-32'>
           <span className='material-symbols-outlined text-primary text-3xl animate-spin'>sync</span>
         </div>
-      ) : alerts.filter((a) => a.type !== 'pdf_missing').length === 0 &&
-        systemAlerts.length === 0 ? (
+      ) : alerts.length === 0 ? (
         <div className='text-center py-20 bg-white rounded-xl border border-slate-200'>
           <span className='material-symbols-outlined text-5xl text-emerald-400 block mb-3'>
             check_circle
@@ -75,7 +80,6 @@ export function Alerts() {
         </div>
       ) : (
         <div className='space-y-6'>
-          {/* System alerts */}
           {systemAlerts.length > 0 && (
             <div>
               <h2 className='text-base font-bold text-slate-900 mb-3 flex items-center gap-2'>
@@ -85,119 +89,160 @@ export function Alerts() {
               <div className='space-y-3'>
                 {systemAlerts.map((alert, i) => (
                   <div
-                    key={alert.id ?? i}
+                    key={i}
                     className='rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-center gap-3'
                   >
                     <span className='material-symbols-outlined text-amber-500'>warning</span>
-                    <p className='text-sm text-amber-800 font-medium'>{alert.message}</p>
+                    <p className='text-sm text-amber-800 font-medium'>
+                      {t('alerts.drawer.statementMissingMessage', {
+                        month: months[alert.month - 1],
+                        year: alert.year,
+                      })}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Summary */}
           <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-            <div className='bg-white rounded-xl border border-slate-200 p-5 text-center shadow-sm'>
-              <p className='text-slate-500 text-sm font-medium'>
-                {t('alerts.summary.totalAlerts')}
-              </p>
-              <p className='text-3xl font-black text-slate-900 mt-1'>{alerts.length}</p>
-            </div>
-            <div className='bg-red-50 rounded-xl border border-red-200 p-5 text-center shadow-sm'>
-              <p className='text-red-700 text-sm font-medium'>{t('alerts.summary.debts')}</p>
-              <p className='text-3xl font-black text-red-900 mt-1'>{debtAlerts.length}</p>
-            </div>
-            <div className='bg-blue-50 rounded-xl border border-blue-200 p-5 text-center shadow-sm'>
-              <p className='text-blue-700 text-sm font-medium'>{t('alerts.summary.credits')}</p>
-              <p className='text-3xl font-black text-blue-900 mt-1'>{creditAlerts.length}</p>
-            </div>
+            <SummaryCard
+              label={t('alerts.summary.totalAlerts')}
+              value={alerts.length}
+              color='slate'
+            />
+            <SummaryCard label={t('alerts.summary.debts')} value={debtAlerts.length} color='red' />
+            <SummaryCard
+              label={t('alerts.summary.credits')}
+              value={creditAlerts.length}
+              color='blue'
+            />
           </div>
 
-          {/* Debt alerts */}
           {debtAlerts.length > 0 && (
-            <div>
-              <h2 className='text-base font-bold text-slate-900 mb-3 flex items-center gap-2'>
-                <span className='inline-block w-3 h-3 rounded-full bg-red-500'></span>
-                {t('alerts.section.debtClients')}
-              </h2>
-              <div className='space-y-3'>
-                {debtAlerts.map((alert) => (
-                  <AlertCard key={alert.client_id} alert={alert} months={months} t={t} />
-                ))}
-              </div>
-            </div>
+            <AlertList
+              title={t('alerts.section.debtClients')}
+              alerts={debtAlerts}
+              dotColor='red'
+              months={months}
+              t={t}
+            />
           )}
 
-          {/* Credit alerts */}
           {creditAlerts.length > 0 && (
-            <div>
-              <h2 className='text-base font-bold text-slate-900 mb-3 flex items-center gap-2'>
-                <span className='inline-block w-3 h-3 rounded-full bg-blue-500'></span>
-                {t('alerts.section.creditClients')}
-              </h2>
-              <p className='text-xs text-slate-500 mb-3'>{t('alerts.section.creditExplanation')}</p>
-              <div className='space-y-3'>
-                {creditAlerts.map((alert) => (
-                  <AlertCard key={alert.client_id} alert={alert} months={months} t={t} />
-                ))}
-              </div>
-            </div>
+            <>
+              <p className='text-xs text-slate-500 -mb-2'>
+                {t('alerts.section.creditExplanation')}
+              </p>
+              <AlertList
+                title={t('alerts.section.creditClients')}
+                alerts={creditAlerts}
+                dotColor='blue'
+                months={months}
+                t={t}
+              />
+            </>
           )}
         </div>
       )}
+
+      <AlertsDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        alerts={alerts}
+        isLoading={isLoading}
+        title={t('alerts.drawer.titleAll')}
+      />
     </div>
   )
 }
 
-function AlertCard({
-  alert,
+function SummaryCard({
+  label,
+  value,
+  color,
+}: {
+  label: string
+  value: number
+  color: 'slate' | 'red' | 'blue'
+}) {
+  const colorMap: Record<typeof color, string> = {
+    slate: 'bg-white border-slate-200 text-slate-900',
+    red: 'bg-red-50 border-red-200 text-red-900',
+    blue: 'bg-blue-50 border-blue-200 text-blue-900',
+  }
+  return (
+    <div className={`rounded-xl border p-5 text-center shadow-sm ${colorMap[color]}`}>
+      <p className='text-sm font-medium opacity-70'>{label}</p>
+      <p className='text-3xl font-black mt-1'>{value}</p>
+    </div>
+  )
+}
+
+function AlertList({
+  title,
+  alerts,
+  dotColor,
   months,
   t,
 }: {
-  alert: Alert
+  title: string
+  alerts: ReturnType<typeof useAlerts>['alerts']
+  dotColor: 'red' | 'blue'
   months: string[]
   t: (key: string, options?: Record<string, unknown>) => string
 }) {
-  const isDebt = alert.type === 'debt'
-  const monthName = months[alert.month - 1]
-
+  const isDebt = dotColor === 'red'
   return (
-    <div
-      className={`rounded-xl border p-5 ${isDebt ? 'border-red-200 bg-red-50' : 'border-blue-200 bg-blue-50'}`}
-    >
-      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-        <div className='flex items-center gap-3'>
-          <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 ${isDebt ? 'bg-red-500' : 'bg-blue-500'}`}
-          >
-            {(alert.client_name ?? '??').slice(0, 2).toUpperCase()}
-          </div>
-          <div>
-            <p className={`font-bold ${isDebt ? 'text-red-900' : 'text-blue-900'}`}>
-              {alert.client_name}
-            </p>
-            <p className={`text-sm ${isDebt ? 'text-red-700' : 'text-blue-700'}`}>
-              {alert.message} — {monthName} {alert.year}
-            </p>
-          </div>
-        </div>
-        <div className='grid grid-cols-3 gap-4 sm:gap-6 text-center shrink-0'>
-          <div>
-            <p className='text-xs text-slate-500 font-medium'>{t('alerts.card.expected')}</p>
-            <p className='font-bold text-slate-900'>€{alert.expected.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className='text-xs text-slate-500 font-medium'>{t('alerts.card.paid')}</p>
-            <p className='font-bold text-slate-900'>€{alert.paid.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className='text-xs text-slate-500 font-medium'>{t('alerts.card.difference')}</p>
-            <p className={`font-black ${isDebt ? 'text-red-700' : 'text-blue-700'}`}>
-              {isDebt ? '-' : '+'}€{Math.abs(alert.diff).toFixed(2)}
-            </p>
-          </div>
-        </div>
+    <div>
+      <h2 className='text-base font-bold text-slate-900 mb-3 flex items-center gap-2'>
+        <span
+          className={`inline-block w-3 h-3 rounded-full ${isDebt ? 'bg-red-500' : 'bg-blue-500'}`}
+        ></span>
+        {title}
+      </h2>
+      <div className='space-y-3'>
+        {alerts.map((alert) => {
+          const monthName = months[alert.month - 1]
+          const message = isDebt
+            ? t('alerts.drawer.debtMessage', {
+                name: alert.client_name ?? '?',
+                month: monthName,
+                year: alert.year,
+              })
+            : t('alerts.drawer.creditMessage', {
+                name: alert.client_name ?? '?',
+                month: monthName,
+                year: alert.year,
+              })
+          return (
+            <div
+              key={alert.client_id}
+              className={`rounded-xl border p-5 ${isDebt ? 'border-red-200 bg-red-50' : 'border-blue-200 bg-blue-50'}`}
+            >
+              <div className='flex items-center justify-between gap-4'>
+                <div className='flex items-center gap-3 min-w-0'>
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 ${isDebt ? 'bg-red-500' : 'bg-blue-500'}`}
+                  >
+                    {(alert.client_name ?? '??').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className='min-w-0'>
+                    <p className={`font-bold ${isDebt ? 'text-red-900' : 'text-blue-900'}`}>
+                      {alert.client_name}
+                    </p>
+                    <p className={`text-sm ${isDebt ? 'text-red-700' : 'text-blue-700'}`}>
+                      {message}
+                    </p>
+                  </div>
+                </div>
+                <Badge variant={isDebt ? 'danger' : 'info'}>
+                  {isDebt ? '-' : '+'}€{alert.amount.toFixed(2)}
+                </Badge>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

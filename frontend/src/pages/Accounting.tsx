@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import { AlertButton } from '../components/alerts/AlertButton'
+import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { Button } from '../components/ui/Button'
+import { useAlerts } from '../hooks/useAlerts'
 import { useTranslation } from '../i18n'
 import { accountingService } from '../services/accounting.service'
 import { clientService } from '../services/client.service'
@@ -25,6 +28,12 @@ export function Accounting() {
   const [summary, setSummary] = useState<AccountingSummaryEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isExporting, setIsExporting] = useState(false)
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false)
+  const { alerts, isLoading: isAlertsLoading } = useAlerts({
+    month,
+    year,
+    types: ['debt', 'credit'],
+  })
 
   useEffect(() => {
     clientService.getAll().then(setClients)
@@ -67,20 +76,23 @@ export function Accounting() {
           <h1 className='text-2xl font-black text-slate-900'>{t('accounting.title')}</h1>
           <p className='text-slate-500 text-sm mt-1'>{t('accounting.subtitle')}</p>
         </div>
-        <Button
-          type='button'
-          onClick={exportExcel}
-          loading={isExporting}
-          disabled={visibleSummary.length === 0}
-          className='flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary/90 transition-colors'
-        >
-          <span
-            className={`material-symbols-outlined text-sm ${isExporting ? 'animate-spin' : ''}`}
+        <div className='flex items-center gap-2'>
+          <AlertButton alerts={alerts} onClick={() => setIsAlertsOpen(true)} />
+          <Button
+            type='button'
+            onClick={exportExcel}
+            loading={isExporting}
+            disabled={visibleSummary.length === 0}
+            className='flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary/90 transition-colors'
           >
-            {isExporting ? 'sync' : 'download'}
-          </span>
-          {isExporting ? t('accounting.exporting') : t('accounting.exportExcel')}
-        </Button>
+            <span
+              className={`material-symbols-outlined text-sm ${isExporting ? 'animate-spin' : ''}`}
+            >
+              {isExporting ? 'sync' : 'download'}
+            </span>
+            {isExporting ? t('accounting.exporting') : t('accounting.exportExcel')}
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -159,6 +171,14 @@ export function Accounting() {
           </div>
         </div>
       )}
+
+      <AlertsDrawer
+        isOpen={isAlertsOpen}
+        onClose={() => setIsAlertsOpen(false)}
+        alerts={alerts}
+        isLoading={isAlertsLoading}
+        title={t('alerts.drawer.titleDebts')}
+      />
     </div>
   )
 }

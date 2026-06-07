@@ -75,7 +75,9 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
     setRoleChanging(user.id)
     try {
       const updated = await adminService.setUserRole(user.id, newRole)
-      setUsers((prev) => prev.map((user) => (user.id === updated.id ? { ...user, role: updated.role } : user)))
+      setUsers((prev) =>
+        prev.map((user) => (user.id === updated.id ? { ...user, role: updated.role } : user)),
+      )
     } finally {
       setRoleChanging(null)
     }

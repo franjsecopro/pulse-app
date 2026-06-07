@@ -212,7 +212,9 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           <select
             id='status'
             value={form.status}
-            onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as ClassStatus }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, status: e.target.value as ClassStatus }))
+            }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
             <option value='normal'>{t('classes.status.normalDesc')}</option>

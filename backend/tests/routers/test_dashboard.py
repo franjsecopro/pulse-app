@@ -1,13 +1,17 @@
 """Router-level tests for /api/dashboard.
 
-Both endpoints delegate entirely to DashboardService, which computes
-aggregates for the current month using datetime.now().  We seed data
-with date.today() so it falls in the right period.
+`/summary` and `/upcoming` delegate to DashboardService which computes
+aggregates for the current month using datetime.now().
 
-SQLite FK constraints are off, so client_id=42 in Class/Payment rows
-is fine without a real Client record.  When the alert response needs a
-client_name we rely on the service fallback ("Desconocido") — seeding
-a real Client isn't required for correctness assertions.
+`/alerts` now delegates to AlertService. The new behavior:
+- Balance comes from AccountingService (source of truth, applies arrears)
+- Debt/credit only fires when the period is reconciled (statement imported
+  OR day-5-of-next-month fallback passed)
+- This requires real Client rows because the balance query joins Client
+  to read `payment_timing` — see test_accounting_service.py for the pattern.
+
+Tests use date.today() so data lands in the current period. SQLite FK
+constraints are off in this fixture.
 """
 from datetime import date
 
@@ -16,48 +20,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.class_ import Class
 from app.models.client import Client
+from app.models.contract import Contract
 from app.models.payment import Payment
+from app.models.statement_import import StatementImport
 from tests.conftest import FAKE_USER
-
-CLIENT_ID = 42
-
-
-# ─── Helpers ────────────────────────────────────────────────────────────────
-
-def _class(
-    *,
-    client_id: int = CLIENT_ID,
-    contract_id: int = 1,
-    class_date: date | None = None,
-    duration_hours: float = 2.0,
-    hourly_rate: float = 20.0,
-    status: str = "normal",
-) -> Class:
-    return Class(
-        user_id=FAKE_USER.id,
-        client_id=client_id,
-        contract_id=contract_id,
-        class_date=class_date or date.today(),
-        duration_hours=duration_hours,
-        hourly_rate=hourly_rate,
-        status=status,
-    )
-
-
-def _payment(
-    *,
-    client_id: int | None = CLIENT_ID,
-    payment_date: date | None = None,
-    amount: float = 30.0,
-    status: str = "confirmed",
-) -> Payment:
-    return Payment(
-        user_id=FAKE_USER.id,
-        client_id=client_id,
-        payment_date=payment_date or date.today(),
-        amount=amount,
-        status=status,
-    )
 
 
 async def _seed(db: AsyncSession, *objects) -> list:
@@ -69,7 +35,74 @@ async def _seed(db: AsyncSession, *objects) -> list:
     return list(objects)
 
 
-# ─── GET /api/dashboard/summary ─────────────────────────────────────────────
+async def _seed_client_with_contract(
+    db: AsyncSession,
+    *,
+    name: str = "Ana",
+    payment_timing: str = "same_month",
+    hourly_rate: float = 20.0,
+) -> tuple[Client, Contract]:
+    (client,) = await _seed(
+        db, Client(user_id=FAKE_USER.id, name=name, payment_timing=payment_timing)
+    )
+    (contract,) = await _seed(
+        db,
+        Contract(
+            client_id=client.id,
+            description="Clases",
+            start_date=date(2026, 1, 1),
+            hourly_rate=hourly_rate,
+        ),
+    )
+    return client, contract
+
+
+def _class_on(
+    client_id: int,
+    contract_id: int,
+    *,
+    duration_hours: float = 1.0,
+    hourly_rate: float = 20.0,
+    status: str = "normal",
+) -> Class:
+    return Class(
+        user_id=FAKE_USER.id,
+        client_id=client_id,
+        contract_id=contract_id,
+        class_date=date.today(),
+        duration_hours=duration_hours,
+        hourly_rate=hourly_rate,
+        status=status,
+    )
+
+
+def _payment(
+    client_id: int,
+    *,
+    amount: float = 20.0,
+    source: str = "bank_import",
+    status: str = "confirmed",
+) -> Payment:
+    return Payment(
+        user_id=FAKE_USER.id,
+        client_id=client_id,
+        amount=amount,
+        payment_date=date.today(),
+        source=source,
+        status=status,
+    )
+
+
+def _statement() -> StatementImport:
+    return StatementImport(
+        user_id=FAKE_USER.id,
+        filename="ext.pdf",
+        month=date.today().month,
+        year=date.today().year,
+        transaction_count=0,
+        total_amount=0.0,
+    )
+
 
 class TestGetSummary:
     async def test_returns_200(self, app_client: AsyncClient):
@@ -100,8 +133,8 @@ class TestGetSummary:
     async def test_total_expected_reflects_classes_this_month(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """2h × €20 = €40 expected."""
-        await _seed(db, _class(duration_hours=2.0, hourly_rate=20.0))
+        client, contract = await _seed_client_with_contract(db)
+        await _seed(db, _class_on(client.id, contract.id, duration_hours=2.0, hourly_rate=20.0))
 
         response = await app_client.get("/api/dashboard/summary")
 
@@ -110,11 +143,11 @@ class TestGetSummary:
     async def test_total_paid_only_counts_confirmed_payments(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """Only confirmed payments with a client_id contribute to total_paid."""
+        client, contract = await _seed_client_with_contract(db)
         await _seed(
             db,
-            _payment(amount=30.0, status="confirmed"),
-            _payment(amount=20.0, status="pending"),   # excluded
+            _payment(client.id, amount=30.0, status="confirmed"),
+            _payment(client.id, amount=20.0, status="pending"),
         )
 
         response = await app_client.get("/api/dashboard/summary")
@@ -124,11 +157,11 @@ class TestGetSummary:
     async def test_total_pending_is_expected_minus_paid(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """expected=40, paid=30 → pending=10."""
+        client, contract = await _seed_client_with_contract(db)
         await _seed(
             db,
-            _class(duration_hours=2.0, hourly_rate=20.0),  # €40
-            _payment(amount=30.0, status="confirmed"),       # €30
+            _class_on(client.id, contract.id, duration_hours=2.0, hourly_rate=20.0),
+            _payment(client.id, amount=30.0),
         )
 
         response = await app_client.get("/api/dashboard/summary")
@@ -155,7 +188,8 @@ class TestGetSummary:
     async def test_monthly_classes_counts_current_month(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        await _seed(db, _class(), _class())
+        client, contract = await _seed_client_with_contract(db)
+        await _seed(db, _class_on(client.id, contract.id), _class_on(client.id, contract.id))
 
         response = await app_client.get("/api/dashboard/summary")
 
@@ -164,11 +198,11 @@ class TestGetSummary:
     async def test_cancelled_without_payment_not_counted(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """cancelled_without_payment classes don't appear in total_expected."""
+        client, contract = await _seed_client_with_contract(db)
         await _seed(
             db,
-            _class(duration_hours=2.0, hourly_rate=20.0, status="normal"),              # €40
-            _class(duration_hours=1.0, hourly_rate=20.0, status="cancelled_without_payment"),  # excluded
+            _class_on(client.id, contract.id, duration_hours=2.0, hourly_rate=20.0, status="normal"),
+            _class_on(client.id, contract.id, duration_hours=1.0, hourly_rate=20.0, status="cancelled_without_payment"),
         )
 
         response = await app_client.get("/api/dashboard/summary")
@@ -176,91 +210,113 @@ class TestGetSummary:
         assert response.json()["total_expected"] == 40.0
 
 
-# ─── GET /api/dashboard/alerts ───────────────────────────────────────────────
-
 class TestGetAlerts:
     async def test_returns_200(self, app_client: AsyncClient):
-        response = await app_client.get("/api/dashboard/alerts")
+        response = await app_client.get("/api/alerts")
 
         assert response.status_code == 200
 
     async def test_empty_db_returns_empty_list(self, app_client: AsyncClient):
-        response = await app_client.get("/api/dashboard/alerts")
+        response = await app_client.get("/api/alerts")
 
         assert response.json() == []
 
-    async def test_debt_alert_when_classes_exceed_payments(
+    async def test_debt_alert_when_statement_imported(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """Client owes: expected=40, paid=0 → debt alert with diff=-40."""
-        await _seed(db, _class(client_id=CLIENT_ID, duration_hours=2.0, hourly_rate=20.0))
+        client, contract = await _seed_client_with_contract(db)
+        await _seed(
+            db,
+            _class_on(client.id, contract.id, duration_hours=2.0, hourly_rate=20.0),
+            _statement(),
+        )
 
-        response = await app_client.get("/api/dashboard/alerts")
+        response = await app_client.get("/api/alerts")
 
-        alerts = response.json()
-        assert len(alerts) == 1
-        alert = alerts[0]
-        assert alert["type"] == "debt"
-        assert alert["client_id"] == CLIENT_ID
-        assert alert["expected"] == 40.0
-        assert alert["paid"] == 0.0
-        assert alert["diff"] == -40.0
+        debts = [a for a in response.json() if a["type"] == "debt"]
+        assert len(debts) == 1
+        assert debts[0]["client_id"] == client.id
+        assert debts[0]["amount"] == 40.0
 
     async def test_credit_alert_when_payments_exceed_classes(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """Client overpaid: expected=20, paid=50 → credit alert with diff=30."""
+        client, contract = await _seed_client_with_contract(db)
         await _seed(
             db,
-            _class(client_id=CLIENT_ID, duration_hours=1.0, hourly_rate=20.0),  # €20
-            _payment(client_id=CLIENT_ID, amount=50.0, status="confirmed"),      # €50
+            _class_on(client.id, contract.id, duration_hours=1.0, hourly_rate=20.0),
+            _payment(client.id, amount=50.0),
+            _statement(),
         )
 
-        response = await app_client.get("/api/dashboard/alerts")
+        response = await app_client.get("/api/alerts")
 
-        alerts = response.json()
-        credit = next((a for a in alerts if a["type"] == "credit"), None)
-        assert credit is not None
-        assert credit["diff"] == 30.0
+        credits = [a for a in response.json() if a["type"] == "credit"]
+        assert len(credits) == 1
+        assert credits[0]["client_id"] == client.id
+        assert credits[0]["amount"] == 30.0
 
     async def test_no_alert_when_paid_equals_expected(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """Perfect balance → no alert generated."""
+        client, contract = await _seed_client_with_contract(db)
         await _seed(
             db,
-            _class(client_id=CLIENT_ID, duration_hours=1.0, hourly_rate=20.0),  # €20
-            _payment(client_id=CLIENT_ID, amount=20.0, status="confirmed"),      # €20
+            _class_on(client.id, contract.id, duration_hours=1.0, hourly_rate=20.0),
+            _payment(client.id, amount=20.0),
+            _statement(),
         )
 
-        response = await app_client.get("/api/dashboard/alerts")
+        response = await app_client.get("/api/alerts")
 
-        assert response.json() == []
+        balance_alerts = [a for a in response.json() if a["type"] in ("debt", "credit")]
+        assert balance_alerts == []
 
     async def test_alert_includes_all_required_fields(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        await _seed(db, _class(client_id=CLIENT_ID))
+        client, contract = await _seed_client_with_contract(db)
+        await _seed(
+            db,
+            _class_on(client.id, contract.id),
+            _statement(),
+        )
 
-        response = await app_client.get("/api/dashboard/alerts")
+        response = await app_client.get("/api/alerts")
 
-        alert = response.json()[0]
-        for field in ("client_id", "client_name", "type", "message",
-                      "expected", "paid", "diff", "month", "year"):
-            assert field in alert
+        debt_alerts = [a for a in response.json() if a["type"] == "debt"]
+        assert len(debt_alerts) == 1
+        for field in ("client_id", "client_name", "type", "severity", "amount", "month", "year"):
+            assert field in debt_alerts[0]
 
     async def test_multiple_clients_each_get_own_alert(
         self, db: AsyncSession, app_client: AsyncClient
     ):
-        """Two clients with debt → two alerts."""
+        client_a, contract_a = await _seed_client_with_contract(db, name="A", hourly_rate=20.0)
+        client_b, contract_b = await _seed_client_with_contract(db, name="B", hourly_rate=15.0)
         await _seed(
             db,
-            _class(client_id=10, duration_hours=1.0, hourly_rate=20.0),  # client 10, €20
-            _class(client_id=20, duration_hours=2.0, hourly_rate=15.0),  # client 20, €30
+            _class_on(client_a.id, contract_a.id, duration_hours=1.0, hourly_rate=20.0),
+            _class_on(client_b.id, contract_b.id, duration_hours=2.0, hourly_rate=15.0),
+            _statement(),
         )
 
-        response = await app_client.get("/api/dashboard/alerts")
+        response = await app_client.get("/api/alerts")
 
-        client_ids = {a["client_id"] for a in response.json()}
-        assert 10 in client_ids
-        assert 20 in client_ids
+        client_ids = {a["client_id"] for a in response.json() if a["type"] == "debt"}
+        assert client_a.id in client_ids
+        assert client_b.id in client_ids
+
+    async def test_filter_by_type_returns_subset(
+        self, db: AsyncSession, app_client: AsyncClient
+    ):
+        client, contract = await _seed_client_with_contract(db)
+        await _seed(
+            db,
+            _class_on(client.id, contract.id),
+            _statement(),
+        )
+
+        response = await app_client.get("/api/alerts?types=debt")
+
+        assert all(a["type"] == "debt" for a in response.json())

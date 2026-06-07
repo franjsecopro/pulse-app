@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { AlertButton } from '../components/alerts/AlertButton'
+import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
 import { ImportStatementModal } from '../components/payments/ImportStatementModal'
@@ -9,6 +11,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
 import { useAuth } from '../context/AuthContext'
+import { useAlerts } from '../hooks/useAlerts'
 import { usePayments } from '../hooks/usePayments'
 import { useTranslation } from '../i18n'
 import type { Payment } from '../types'
@@ -28,6 +31,12 @@ export function Payments() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false)
+  const { alerts, isLoading: isAlertsLoading } = useAlerts({
+    month: typeof filterMonth === 'number' ? filterMonth : undefined,
+    year: filterYear,
+    types: ['statement_missing'],
+  })
 
   const {
     payments,
@@ -74,6 +83,7 @@ export function Payments() {
           <p className='text-slate-500 text-sm mt-1'>{t('payments.subtitle')}</p>
         </div>
         <div className='flex gap-2'>
+          <AlertButton alerts={alerts} onClick={() => setIsAlertsOpen(true)} />
           <Button
             type='button'
             onClick={() => setShowImportModal(true)}
@@ -209,7 +219,9 @@ export function Payments() {
                           <td className='px-6 py-4 font-bold text-slate-900'>
                             €{payment.amount.toFixed(2)}
                           </td>
-                          <td className='px-6 py-4 text-slate-500'>{payment.payment_date}</td>
+                          <td className='px-6 py-4 text-slate-500 text-sm whitespace-nowrap'>
+                            {payment.payment_date}
+                          </td>
                           <td className='px-6 py-4'>
                             <span
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status.className}`}
@@ -217,7 +229,7 @@ export function Payments() {
                               <span className='material-symbols-outlined text-[12px]'>
                                 {status.icon}
                               </span>
-                              {status.label}
+                              {t(status.label)}
                             </span>
                           </td>
                           <td className='px-6 py-4 text-right'>
@@ -315,13 +327,20 @@ export function Payments() {
           clients={clients}
           onClose={() => setShowImportModal(false)}
           onImported={(month, year) => {
-            // Situate the user on the imported statement's period.
             if (month) setFilterMonth(month)
             if (year) setFilterYear(year)
             handleImported()
           }}
         />
       </Modal>
+
+      <AlertsDrawer
+        isOpen={isAlertsOpen}
+        onClose={() => setIsAlertsOpen(false)}
+        alerts={alerts}
+        isLoading={isAlertsLoading}
+        title={t('alerts.drawer.titleStatements')}
+      />
     </div>
   )
 }
