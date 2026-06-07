@@ -13,6 +13,9 @@ export function useAlerts({ month, year, types, enabled = true }: UseAlertsParam
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Inline `types: [...]` at call sites is a new array ref every render — sort+join makes it a stable key.
+  const typesKey = types ? [...types].sort().join(',') : ''
+
   useEffect(() => {
     if (!enabled) {
       setAlerts([])
@@ -24,7 +27,7 @@ export function useAlerts({ month, year, types, enabled = true }: UseAlertsParam
       .getAlerts({ month, year, types })
       .then(setAlerts)
       .finally(() => setIsLoading(false))
-  }, [month, year, enabled, types])
+  }, [month, year, enabled, typesKey])
 
   return { alerts, isLoading, count: alerts.length }
 }

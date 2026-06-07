@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -17,6 +17,13 @@ class NotificationResponse(BaseModel):
     sent_at: Optional[datetime]
 
     model_config = {"from_attributes": True}
+
+
+class NotificationLogPage(BaseModel):
+    items: List[NotificationResponse]
+    total: int
+    page: int
+    page_size: int
 
 
 class NotificationSettingsResponse(BaseModel):

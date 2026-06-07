@@ -1,8 +1,9 @@
 from __future__ import annotations
+from calendar import monthrange
 from datetime import datetime, date, timedelta, timezone
 from typing import Optional
 from urllib.parse import quote
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -182,31 +183,122 @@ class NotificationService:
         await self._db.refresh(notification)
         return notification
 
-    async def get_pending(self, user_id: int) -> list[dict]:
-        """Returns pending notifications with computed whatsapp_url."""
-        result = await self._db.execute(
+    async def get_pending(
+        self, user_id: int, date: Optional[date] = None
+    ) -> list[dict]:
+        """Returns pending/skipped notifications with computed whatsapp_url.
+
+        ``date`` is the day the user wants to send notifications for. Internally
+        we look at ``class_date = date + 1`` because reminders go out the day
+        before the class. If ``date`` is None, all pending/skipped records for
+        the user are returned (legacy behaviour).
+        """
+        stmt = (
             select(Notification)
             .options(selectinload(Notification.client), selectinload(Notification.class_session))
             .where(
                 Notification.user_id == user_id,
                 Notification.status.in_(["pending", "skipped"]),
             )
-            .order_by(Notification.class_date, Notification.created_at)
         )
+        if date is not None:
+            target_date = date + timedelta(days=1)
+            stmt = stmt.where(Notification.class_date == target_date)
+        stmt = stmt.order_by(Notification.class_date, Notification.created_at)
+        result = await self._db.execute(stmt)
         notifications = result.scalars().all()
         return [_serialize(n) for n in notifications]
 
-    async def get_log(self, user_id: int, limit: int = 100) -> list[dict]:
-        """Returns notification history ordered by most recent first."""
-        result = await self._db.execute(
+    async def get_log(
+        self,
+        user_id: int,
+        *,
+        mode: Optional[str] = None,
+        date: Optional[date] = None,
+        status: Optional[str] = None,
+        client_id: Optional[int] = None,
+        channel: Optional[str] = None,
+        page: int = 1,
+        page_size: int = 50,
+    ) -> dict:
+        """Returns paginated notification history filtered by ``created_at``.
+
+        ``mode`` controls the granularity of the time window anchored at
+        ``date``:
+
+        - ``day``: the 24h period starting at 00:00 of ``date``
+        - ``week``: Monday to Sunday of the week containing ``date``
+        - ``month``: first day to last day of the month of ``date``
+
+        If ``mode`` and ``date`` are both provided, the half-open range
+        ``[start, end)`` on ``created_at`` (UTC) is applied. The range is
+        index-friendly and avoids ``EXTRACT()`` so the planner can use a
+        range scan. Note: ``created_at`` is stored in UTC — boundaries are
+        cut in UTC. For a multi-timezone MVP this is acceptable; document if
+        it ever bites.
+
+        If ``mode``/``date`` are absent, no time filter is applied and every
+        record for the user is returned (paginated).
+
+        Returns a dict with ``items``, ``total``, ``page`` and ``page_size``.
+        """
+        where_clauses = [Notification.user_id == user_id]
+        if mode is not None and date is not None:
+            start, end = _range_bounds(mode, date)
+            where_clauses.append(Notification.created_at >= start)
+            where_clauses.append(Notification.created_at < end)
+        if status is not None:
+            where_clauses.append(Notification.status == status)
+        if client_id is not None:
+            where_clauses.append(Notification.client_id == client_id)
+        if channel is not None:
+            where_clauses.append(Notification.channel == channel)
+
+        total_result = await self._db.execute(
+            select(func.count(Notification.id)).where(*where_clauses)
+        )
+        total = int(total_result.scalar_one())
+
+        offset = (page - 1) * page_size
+        items_result = await self._db.execute(
             select(Notification)
             .options(selectinload(Notification.client), selectinload(Notification.class_session))
-            .where(Notification.user_id == user_id)
+            .where(*where_clauses)
             .order_by(Notification.created_at.desc())
-            .limit(limit)
+            .offset(offset)
+            .limit(page_size)
         )
-        notifications = result.scalars().all()
-        return [_serialize(n) for n in notifications]
+        items = [_serialize(n) for n in items_result.scalars().all()]
+
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+        }
+
+
+def _range_bounds(mode: str, date: date) -> tuple[datetime, datetime]:
+    """Returns the half-open [start, end) UTC range for the given mode and date.
+
+    - ``day``: 24h period starting at 00:00 UTC of ``date``
+    - ``week``: Monday 00:00 to next Monday 00:00 of the week containing ``date``
+    - ``month``: first day 00:00 to first day of next month 00:00 of ``date``
+    """
+    if mode == "day":
+        start = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
+        end = start + timedelta(days=1)
+    elif mode == "week":
+        monday = date - timedelta(days=date.weekday())
+        start = datetime(monday.year, monday.month, monday.day, tzinfo=timezone.utc)
+        end = start + timedelta(days=7)
+    elif mode == "month":
+        start = datetime(date.year, date.month, 1, tzinfo=timezone.utc)
+        last_day = monthrange(date.year, date.month)[1]
+        end = datetime(date.year, date.month, last_day, tzinfo=timezone.utc) + timedelta(days=1)
+    else:
+        raise ValueError(f"Unknown mode: {mode!r}. Must be 'day', 'week' or 'month'.")
+    return start, end
 
 
 def _serialize(n: Notification) -> dict:

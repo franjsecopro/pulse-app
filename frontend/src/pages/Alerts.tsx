@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
+import { MonthYearSelect } from '../components/notifications/MonthYearSelect'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { useAlerts } from '../hooks/useAlerts'
@@ -32,28 +33,14 @@ export function Alerts() {
           <p className='text-slate-500 text-sm mt-1'>{t('alerts.subtitle')}</p>
         </div>
         <div className='flex items-center gap-2'>
-          <select
-            value={filterMonth}
-            onChange={(e) => setFilterMonth(parseInt(e.target.value, 10))}
-            className='border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none'
-          >
-            {months.map((m, i) => (
-              <option key={m} value={i + 1}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <select
-            value={filterYear}
-            onChange={(e) => setFilterYear(parseInt(e.target.value, 10))}
-            className='border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary outline-none'
-          >
-            {YEARS.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+          <MonthYearSelect
+            month={filterMonth}
+            year={filterYear}
+            onMonthChange={setFilterMonth}
+            onYearChange={setFilterYear}
+            years={YEARS}
+            labels={{ month: t('alerts.month'), year: t('alerts.year') }}
+          />
           <Button
             type='button'
             onClick={() => setIsDrawerOpen(true)}
@@ -87,9 +74,9 @@ export function Alerts() {
                 {t('alerts.section.systemAlerts')}
               </h2>
               <div className='space-y-3'>
-                {systemAlerts.map((alert, i) => (
+                {systemAlerts.map((alert) => (
                   <div
-                    key={i}
+                    key={`${alert.type}-${alert.month}-${alert.year}`}
                     className='rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-center gap-3'
                   >
                     <span className='material-symbols-outlined text-amber-500'>warning</span>

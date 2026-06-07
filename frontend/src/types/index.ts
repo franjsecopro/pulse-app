@@ -177,9 +177,26 @@ export interface AppNotification {
   sent_at: string | null
 }
 
+export interface NotificationLogFilters {
+  mode: 'day' | 'week' | 'month'
+  date: string
+  status?: NotificationStatus
+  client_id?: number
+  channel?: NotificationChannel
+  page: number
+  page_size: number
+}
+
+export interface NotificationLogPage {
+  items: AppNotification[]
+  total: number
+  page: number
+  page_size: number
+}
+
 export interface NotificationSettings {
-  default_channel: NotificationChannel
-  message_template: string
+  defaultChannel: NotificationChannel
+  messageTemplate: string
 }
 
 export interface UpcomingClass {
