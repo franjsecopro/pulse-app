@@ -579,6 +579,8 @@
   "alerts": {
     "title": "Centre d'Alertes",
     "subtitle": "Écarts entre les cours dispensés et les paiements reçus.",
+    "month": "Mois",
+    "year": "Année",
     "allOk": {
       "title": "Tout est à jour",
       "description": "Aucun écart entre les cours et les paiements ce mois-ci."
@@ -624,13 +626,39 @@
     "updating": "Mise à jour...",
     "update": "Mettre à jour",
     "send": "Envoyer",
-    "classesForDate": "Cours du {{date}}",
     "skippedHint": "Sans numéro WhatsApp",
     "tab": {
-      "notifications": "Notifications",
+      "pending": "En attente",
       "history": "Historique",
-      "all": "Toutes",
       "settings": "Configuration"
+    },
+    "pending": {
+      "dayLabel": "Jour d'envoi",
+      "classesForDay": "Notifications du {{notificationDay}} → cours du {{classDay}}"
+    },
+    "mode": {
+      "label": "Mode",
+      "day": "Jour",
+      "week": "Semaine",
+      "month": "Mois"
+    },
+    "dateLabel": "Date",
+    "range": {
+      "day": "Affichage : {{date}}",
+      "week": "Affichage : semaine du {{start}} au {{end}}",
+      "month": "Affichage : {{month}}"
+    },
+    "generateTooltip": "Génère les notifications pour le {{date}}, quel que soit le mode d'affichage",
+    "filters": {
+      "legend": "Filtres",
+      "status": "Statut",
+      "client": "Client",
+      "channel": "Canal",
+      "month": "Mois",
+      "year": "Année",
+      "allStatuses": "Tous les statuts",
+      "allClients": "Tous les clients",
+      "allChannels": "Tous les canaux"
     },
     "table": {
       "client": "Client",
@@ -647,7 +675,8 @@
     },
     "status": {
       "sent": "Envoyé",
-      "pending": "En attente"
+      "pending": "En attente",
+      "skipped": "Sans numéro"
     },
     "settings": {
       "defaultChannel": "Canal par défaut",
@@ -672,10 +701,7 @@
       "hint": "Cliquez sur \"Générer les notifications\" pour préparer les messages de demain."
     },
     "history": {
-      "empty": "Aucune notification envoyée pour le moment"
-    },
-    "all": {
-      "empty": "Aucune notification enregistrée"
+      "empty": "Aucune notification enregistrée pour cette période"
     },
     "errors": {
       "load": "Erreur lors du chargement des notifications",

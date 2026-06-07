@@ -28,7 +28,11 @@
       "Bash(Select-String -Pattern \"Test Files|Tests |passed|failed|FAIL|✓|✗\")",
       "Bash(Select-Object -Last 20)",
       "Bash(Get-ChildItem -Recurse -Directory)",
-      "Bash(Select-Object -First 30)"
+      "Bash(Select-Object -First 30)",
+      "Bash(ls \"C:\\\\Users\\\\luthe\\\\Desktop\\\\DEV\\\\pulse-app\\\\frontend\\\\src\\\\test\")",
+      "Bash(cat \"C:\\\\Users\\\\luthe\\\\Desktop\\\\DEV\\\\pulse-app\\\\frontend\\\\vite.config.ts\")",
+      "Bash(cat \"C:\\\\Users\\\\luthe\\\\Desktop\\\\DEV\\\\pulse-app\\\\frontend\\\\biome.jsonc\" 2>nul | head -60)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\luthe\\\\.claude\\\\plans\" 2>nul; echo done)"
     ]
   }
 }

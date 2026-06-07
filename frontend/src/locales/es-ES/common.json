@@ -537,6 +537,8 @@
   "alerts": {
     "title": "Centro de Alertas",
     "subtitle": "Discrepancias entre clases impartidas y pagos recibidos.",
+    "month": "Mes",
+    "year": "Año",
     "allOk": {
       "title": "Todo al día",
       "description": "No hay discrepancias entre clases y pagos este mes."
@@ -582,13 +584,39 @@
     "updating": "Actualizando...",
     "update": "Actualizar",
     "send": "Enviar",
-    "classesForDate": "Clases del {{date}}",
     "skippedHint": "Sin número de WhatsApp",
     "tab": {
-      "notifications": "Notificaciones",
+      "pending": "Pendientes",
       "history": "Historial",
-      "all": "Todas",
       "settings": "Configuración"
+    },
+    "pending": {
+      "dayLabel": "Día de envío",
+      "classesForDay": "Notificaciones del {{notificationDay}} → clases del {{classDay}}"
+    },
+    "mode": {
+      "label": "Modo",
+      "day": "Día",
+      "week": "Semana",
+      "month": "Mes"
+    },
+    "dateLabel": "Fecha",
+    "range": {
+      "day": "Mostrando: {{date}}",
+      "week": "Mostrando: semana del {{start}} al {{end}}",
+      "month": "Mostrando: {{month}}"
+    },
+    "generateTooltip": "Genera las notificaciones para el día {{date}}, sin importar el modo de visualización",
+    "filters": {
+      "legend": "Filtros",
+      "status": "Estado",
+      "client": "Cliente",
+      "channel": "Canal",
+      "month": "Mes",
+      "year": "Año",
+      "allStatuses": "Todos los estados",
+      "allClients": "Todos los clientes",
+      "allChannels": "Todos los canales"
     },
     "table": {
       "client": "Cliente",
@@ -605,7 +633,8 @@
     },
     "status": {
       "sent": "Enviado",
-      "pending": "Pendiente"
+      "pending": "Pendiente",
+      "skipped": "Sin número"
     },
     "settings": {
       "defaultChannel": "Canal por defecto",
@@ -630,10 +659,7 @@
       "hint": "Pulsa \"Generar notificaciones\" para preparar los mensajes de mañana."
     },
     "history": {
-      "empty": "Sin notificaciones enviadas todavía"
-    },
-    "all": {
-      "empty": "No hay notificaciones registradas"
+      "empty": "Sin notificaciones registradas en este período"
     },
     "errors": {
       "load": "Error al cargar notificaciones",
