@@ -107,14 +107,15 @@ export function usePendingNotifications({
     setIsGenerating(true)
     setGenerateError(null)
     try {
-      const generated = await notificationsService.generate(targetDate)
-      setNotifications(generated)
+      await notificationsService.generate(targetDate)
+      const fresh = await notificationsService.getPending(date)
+      setNotifications(fresh)
     } catch (err: unknown) {
       setGenerateError(err instanceof Error ? err.message : t('notifications.errors.generate'))
     } finally {
       setIsGenerating(false)
     }
-  }, [targetDate, t])
+  }, [date, targetDate, t])
 
   const handleSend = useCallback(async (notification: AppNotification) => {
     if (!notification.whatsapp_url) return
@@ -153,6 +154,7 @@ export function useNotificationLog(filters: NotificationLogFilters): UseNotifica
   // Inline `filters={{...}}` at call sites is a new object ref every render — JSON.stringify gives a stable key.
   const filtersKey = JSON.stringify(filters)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: filtersKey is derived from filters; using filters directly would re-fire on every render (see filtersKey comment above).
   useEffect(() => {
     let cancelled = false
     setIsLoading(true)

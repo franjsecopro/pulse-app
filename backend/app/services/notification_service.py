@@ -183,15 +183,14 @@ class NotificationService:
         await self._db.refresh(notification)
         return notification
 
-    async def get_pending(
-        self, user_id: int, date: Optional[date] = None
+    async def get_pending_by_send_date(
+        self, user_id: int, send_date: Optional[date] = None
     ) -> list[dict]:
-        """Returns pending/skipped notifications with computed whatsapp_url.
+        """Returns pending/skipped notifications whose class is the day after
+        ``send_date`` (reminders go out the day before the class).
 
-        ``date`` is the day the user wants to send notifications for. Internally
-        we look at ``class_date = date + 1`` because reminders go out the day
-        before the class. If ``date`` is None, all pending/skipped records for
-        the user are returned (legacy behaviour).
+        If ``send_date`` is None, every pending/skipped record for the user
+        is returned (legacy behaviour).
         """
         stmt = (
             select(Notification)
@@ -201,10 +200,33 @@ class NotificationService:
                 Notification.status.in_(["pending", "skipped"]),
             )
         )
-        if date is not None:
-            target_date = date + timedelta(days=1)
-            stmt = stmt.where(Notification.class_date == target_date)
+        if send_date is not None:
+            class_date = send_date + timedelta(days=1)
+            stmt = stmt.where(Notification.class_date == class_date)
         stmt = stmt.order_by(Notification.class_date, Notification.created_at)
+        result = await self._db.execute(stmt)
+        notifications = result.scalars().all()
+        return [_serialize(n) for n in notifications]
+
+    async def get_pending_by_class_date(
+        self, user_id: int, class_date: date
+    ) -> list[dict]:
+        """Returns pending/skipped notifications for an exact ``class_date``.
+
+        Used by the generate endpoint to surface the freshly-created records
+        for the same day the user just generated for, without any send-date
+        arithmetic.
+        """
+        stmt = (
+            select(Notification)
+            .options(selectinload(Notification.client), selectinload(Notification.class_session))
+            .where(
+                Notification.user_id == user_id,
+                Notification.status.in_(["pending", "skipped"]),
+                Notification.class_date == class_date,
+            )
+            .order_by(Notification.class_date, Notification.created_at)
+        )
         result = await self._db.execute(stmt)
         notifications = result.scalars().all()
         return [_serialize(n) for n in notifications]

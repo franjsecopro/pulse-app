@@ -26,7 +26,7 @@ async def get_pending(
     current_user: User = Depends(get_current_user),
 ):
     """Returns pending and skipped notifications for the given send date."""
-    return await NotificationService(db).get_pending(current_user.id, date)
+    return await NotificationService(db).get_pending_by_send_date(current_user.id, date)
 
 
 @router.post("/generate")
@@ -46,7 +46,7 @@ async def generate_daily(
     """
     service = NotificationService(db)
     await service.generate_daily(current_user.id, target_date)
-    return await service.get_pending(current_user.id, target_date)
+    return await service.get_pending_by_class_date(current_user.id, target_date)
 
 
 @router.post("/{notification_id}/mark-sent")

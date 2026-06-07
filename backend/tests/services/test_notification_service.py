@@ -74,7 +74,7 @@ def _notification(
     )
 
 
-class TestGetPendingByDate:
+class TestGetPendingBySendDate:
     @pytest.mark.asyncio
     async def test_returns_all_pending_when_date_is_none(self, db):
         client, contract, _ = await _seed_client_with_notification_settings(db, name="Ana")
@@ -90,12 +90,12 @@ class TestGetPendingByDate:
         )
 
         service = NotificationService(db)
-        result = await service.get_pending(USER_ID)
+        result = await service.get_pending_by_send_date(USER_ID)
 
         assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_filters_pending_by_date_uses_next_day_as_class_date(self, db):
+    async def test_filters_pending_by_send_date_uses_next_day_as_class_date(self, db):
         client, contract, _ = await _seed_client_with_notification_settings(db, name="Ana")
         await _seed(
             db,
@@ -109,7 +109,7 @@ class TestGetPendingByDate:
         )
 
         service = NotificationService(db)
-        result = await service.get_pending(USER_ID, date=date(2026, 4, 9))
+        result = await service.get_pending_by_send_date(USER_ID, send_date=date(2026, 4, 9))
 
         assert len(result) == 1
         assert result[0]["class_date"] == "2026-04-10"
@@ -127,13 +127,13 @@ class TestGetPendingByDate:
         )
 
         service = NotificationService(db)
-        result = await service.get_pending(USER_ID, date=date(2026, 4, 9))
+        result = await service.get_pending_by_send_date(USER_ID, send_date=date(2026, 4, 9))
 
         assert len(result) == 1
         assert result[0]["status"] == "skipped"
 
     @pytest.mark.asyncio
-    async def test_excludes_sent_when_date_is_set(self, db):
+    async def test_excludes_sent_when_send_date_is_set(self, db):
         client, contract, _ = await _seed_client_with_notification_settings(db, name="Ana")
         await _seed(
             db,
@@ -145,9 +145,85 @@ class TestGetPendingByDate:
         )
 
         service = NotificationService(db)
-        result = await service.get_pending(USER_ID, date=date(2026, 4, 9))
+        result = await service.get_pending_by_send_date(USER_ID, send_date=date(2026, 4, 9))
 
         assert result == []
+
+
+class TestGetPendingByClassDate:
+    @pytest.mark.asyncio
+    async def test_filters_pending_by_class_date_directly(self, db):
+        client, contract, _ = await _seed_client_with_notification_settings(db, name="Ana")
+        await _seed(
+            db,
+            _class_on(client.id, contract.id, date(2026, 4, 10)),
+            _class_on(client.id, contract.id, date(2026, 4, 11)),
+        )
+        await _seed(
+            db,
+            _notification(client.id, 1, date(2026, 4, 10), status="pending"),
+            _notification(client.id, 2, date(2026, 4, 11), status="pending"),
+        )
+
+        service = NotificationService(db)
+        result = await service.get_pending_by_class_date(USER_ID, class_date=date(2026, 4, 10))
+
+        assert len(result) == 1
+        assert result[0]["class_date"] == "2026-04-10"
+
+    @pytest.mark.asyncio
+    async def test_includes_skipped(self, db):
+        client, contract, _ = await _seed_client_with_notification_settings(db, name="Ana")
+        await _seed(
+            db,
+            _class_on(client.id, contract.id, date(2026, 4, 10)),
+        )
+        await _seed(
+            db,
+            _notification(client.id, 1, date(2026, 4, 10), status="skipped"),
+        )
+
+        service = NotificationService(db)
+        result = await service.get_pending_by_class_date(USER_ID, class_date=date(2026, 4, 10))
+
+        assert len(result) == 1
+        assert result[0]["status"] == "skipped"
+
+    @pytest.mark.asyncio
+    async def test_excludes_sent(self, db):
+        client, contract, _ = await _seed_client_with_notification_settings(db, name="Ana")
+        await _seed(
+            db,
+            _class_on(client.id, contract.id, date(2026, 4, 10)),
+        )
+        await _seed(
+            db,
+            _notification(client.id, 1, date(2026, 4, 10), status="sent"),
+        )
+
+        service = NotificationService(db)
+        result = await service.get_pending_by_class_date(USER_ID, class_date=date(2026, 4, 10))
+
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_returns_existing_pending_after_generate_called_with_same_date(self, db):
+        client, contract, _ = await _seed_client_with_notification_settings(db, name="Ana")
+        await _seed(
+            db,
+            _class_on(client.id, contract.id, date(2026, 4, 10)),
+        )
+        await _seed(
+            db,
+            _notification(client.id, 1, date(2026, 4, 10), status="pending"),
+        )
+
+        service = NotificationService(db)
+        await service.generate_daily(USER_ID, target_date=date(2026, 4, 10))
+        result = await service.get_pending_by_class_date(USER_ID, class_date=date(2026, 4, 10))
+
+        assert len(result) == 1
+        assert result[0]["class_date"] == "2026-04-10"
 
 
 class TestGetLogModeFilter:

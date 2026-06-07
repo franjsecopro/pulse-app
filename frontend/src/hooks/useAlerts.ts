@@ -16,6 +16,7 @@ export function useAlerts({ month, year, types, enabled = true }: UseAlertsParam
   // Inline `types: [...]` at call sites is a new array ref every render — sort+join makes it a stable key.
   const typesKey = types ? [...types].sort().join(',') : ''
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: typesKey is derived from types; using types directly would re-fire on every render (see typesKey comment above).
   useEffect(() => {
     if (!enabled) {
       setAlerts([])
