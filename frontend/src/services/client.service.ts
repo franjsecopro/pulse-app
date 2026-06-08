@@ -4,12 +4,12 @@ import { api } from './api'
 export const clientService = {
   getAll: (params?: {
     search?: string
-    is_active?: boolean
+    isActive?: boolean
     deleted_filter?: 'exclude' | 'include' | 'only'
   }) => {
     const query = new URLSearchParams()
     if (params?.search) query.set('search', params.search)
-    if (params?.is_active !== undefined) query.set('is_active', String(params.is_active))
+    if (params?.isActive !== undefined) query.set('isActive', String(params.isActive))
     if (params?.deleted_filter) query.set('deleted_filter', params.deleted_filter)
     const qs = query.toString()
     return api.get<Client[]>(`/clients${qs ? `?${qs}` : ''}`)
@@ -20,7 +20,7 @@ export const clientService = {
     return api.get<Client>(`/clients/${id}${query}`)
   },
 
-  create: (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>) =>
+  create: (data: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'archivedAt' | 'contracts'>) =>
     api.post<Client>('/clients', data),
 
   update: (id: number, data: Partial<Client>) => api.put<Client>(`/clients/${id}`, data),
@@ -31,7 +31,7 @@ export const clientService = {
 
   getContracts: (clientId: number) => api.get<Contract[]>(`/clients/${clientId}/contracts`),
 
-  createContract: (clientId: number, data: Omit<Contract, 'id' | 'client_id' | 'created_at'>) =>
+  createContract: (clientId: number, data: Omit<Contract, 'id' | 'clientId' | 'createdAt'>) =>
     api.post<Contract>(`/clients/${clientId}/contracts`, data),
 
   updateContract: (clientId: number, contractId: number, data: Partial<Contract>) =>

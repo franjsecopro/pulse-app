@@ -5,7 +5,7 @@ interface AdminUser {
   id: number
   email: string
   role: 'admin' | 'user'
-  created_at: string
+  createdAt: string
 }
 
 interface DemoResetResult {
@@ -15,7 +15,7 @@ interface DemoResetResult {
 }
 
 interface DemoStatus {
-  demo_user_id: number
+  demo_userId: number
 }
 
 export const adminService = {

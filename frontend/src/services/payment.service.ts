@@ -3,7 +3,7 @@ import { api } from './api'
 
 export const paymentService = {
   getAll: (params?: {
-    client_id?: number
+    clientId?: number
     month?: number
     year?: number
     status?: string
@@ -11,7 +11,7 @@ export const paymentService = {
     offset?: number
   }) => {
     const query = new URLSearchParams()
-    if (params?.client_id) query.set('client_id', String(params.client_id))
+    if (params?.clientId) query.set('clientId', String(params.clientId))
     if (params?.month) query.set('month', String(params.month))
     if (params?.year) query.set('year', String(params.year))
     if (params?.status) query.set('status', params.status)
@@ -22,9 +22,9 @@ export const paymentService = {
   },
 
   create: (data: {
-    client_id?: number | null
+    clientId?: number | null
     amount: number
-    payment_date: string
+    paymentDate: string
     concept?: string | null
     source?: string
     status?: string

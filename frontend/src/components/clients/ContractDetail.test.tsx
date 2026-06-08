@@ -34,22 +34,22 @@ const mockDeleteFuture = vi.mocked(clientService.deleteFutureContractClasses)
 function makeContract(overrides: Partial<Contract> = {}): Contract {
   return {
     id: 1,
-    client_id: 100,
+    clientId: 100,
     description: 'María - Colegio',
-    start_date: '2026-01-01',
-    end_date: null,
-    hourly_rate: 30,
-    is_active: true,
+    startDate: '2026-01-01',
+    endDate: null,
+    hourlyRate: 30,
+    isActive: true,
     notes: null,
-    schedule_days: {
+    scheduleDays: {
       '0': { start: '16:00', end: '17:30' },
       '2': { start: '16:00', end: '17:30' },
     },
-    calendar_description: null,
-    calendar_reminders: null,
+    calendarDescription: null,
+    calendarReminders: null,
     phone: null,
     notify: false,
-    created_at: '2026-01-01',
+    createdAt: '2026-01-01',
     ...overrides,
   }
 }
@@ -106,7 +106,9 @@ describe('ContractDetail', () => {
 
     it('shows the edit button when not in edit mode', () => {
       renderDetail()
-      const editButton = screen.getByRole('button', { name: /contracts\.edit/ })
+      const editButton = screen.getByRole('button', {
+        name: /contracts\.edit/,
+      })
       expect(editButton).toBeTruthy()
     })
 
@@ -143,18 +145,22 @@ describe('ContractDetail', () => {
   describe('generate classes button', () => {
     it('shows the generate button when contract has a schedule', () => {
       renderDetail()
-      const generateButton = screen.getByRole('button', { name: /contracts\.generateClasses/ })
+      const generateButton = screen.getByRole('button', {
+        name: /contracts\.generateClasses/,
+      })
       expect(generateButton).toBeTruthy()
     })
 
     it('hides the generate button when contract has no schedule', () => {
-      renderDetail({ contract: makeContract({ schedule_days: null }) })
+      renderDetail({ contract: makeContract({ scheduleDays: null }) })
       expect(screen.queryByRole('button', { name: /contracts\.generateClasses/ })).toBeFalsy()
     })
 
     it('disables the generate button when in edit mode', () => {
       renderDetail({ isEditMode: true })
-      const generateButton = screen.getByRole('button', { name: /contracts\.generateClasses/ })
+      const generateButton = screen.getByRole('button', {
+        name: /contracts\.generateClasses/,
+      })
       expect((generateButton as HTMLButtonElement).disabled).toBe(true)
     })
 
@@ -188,13 +194,17 @@ describe('ContractDetail', () => {
   describe('delete future classes flow', () => {
     it('shows the delete future button', () => {
       renderDetail()
-      const deleteButton = screen.getByRole('button', { name: /contracts\.deleteFutureClasses/ })
+      const deleteButton = screen.getByRole('button', {
+        name: /contracts\.deleteFutureClasses/,
+      })
       expect(deleteButton).toBeTruthy()
     })
 
     it('disables the delete future button when in edit mode', () => {
       renderDetail({ isEditMode: true })
-      const deleteButton = screen.getByRole('button', { name: /contracts\.deleteFutureClasses/ })
+      const deleteButton = screen.getByRole('button', {
+        name: /contracts\.deleteFutureClasses/,
+      })
       expect((deleteButton as HTMLButtonElement).disabled).toBe(true)
     })
 

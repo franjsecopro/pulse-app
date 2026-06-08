@@ -13,7 +13,7 @@ interface AdminUser {
   id: number
   email: string
   role: 'admin' | 'user'
-  created_at: string
+  createdAt: string
 }
 
 interface PendingRoleChange {
@@ -121,7 +121,10 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
                     value={user.role}
                     disabled={roleChanging === user.id}
                     onChange={(e) =>
-                      setPendingRoleChange({ user, newRole: e.target.value as 'admin' | 'user' })
+                      setPendingRoleChange({
+                        user,
+                        newRole: e.target.value as 'admin' | 'user',
+                      })
                     }
                     className='text-xs border border-slate-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500'
                   >
@@ -130,7 +133,7 @@ function UsersTab({ t }: { t: (key: string, options?: Record<string, unknown>) =
                   </select>
                 </td>
                 <td className='px-4 py-3 text-slate-500'>
-                  {new Date(user.created_at).toLocaleDateString(i18n.language)}
+                  {new Date(user.createdAt).toLocaleDateString(i18n.language)}
                 </td>
                 <td className='px-4 py-3'>
                   <div className='flex items-center justify-end gap-2'>
@@ -314,9 +317,9 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
               {clients.map((client) => (
                 <tr key={client.id}>
                   <td className='px-4 py-3 font-medium text-slate-800'>{client.name}</td>
-                  <td className='px-4 py-3 text-slate-500 text-xs'>{client.owner_email}</td>
+                  <td className='px-4 py-3 text-slate-500 text-xs'>{client.ownerEmail}</td>
                   <td className='px-4 py-3'>
-                    {client.archived_at ? (
+                    {client.archivedAt ? (
                       <span className='inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5'>
                         {t('admin.clients.archived')}
                       </span>
@@ -377,7 +380,7 @@ function ClientsTab({ t }: { t: (key: string, options?: Record<string, unknown>)
         entityName={deleteTarget?.name ?? ''}
         warningMessage={t('admin.clients.deleteWarn', {
           name: deleteTarget?.name,
-          owner: deleteTarget?.owner_email,
+          owner: deleteTarget?.ownerEmail,
         })}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}

@@ -21,7 +21,10 @@ const mockOnCancel = vi.fn()
 
 function renderForm(
   initial?: Record<string, unknown>,
-  overrides: { onSave?: ReturnType<typeof vi.fn>; onCancel?: ReturnType<typeof vi.fn> } = {},
+  overrides: {
+    onSave?: ReturnType<typeof vi.fn>
+    onCancel?: ReturnType<typeof vi.fn>
+  } = {},
 ) {
   return render(
     <ContractForm
@@ -40,14 +43,18 @@ describe('ContractForm', () => {
   describe('native buttons present', () => {
     it('renders the save button with submit type', () => {
       renderForm()
-      const saveButton = screen.getByRole('button', { name: /contracts\.save/ })
+      const saveButton = screen.getByRole('button', {
+        name: /contracts\.save/,
+      })
       expect(saveButton).toBeTruthy()
       expect(saveButton.getAttribute('type')).toBe('submit')
     })
 
     it('renders the cancel button with type button', () => {
       renderForm()
-      const cancelButton = screen.getByRole('button', { name: /actions\.cancel/ })
+      const cancelButton = screen.getByRole('button', {
+        name: /actions\.cancel/,
+      })
       expect(cancelButton).toBeTruthy()
       expect(cancelButton.getAttribute('type')).toBe('button')
     })
@@ -112,13 +119,13 @@ describe('ContractForm', () => {
       expect(onSave).toHaveBeenCalledTimes(1)
       const arg = onSave.mock.calls[0][0] as Record<string, unknown>
       expect(arg.description).toBe('Math tutoring')
-      expect(arg.end_date).toBeNull()
+      expect(arg.endDate).toBeNull()
       expect(arg.phone).toBeNull()
-      expect(arg.schedule_days).toBeNull()
-      expect(arg.calendar_description).toBeNull()
+      expect(arg.scheduleDays).toBeNull()
+      expect(arg.calendarDescription).toBeNull()
     })
 
-    it('includes schedule_days when a weekday is toggled', async () => {
+    it('includes scheduleDays when a weekday is toggled', async () => {
       const onSave = vi.fn().mockResolvedValue(undefined)
       renderForm(undefined, { onSave })
 
@@ -127,13 +134,17 @@ describe('ContractForm', () => {
       const form = document.querySelector('form') as HTMLFormElement
       fireEvent.submit(form)
 
-      const arg = onSave.mock.calls[0][0] as { schedule_days: Record<string, unknown> | null }
-      expect(arg.schedule_days).toEqual({ '0': { start: '09:00', end: '10:00' } })
+      const arg = onSave.mock.calls[0][0] as {
+        scheduleDays: Record<string, unknown> | null
+      }
+      expect(arg.scheduleDays).toEqual({
+        '0': { start: '09:00', end: '10:00' },
+      })
     })
 
-    it('shows error when end_date is before start_date', async () => {
+    it('shows error when endDate is before startDate', async () => {
       const onSave = vi.fn()
-      renderForm({ start_date: '2025-06-15', end_date: '2025-06-10' }, { onSave })
+      renderForm({ startDate: '2025-06-15', endDate: '2025-06-10' }, { onSave })
 
       const form = document.querySelector('form') as HTMLFormElement
       fireEvent.submit(form)
@@ -183,14 +194,18 @@ describe('ContractForm', () => {
   describe('save button visual state', () => {
     it('save button has primary styling (bg-primary)', () => {
       renderForm()
-      const saveButton = screen.getByRole('button', { name: /contracts\.save/ })
+      const saveButton = screen.getByRole('button', {
+        name: /contracts\.save/,
+      })
       expect(saveButton.className).toContain('bg-primary')
       expect(saveButton.className).toContain('text-white')
     })
 
     it('cancel button has secondary styling (text-slate-600)', () => {
       renderForm()
-      const cancelButton = screen.getByRole('button', { name: /actions\.cancel/ })
+      const cancelButton = screen.getByRole('button', {
+        name: /actions\.cancel/,
+      })
       expect(cancelButton.className).toContain('text-slate-600')
     })
   })

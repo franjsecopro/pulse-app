@@ -10,7 +10,8 @@ const DAY_MS = 24 * 60 * 60 * 1000
  * string (``YYYY-MM-DD``). Uses local time so the user's "day" is respected
  * regardless of server timezone — the backend then handles timezone math.
  */
-function addDaysISO(isoDate: string, days: number): string {
+function addDaysISO(isoDate: string | undefined, days: number): string {
+  if (!isoDate) return todayISO()
   const [year, month, day] = isoDate.split('-').map(Number)
   const d = new Date(year, month - 1, day)
   d.setTime(d.getTime() + days * DAY_MS)
@@ -31,7 +32,7 @@ function todayISO(): string {
 interface UsePendingNotificationsParams {
   /**
    * The day the user is sending notifications for. The backend filters by
-   * ``class_date = date + 1`` (reminders go out the day before the class).
+   * ``classDate = date + 1`` (reminders go out the day before the class).
    */
   date: string
 }
@@ -118,8 +119,8 @@ export function usePendingNotifications({
   }, [date, targetDate, t])
 
   const handleSend = useCallback(async (notification: AppNotification) => {
-    if (!notification.whatsapp_url) return
-    window.open(notification.whatsapp_url, '_blank', 'noopener,noreferrer')
+    if (!notification.whatsappUrl) return
+    window.open(notification.whatsappUrl, '_blank', 'noopener,noreferrer')
     await notificationsService.markSent(notification.id)
     setSentIds((prev) => new Set(prev).add(notification.id))
     setNotifications((prev) =>
@@ -175,8 +176,8 @@ export function useNotificationLog(filters: NotificationLogFilters): UseNotifica
     items: page?.items ?? [],
     total: page?.total ?? 0,
     page: page?.page ?? filters.page,
-    pageSize: page?.page_size ?? filters.page_size,
-    pageCount: Math.max(1, Math.ceil((page?.total ?? 0) / (page?.page_size ?? filters.page_size))),
+    pageSize: page?.pageSize ?? filters.pageSize,
+    pageCount: Math.max(1, Math.ceil((page?.total ?? 0) / (page?.pageSize ?? filters.pageSize))),
     isLoading,
   }
 }

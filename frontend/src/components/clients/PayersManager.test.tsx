@@ -24,15 +24,15 @@ const mockOnPayersChanged = vi.fn()
 const mockClient = {
   id: 1,
   name: 'Test Client',
-  payment_name: null,
+  paymentName: null,
   email: null,
   phone: null,
-  whatsapp_phone: null,
+  whatsappPhone: null,
   address: null,
-  tax_id: null,
-  payment_timing: 'same_month',
-  is_active: true,
-  created_at: '2026-01-01',
+  taxId: null,
+  paymentTiming: 'same_month',
+  isActive: true,
+  createdAt: '2026-01-01',
   contracts: [],
   payers: [],
 }
@@ -67,8 +67,20 @@ describe('PayersManager', () => {
         client: {
           ...mockClient,
           payers: [
-            { id: 10, client_id: 1, name: 'Bank A', info: null, created_at: '2026-01-01' },
-            { id: 11, client_id: 1, name: 'Bank B', info: 'iban', created_at: '2026-01-02' },
+            {
+              id: 10,
+              clientId: 1,
+              name: 'Bank A',
+              info: null,
+              createdAt: '2026-01-01',
+            },
+            {
+              id: 11,
+              clientId: 1,
+              name: 'Bank B',
+              info: 'iban',
+              createdAt: '2026-01-02',
+            },
           ],
         },
       })
@@ -86,7 +98,9 @@ describe('PayersManager', () => {
   describe('add flow', () => {
     it('add button is disabled when newName input is empty', () => {
       renderPayers()
-      const addButton = screen.getByRole('button', { name: /actions\.add/ }) as HTMLButtonElement
+      const addButton = screen.getByRole('button', {
+        name: /actions\.add/,
+      }) as HTMLButtonElement
       expect(addButton.disabled).toBe(true)
     })
 
@@ -95,17 +109,19 @@ describe('PayersManager', () => {
       const nameInput = container.querySelector('input') as HTMLInputElement
       fireEvent.change(nameInput, { target: { value: 'Bank X' } })
 
-      const addButton = screen.getByRole('button', { name: /actions\.add/ }) as HTMLButtonElement
+      const addButton = screen.getByRole('button', {
+        name: /actions\.add/,
+      }) as HTMLButtonElement
       expect(addButton.disabled).toBe(false)
     })
 
     it('calls clientService.createPayer on submit', async () => {
       const created = {
         id: 99,
-        client_id: 1,
+        clientId: 1,
         name: 'Bank X',
         info: null,
-        created_at: '2026-01-01',
+        createdAt: '2026-01-01',
       }
       mockCreatePayer.mockResolvedValue(created)
 
@@ -128,10 +144,10 @@ describe('PayersManager', () => {
     it('fires onPayersChanged after successful add', async () => {
       const created = {
         id: 99,
-        client_id: 1,
+        clientId: 1,
         name: 'Bank X',
         info: null,
-        created_at: '2026-01-01',
+        createdAt: '2026-01-01',
       }
       mockCreatePayer.mockResolvedValue(created)
 
@@ -150,10 +166,10 @@ describe('PayersManager', () => {
     it('clears input fields after successful add', async () => {
       const created = {
         id: 99,
-        client_id: 1,
+        clientId: 1,
         name: 'Bank X',
         info: null,
-        created_at: '2026-01-01',
+        createdAt: '2026-01-01',
       }
       mockCreatePayer.mockResolvedValue(created)
 
@@ -177,7 +193,15 @@ describe('PayersManager', () => {
       renderPayers({
         client: {
           ...mockClient,
-          payers: [{ id: 10, client_id: 1, name: 'Bank A', info: null, created_at: '2026-01-01' }],
+          payers: [
+            {
+              id: 10,
+              clientId: 1,
+              name: 'Bank A',
+              info: null,
+              createdAt: '2026-01-01',
+            },
+          ],
         },
       })
 
@@ -196,8 +220,20 @@ describe('PayersManager', () => {
         client: {
           ...mockClient,
           payers: [
-            { id: 10, client_id: 1, name: 'Bank A', info: null, created_at: '2026-01-01' },
-            { id: 11, client_id: 1, name: 'Bank B', info: null, created_at: '2026-01-02' },
+            {
+              id: 10,
+              clientId: 1,
+              name: 'Bank A',
+              info: null,
+              createdAt: '2026-01-01',
+            },
+            {
+              id: 11,
+              clientId: 1,
+              name: 'Bank B',
+              info: null,
+              createdAt: '2026-01-02',
+            },
           ],
         },
       })
@@ -207,7 +243,13 @@ describe('PayersManager', () => {
 
       await waitFor(() => {
         expect(mockOnPayersChanged).toHaveBeenCalledWith(1, [
-          { id: 11, client_id: 1, name: 'Bank B', info: null, created_at: '2026-01-02' },
+          {
+            id: 11,
+            clientId: 1,
+            name: 'Bank B',
+            info: null,
+            createdAt: '2026-01-02',
+          },
         ])
       })
     })

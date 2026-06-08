@@ -3,7 +3,7 @@
  *
  * Key behaviors:
  *  - month/year coupling: year is only sent when filterMonth is set
- *  - status and client_id filters forwarded (or undefined when empty)
+ *  - status and clientId filters forwarded (or undefined when empty)
  *  - totalAmount sums all loaded payment amounts
  *  - requestDelete / cancelDelete / confirmDelete manage pendingDeleteId
  *    (same pattern as useClasses — no window.confirm)
@@ -82,20 +82,20 @@ describe('month/year filter coupling', () => {
 // ─── optional filter forwarding ──────────────────────────────────────────────
 
 describe('optional filter forwarding', () => {
-  it('passes client_id when filterClient is set', async () => {
+  it('passes clientId when filterClient is set', async () => {
     renderHook(() => usePayments({ ...defaults, filterClient: 10 }))
 
     await waitFor(() =>
-      expect(mockGetAllPayments).toHaveBeenCalledWith(expect.objectContaining({ client_id: 10 })),
+      expect(mockGetAllPayments).toHaveBeenCalledWith(expect.objectContaining({ clientId: 10 })),
     )
   })
 
-  it('passes client_id as undefined when filterClient is empty', async () => {
+  it('passes clientId as undefined when filterClient is empty', async () => {
     renderHook(() => usePayments({ ...defaults, filterClient: '' }))
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
-        expect.objectContaining({ client_id: undefined }),
+        expect.objectContaining({ clientId: undefined }),
       ),
     )
   })

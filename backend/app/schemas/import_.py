@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from app.schemas._base import BaseSchema
 
 
-class ParsedTransactionResponse(BaseModel):
+class ParsedTransactionResponse(BaseSchema):
     date: str
     concept: str
     amount: float
@@ -12,27 +12,24 @@ class ParsedTransactionResponse(BaseModel):
     suggested_client_name: Optional[str]
     match_type: str
     confidence: float
-    # True when an identical bank_import payment already exists (Nivel 2).
     already_imported: bool = False
 
 
-class ParseStatementResponse(BaseModel):
+class ParseStatementResponse(BaseSchema):
     transactions: list[ParsedTransactionResponse]
     file_hash: str
-    # When the same file was already imported before (Nivel 1), its import date.
     file_already_imported_at: Optional[datetime] = None
-    # How many of the parsed transactions are already imported (Nivel 2).
     duplicate_count: int = 0
 
 
-class ConfirmPaymentItem(BaseModel):
+class ConfirmPaymentItem(BaseSchema):
     date: str
     concept: str
     amount: float
     client_id: Optional[int] = None
 
 
-class ConfirmImportRequest(BaseModel):
+class ConfirmImportRequest(BaseSchema):
     payments: list[ConfirmPaymentItem]
     filename: Optional[str] = None
     month: Optional[int] = None
@@ -40,7 +37,7 @@ class ConfirmImportRequest(BaseModel):
     file_hash: Optional[str] = None
 
 
-class StatementImportResponse(BaseModel):
+class StatementImportResponse(BaseSchema):
     id: int
     filename: str
     imported_at: datetime
@@ -48,5 +45,3 @@ class StatementImportResponse(BaseModel):
     year: Optional[int]
     transaction_count: int
     total_amount: float
-
-    model_config = {"from_attributes": True}

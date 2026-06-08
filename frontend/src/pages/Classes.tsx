@@ -15,7 +15,9 @@ type ViewMode = 'list' | 'calendar'
 
 export function Classes() {
   const { t } = useTranslation()
-  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
+  const months: string[] = t('common.months.full', {
+    returnObjects: true,
+  }) as unknown as string[]
   const now = new Date()
 
   const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1)
@@ -49,7 +51,7 @@ export function Classes() {
   } = useClasses({ filterMonth, filterYear, filterClient })
 
   const dayDetailClasses = dayDetailDate
-    ? classes.filter((classSession) => classSession.class_date === dayDetailDate)
+    ? classes.filter((classSession) => classSession.classDate === dayDetailDate)
     : []
 
   const handleViewMode = (mode: ViewMode) => {
@@ -258,32 +260,32 @@ export function Classes() {
                     return (
                       <tr key={classSession.id} className='hover:bg-slate-50 transition-colors'>
                         <td className='px-6 py-4'>
-                          <p className='font-medium text-slate-900'>{classSession.class_date}</p>
-                          {classSession.class_time && (
+                          <p className='font-medium text-slate-900'>{classSession.classDate}</p>
+                          {classSession.classTime && (
                             <p className='text-xs text-slate-400'>
-                              {classSession.class_time.slice(0, 5)}
+                              {classSession.classTime.slice(0, 5)}
                             </p>
                           )}
                         </td>
                         <td className='px-6 py-4'>
                           <div className='flex items-center gap-2'>
                             <div className='w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
-                              {(classSession.client_name ?? '?').slice(0, 2).toUpperCase()}
+                              {(classSession.clientName ?? '?').slice(0, 2).toUpperCase()}
                             </div>
                             <span className='font-medium text-slate-900'>
-                              {classSession.client_name ?? '—'}
+                              {classSession.clientName ?? '—'}
                             </span>
                           </div>
                         </td>
                         <td className='px-6 py-4 text-slate-700'>
-                          {classSession.duration_hours}
+                          {classSession.durationHours}
                           {t('common.units.hoursShort')}
                         </td>
                         <td className='px-6 py-4 text-slate-700'>
-                          €{classSession.hourly_rate}/{t('common.units.hoursShort')}
+                          €{classSession.hourlyRate}/{t('common.units.hoursShort')}
                         </td>
                         <td className='px-6 py-4 font-bold text-slate-900'>
-                          €{(classSession.total_amount ?? 0).toFixed(2)}
+                          €{(classSession.totalAmount ?? 0).toFixed(2)}
                         </td>
                         <td className='px-6 py-4'>
                           {classSession.status !== 'normal' ? (
@@ -303,15 +305,13 @@ export function Classes() {
                           <div className='flex items-center justify-end gap-1'>
                             <span
                               title={
-                                classSession.google_calendar_id
+                                classSession.googleCalendarId
                                   ? t('classes.gcalSynced')
                                   : t('classes.gcalNotSynced')
                               }
-                              className={`material-symbols-outlined text-base ${classSession.google_calendar_id ? 'text-emerald-400' : 'text-slate-200'}`}
+                              className={`material-symbols-outlined text-base ${classSession.googleCalendarId ? 'text-emerald-400' : 'text-slate-200'}`}
                             >
-                              {classSession.google_calendar_id
-                                ? 'event_available'
-                                : 'calendar_month'}
+                              {classSession.googleCalendarId ? 'event_available' : 'calendar_month'}
                             </span>
                             <Button
                               type='button'
@@ -376,7 +376,7 @@ export function Classes() {
       >
         <ClassForm
           clients={clients}
-          initial={newClassDate ? { class_date: newClassDate } : undefined}
+          initial={newClassDate ? { classDate: newClassDate } : undefined}
           onSave={handleCreate}
           onCancel={() => {
             setShowCreateModal(false)

@@ -60,20 +60,20 @@ const mockGoToPage = vi.fn()
 function makeClass(overrides: Partial<ClassSession> = {}): ClassSession {
   return {
     id: 1,
-    user_id: 1,
-    client_id: 1,
-    contract_id: null,
-    class_date: '2026-06-15',
-    class_time: '16:00',
-    duration_hours: 1.5,
-    hourly_rate: 30,
+    userId: 1,
+    clientId: 1,
+    contractId: null,
+    classDate: '2026-06-15',
+    classTime: '16:00',
+    durationHours: 1.5,
+    hourlyRate: 30,
     status: 'normal',
     notes: null,
-    google_calendar_id: null,
-    created_at: '2026-06-01',
-    client_name: 'Juan García',
-    contract_description: null,
-    total_amount: 45,
+    googleCalendarId: null,
+    createdAt: '2026-06-01',
+    clientName: 'Juan García',
+    contractDescription: null,
+    totalAmount: 45,
     ...overrides,
   }
 }
@@ -116,20 +116,26 @@ describe('Classes', () => {
 
     it('renders the new class primary button in the header', () => {
       render(<Classes />)
-      const newClassButton = screen.getByRole('button', { name: /classes\.newClass/ })
+      const newClassButton = screen.getByRole('button', {
+        name: /classes\.newClass/,
+      })
       expect(newClassButton).toBeTruthy()
     })
 
     it('renders the sync GCal button', () => {
       render(<Classes />)
-      const syncButton = screen.getByRole('button', { name: /classes\.syncGCal/ })
+      const syncButton = screen.getByRole('button', {
+        name: /classes\.syncGCal/,
+      })
       expect(syncButton).toBeTruthy()
     })
 
     it('disables the sync GCal button when isSyncing is true', () => {
       mockUseClasses.mockReturnValue(makeHook({ isSyncing: true }) as never)
       render(<Classes />)
-      const syncButton = screen.getByRole('button', { name: /classes\.syncing/ })
+      const syncButton = screen.getByRole('button', {
+        name: /classes\.syncing/,
+      })
       expect((syncButton as HTMLButtonElement).disabled).toBe(true)
     })
 
@@ -224,7 +230,11 @@ describe('Classes', () => {
   describe('delete confirmation', () => {
     it('shows the ConfirmModal when pendingDeleteId is set', () => {
       mockUseClasses.mockReturnValue(
-        makeHook({ pendingDeleteId: 1, classes: [makeClass()], totalCount: 1 }) as never,
+        makeHook({
+          pendingDeleteId: 1,
+          classes: [makeClass()],
+          totalCount: 1,
+        }) as never,
       )
       render(<Classes />)
       const confirmModal = screen.getByTestId('mock-confirm-modal')

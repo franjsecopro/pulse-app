@@ -3,28 +3,32 @@ import io
 
 from openpyxl import load_workbook
 
+from app.schemas.accounting import (
+    AccountingSummaryEntryResponse,
+    ContractBreakdownResponse,
+)
 from app.services.report_service import build_monthly_report_xlsx
 
 SUMMARY = [
-    {
-        "client_id": 1, "client_name": "Ana García",
-        "expected": 200.0, "paid": 150.0, "previous_credit": 0.0, "balance": -50.0,
-        "month": 4, "year": 2026, "month_name": "Abril",
-        "contracts": [
-            {
-                "contract_id": 10, "contract_description": "Clases de inglés",
-                "hourly_rate": 25.0, "normal_count": 8,
-                "cancelled_with_payment_count": 0, "cancelled_without_payment_count": 1,
-                "expected": 200.0, "class_count": 8,
-            },
+    AccountingSummaryEntryResponse(
+        client_id=1, client_name="Ana García",
+        expected=200.0, paid=150.0, previous_credit=0.0, balance=-50.0,
+        month=4, year=2026, month_name="Abril",
+        contracts=[
+            ContractBreakdownResponse(
+                contract_id=10, contract_description="Clases de inglés",
+                hourly_rate=25.0, normal_count=8,
+                cancelled_with_payment_count=0, cancelled_without_payment_count=1,
+                expected=200.0, class_count=8,
+            ),
         ],
-    },
-    {
-        "client_id": 2, "client_name": "Beto López",
-        "expected": 100.0, "paid": 120.0, "previous_credit": 0.0, "balance": 20.0,
-        "month": 4, "year": 2026, "month_name": "Abril",
-        "contracts": [],
-    },
+    ),
+    AccountingSummaryEntryResponse(
+        client_id=2, client_name="Beto López",
+        expected=100.0, paid=120.0, previous_credit=0.0, balance=20.0,
+        month=4, year=2026, month_name="Abril",
+        contracts=[],
+    ),
 ]
 
 

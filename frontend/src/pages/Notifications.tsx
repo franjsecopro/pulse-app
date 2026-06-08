@@ -26,7 +26,10 @@ function todayISO(): string {
 }
 
 function formatTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
+  return new Date(dateStr).toLocaleTimeString(i18n.language, {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 interface FormatDateArgs {
@@ -35,7 +38,9 @@ interface FormatDateArgs {
 }
 
 function formatDateEs({ t, dateStr }: FormatDateArgs): string {
-  const days: string[] = t('common.weekdays.full', { returnObjects: true }) as unknown as string[]
+  const days: string[] = t('common.weekdays.full', {
+    returnObjects: true,
+  }) as unknown as string[]
   const monthsLower: string[] = t('common.months.lowercase', {
     returnObjects: true,
   }) as unknown as string[]
@@ -87,7 +92,7 @@ function matchesClientFilter(
   clientId: NotificationFilterValues['clientId'],
 ): boolean {
   if (clientId === 'all') return true
-  return notification.client_id === clientId
+  return notification.clientId === clientId
 }
 
 function matchesChannelFilter(
@@ -110,7 +115,7 @@ const PENDING_FILTERS: NotificationFilterValues = {
   channel: 'all',
 }
 
-const DEFAULT_HISTORY_PAGE_SIZE = 50
+const DefaultHistoryPageSize = 50
 
 function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>) => string }) {
   const [notificationDay, setNotificationDay] = useState(todayISO())
@@ -221,10 +226,10 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                   <tr key={notification.id} className={isSent ? 'bg-emerald-50' : ''}>
                     <td className='px-4 py-3 font-medium'>
                       <Link to='/clients' className='text-indigo-600 hover:underline'>
-                        {notification.client_name}
+                        {notification.clientName}
                       </Link>
                     </td>
-                    <td className='px-4 py-3 text-slate-600'>{notification.class_time ?? '—'}</td>
+                    <td className='px-4 py-3 text-slate-600'>{notification.classTime ?? '—'}</td>
                     <td className='px-4 py-3'>
                       <StatusBadge status={isSent ? 'sent' : notification.status} t={t} />
                     </td>
@@ -236,18 +241,16 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
                       ) : null}
                     </td>
                     <td className='px-4 py-3 text-right'>
-                      {!isSent &&
-                        notification.status === 'pending' &&
-                        notification.whatsapp_url && (
-                          <Button
-                            type='button'
-                            onClick={() => handleSend(notification)}
-                            className='inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors'
-                          >
-                            <span className='material-symbols-outlined text-[14px]'>send</span>{' '}
-                            {t('notifications.send')}
-                          </Button>
-                        )}
+                      {!isSent && notification.status === 'pending' && notification.whatsappUrl && (
+                        <Button
+                          type='button'
+                          onClick={() => handleSend(notification)}
+                          className='inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors'
+                        >
+                          <span className='material-symbols-outlined text-[14px]'>send</span>{' '}
+                          {t('notifications.send')}
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 )
@@ -286,11 +289,11 @@ function HistoryTab({ t }: { t: (key: string, options?: Record<string, unknown>)
       date,
       status: filters.status === 'all' ? undefined : filters.status,
       // biome-ignore lint/style/useNamingConvention: matches backend query param
-      client_id: filters.clientId === 'all' ? undefined : filters.clientId,
+      clientId: filters.clientId === 'all' ? undefined : filters.clientId,
       channel: filters.channel === 'all' ? undefined : filters.channel,
       page,
       // biome-ignore lint/style/useNamingConvention: matches backend query param
-      page_size: DEFAULT_HISTORY_PAGE_SIZE,
+      pageSize: DefaultHistoryPageSize,
     }),
     [mode, date, filters, page],
   )
@@ -362,17 +365,17 @@ function HistoryTab({ t }: { t: (key: string, options?: Record<string, unknown>)
               {items.map((notification) => (
                 <tr key={notification.id}>
                   <td className='px-4 py-3 font-medium text-slate-800'>
-                    {notification.client_name}
+                    {notification.clientName}
                   </td>
                   <td className='px-4 py-3 text-slate-600'>
-                    {formatDateEs({ t, dateStr: notification.class_date })}
+                    {formatDateEs({ t, dateStr: notification.classDate })}
                   </td>
-                  <td className='px-4 py-3 text-slate-600'>{notification.class_time ?? '—'}</td>
+                  <td className='px-4 py-3 text-slate-600'>{notification.classTime ?? '—'}</td>
                   <td className='px-4 py-3'>
                     <StatusBadge status={notification.status} t={t} />
                   </td>
                   <td className='px-4 py-3 text-slate-500 hidden md:table-cell'>
-                    {notification.sent_at ? formatTime(notification.sent_at) : '—'}
+                    {notification.sentAt ? formatTime(notification.sentAt) : '—'}
                   </td>
                 </tr>
               ))}
@@ -385,7 +388,12 @@ function HistoryTab({ t }: { t: (key: string, options?: Record<string, unknown>)
   )
 }
 
-const SAMPLE_VARS = { nombre: 'Sofia', hora: '10:00', dia: 'martes 14 de abril', materia: 'Ingles' }
+const SAMPLE_VARS = {
+  nombre: 'Sofia',
+  hora: '10:00',
+  dia: 'martes 14 de abril',
+  materia: 'Ingles',
+}
 
 function renderPreview(template: string): string {
   return template
@@ -478,7 +486,12 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
         <textarea
           rows={4}
           value={settings.messageTemplate}
-          onChange={(e) => setSettings((prev) => ({ ...prev, messageTemplate: e.target.value }))}
+          onChange={(e) =>
+            setSettings((prev) => ({
+              ...prev,
+              messageTemplate: e.target.value,
+            }))
+          }
           className='w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none'
         />
         {settings.messageTemplate && (
@@ -515,9 +528,17 @@ export function Notifications() {
   const [activeTab, setActiveTab] = useState<Tab>('pending')
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'pending', label: t('notifications.tab.pending'), icon: 'notifications' },
+    {
+      id: 'pending',
+      label: t('notifications.tab.pending'),
+      icon: 'notifications',
+    },
     { id: 'history', label: t('notifications.tab.history'), icon: 'history' },
-    { id: 'settings', label: t('notifications.tab.settings'), icon: 'settings' },
+    {
+      id: 'settings',
+      label: t('notifications.tab.settings'),
+      icon: 'settings',
+    },
   ]
 
   return (

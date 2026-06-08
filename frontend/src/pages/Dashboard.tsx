@@ -32,7 +32,9 @@ function StatCard({
 
 export function Dashboard() {
   const { t } = useTranslation()
-  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
+  const months: string[] = t('common.months.full', {
+    returnObjects: true,
+  }) as unknown as string[]
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [recentPayments, setRecentPayments] = useState<Payment[]>([])
   const [upcoming, setUpcoming] = useState<UpcomingClasses | null>(null)
@@ -91,25 +93,25 @@ export function Dashboard() {
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
         <StatCard
           label={t('dashboard.stats.expected')}
-          value={`€${summary?.total_expected.toFixed(2) ?? '0.00'}`}
+          value={`€${summary?.totalExpected.toFixed(2) ?? '0.00'}`}
           icon='trending_up'
           iconColor='text-emerald-600'
         />
         <StatCard
           label={t('dashboard.stats.paid')}
-          value={`€${summary?.total_paid.toFixed(2) ?? '0.00'}`}
+          value={`€${summary?.totalPaid.toFixed(2) ?? '0.00'}`}
           icon='check_circle'
           iconColor='text-primary'
         />
         <StatCard
           label={t('dashboard.stats.pending')}
-          value={`€${summary?.total_pending.toFixed(2) ?? '0.00'}`}
+          value={`€${summary?.totalPending.toFixed(2) ?? '0.00'}`}
           icon='schedule'
           iconColor='text-amber-600'
         />
         <StatCard
           label={t('dashboard.stats.activeClients')}
-          value={String(summary?.active_clients ?? 0)}
+          value={String(summary?.activeClients ?? 0)}
           icon='groups'
           iconColor='text-slate-500'
         />
@@ -130,7 +132,9 @@ export function Dashboard() {
                 <div className='px-5 py-3 border-b border-slate-100 flex items-center justify-between'>
                   <h3 className='font-bold text-slate-900 text-sm'>{label}</h3>
                   <span className='text-xs font-semibold text-slate-400'>
-                    {t('dashboard.upcoming.classCount', { count: classes.length })}
+                    {t('dashboard.upcoming.classCount', {
+                      count: classes.length,
+                    })}
                   </span>
                 </div>
                 {classes.length === 0 ? (
@@ -146,26 +150,27 @@ export function Dashboard() {
                       >
                         <div className='flex items-center gap-3 min-w-0'>
                           <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0'>
-                            {(classSession.client_name ?? '?').slice(0, 2).toUpperCase()}
+                            {(classSession.clientName ?? '?').slice(0, 2).toUpperCase()}
                           </div>
                           <div className='min-w-0'>
                             <p className='text-sm font-semibold text-slate-900 truncate'>
-                              {classSession.client_name ?? t('dashboard.upcoming.noClient')}
+                              {classSession.clientName ?? t('dashboard.upcoming.noClient')}
                             </p>
-                            {classSession.contract_description && (
+                            {classSession.contractDescription && (
                               <p className='text-xs text-slate-400 truncate'>
-                                {classSession.contract_description}
+                                {classSession.contractDescription}
                               </p>
                             )}
                           </div>
                         </div>
                         <div className='text-right shrink-0'>
                           <p className='text-sm font-bold text-slate-900'>
-                            {classSession.class_time ? classSession.class_time.slice(0, 5) : '—'}
+                            {classSession.classTime ? classSession.classTime.slice(0, 5) : '—'}
                           </p>
                           <p className='text-xs text-slate-400'>
-                            {classSession.duration_hours}
-                            {t('common.units.hoursShort')} · €{classSession.total_amount.toFixed(2)}
+                            {classSession.durationHours ?? '—'}
+                            {t('common.units.hoursShort')} · €
+                            {(classSession.totalAmount ?? 0).toFixed(2)}
                           </p>
                         </div>
                       </li>
@@ -186,16 +191,16 @@ export function Dashboard() {
           </h2>
           {alerts.map((alert) => (
             <div
-              key={alert.client_id}
+              key={alert.clientId}
               className='flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-5'
             >
               <div className='flex items-center gap-3'>
                 <span className='material-symbols-outlined text-red-600'>error</span>
                 <div>
-                  <p className='text-red-900 font-bold'>{alert.client_name}</p>
+                  <p className='text-red-900 font-bold'>{alert.clientName}</p>
                   <p className='text-red-700 text-sm'>
                     {t('alerts.drawer.debtMessage', {
-                      name: alert.client_name ?? '?',
+                      name: alert.clientName ?? '?',
                       month: months[alert.month - 1],
                       year: alert.year,
                     })}{' '}
@@ -252,17 +257,17 @@ export function Dashboard() {
                     <td className='px-6 py-4'>
                       <div className='flex items-center gap-3'>
                         <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
-                          {(payment.client_name ?? '?').slice(0, 2).toUpperCase()}
+                          {(payment.clientName ?? '?').slice(0, 2).toUpperCase()}
                         </div>
                         <span className='font-medium text-slate-900'>
-                          {payment.client_name ?? t('dashboard.upcoming.noClient')}
+                          {payment.clientName ?? t('dashboard.upcoming.noClient')}
                         </span>
                       </div>
                     </td>
                     <td className='px-6 py-4 font-semibold text-slate-900'>
                       €{payment.amount.toFixed(2)}
                     </td>
-                    <td className='px-6 py-4 text-slate-500'>{payment.payment_date}</td>
+                    <td className='px-6 py-4 text-slate-500'>{payment.paymentDate}</td>
                     <td className='px-6 py-4'>
                       {payment.status === 'confirmed' ? (
                         <span className='inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700'>

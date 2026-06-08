@@ -35,16 +35,16 @@ function assignColumns(classes: ClassSession[]): ColumnedClass[] {
       const [h, m] = t.split(':').map(Number)
       return h + m / 60
     }
-    return toFrac(classA.class_time ?? '') - toFrac(classB.class_time ?? '')
+    return toFrac(classA.classTime ?? '') - toFrac(classB.classTime ?? '')
   })
 
   const result: ColumnedClass[] = []
   const columnEnds: number[] = []
 
   for (const classItem of sorted) {
-    const [h, m] = (classItem.class_time ?? '').split(':').map(Number)
+    const [h, m] = (classItem.classTime ?? '').split(':').map(Number)
     const start = h + m / 60
-    const end = start + classItem.duration_hours
+    const end = start + classItem.durationHours
 
     let col = columnEnds.findIndex((endTime) => endTime <= start)
     if (col === -1) {
@@ -81,15 +81,15 @@ interface DayViewProps {
 
 export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayViewProps) {
   const { t } = useTranslation()
-  const timedClasses = classes.filter((classSession) => classSession.class_time)
-  const untimedClasses = classes.filter((classSession) => !classSession.class_time)
+  const timedClasses = classes.filter((classSession) => classSession.classTime)
+  const untimedClasses = classes.filter((classSession) => !classSession.classTime)
 
   const startHours = timedClasses.map((classSession) =>
-    parseInt((classSession.class_time ?? '').split(':')[0], 10),
+    parseInt((classSession.classTime ?? '').split(':')[0], 10),
   )
   const endHours = timedClasses.map((classSession) => {
-    const [h, m] = (classSession.class_time ?? '').split(':').map(Number)
-    return Math.ceil(h + m / 60 + classSession.duration_hours)
+    const [h, m] = (classSession.classTime ?? '').split(':').map(Number)
+    return Math.ceil(h + m / 60 + classSession.durationHours)
   })
 
   const StartHour = timedClasses.length > 0 ? Math.min(DEFAULT_START, ...startHours) : DEFAULT_START
@@ -119,14 +119,14 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
           {untimedClasses.map((classSession) => (
             <div
               key={classSession.id}
-              className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${clientColor(classSession.client_id)}`}
+              className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${clientColor(classSession.clientId)}`}
             >
               <div>
                 <span className='font-semibold'>
-                  {classSession.contract_description ?? classSession.client_name}
+                  {classSession.contractDescription ?? classSession.clientName}
                 </span>
                 <span className='ml-2 opacity-60 text-xs'>
-                  {classSession.duration_hours}h · €{(classSession.total_amount ?? 0).toFixed(0)}
+                  {classSession.durationHours}h · €{(classSession.totalAmount ?? 0).toFixed(0)}
                 </span>
               </div>
               <div className='flex items-center gap-1'>
@@ -177,15 +177,15 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
           ))}
 
           {columnedClasses.map(({ class: classItem, columnIndex, totalColumns }) => {
-            const top = getTop(classItem.class_time ?? '')
-            const height = getHeight(classItem.duration_hours)
+            const top = getTop(classItem.classTime ?? '')
+            const height = getHeight(classItem.durationHours)
             const widthPct = 100 / totalColumns
             const leftPct = columnIndex * widthPct
 
             return (
               <div
                 key={classItem.id}
-                className={`absolute rounded-lg border px-2 py-1 overflow-hidden group/block ${clientColor(classItem.client_id)}`}
+                className={`absolute rounded-lg border px-2 py-1 overflow-hidden group/block ${clientColor(classItem.clientId)}`}
                 style={{
                   top,
                   height,
@@ -199,12 +199,12 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                   className='cursor-pointer h-full pr-10 border-0 bg-transparent w-full text-left'
                 >
                   <p className='text-[11px] font-bold truncate leading-tight'>
-                    {classItem.contract_description ?? classItem.client_name}
+                    {classItem.contractDescription ?? classItem.clientName}
                   </p>
                   {height >= 40 && (
                     <p className='text-[10px] opacity-70 truncate'>
-                      {classItem.class_time?.slice(0, 5)} · {classItem.duration_hours}h · €
-                      {(classItem.total_amount ?? 0).toFixed(0)}
+                      {classItem.classTime?.slice(0, 5)} · {classItem.durationHours}h · €
+                      {(classItem.totalAmount ?? 0).toFixed(0)}
                     </p>
                   )}
                 </Button>

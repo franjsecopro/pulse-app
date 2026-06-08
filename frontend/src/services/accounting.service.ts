@@ -7,10 +7,10 @@ export const accountingService = {
 
   getClientBalance: (clientId: number) =>
     api.get<{
-      client_id: number
-      client_name: string
-      total_expected: number
-      total_paid: number
+      clientId: number
+      clientName: string
+      totalExpected: number
+      totalPaid: number
       balance: number
     }>(`/accounting/client/${clientId}`),
 
@@ -20,8 +20,11 @@ export const accountingService = {
     api.delete<{ deleted: number; payments_deleted: number }>(`/imports/${id}`),
 
   getReport: (month: number, year: number, clientId?: number | '') => {
-    const params = new URLSearchParams({ month: String(month), year: String(year) })
-    if (clientId !== undefined && clientId !== '') params.set('client_id', String(clientId))
+    const params = new URLSearchParams({
+      month: String(month),
+      year: String(year),
+    })
+    if (clientId !== undefined && clientId !== '') params.set('clientId', String(clientId))
     return api.getBlob(`/accounting/report?${params.toString()}`)
   },
 }

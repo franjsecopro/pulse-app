@@ -21,6 +21,7 @@ from app.models.notification_settings import NotificationSettings
 from app.models.payment_identifier import PaymentIdentifier
 from app.models.google_auth import UserGoogleAuth
 from app.repositories.google_auth_repository import GoogleAuthRepository
+from app.schemas.admin import AdminClientResponse
 from app.schemas.auth import UserResponse
 from app.services.auth_service import AuthService
 from app.services import demo_service
@@ -179,7 +180,7 @@ async def force_gcal_sync(
 
 # ── Clients (cross-user hard delete) ─────────────────────────────────────────
 
-@router.get("/clients")
+@router.get("/clients", response_model=list[AdminClientResponse])
 async def list_all_clients(
     archived_only: bool = Query(False),
     demo_only: bool = Query(False),
@@ -213,14 +214,14 @@ async def list_all_clients(
     result = await db.execute(query)
     rows = result.all()
     return [
-        {
-            "id": r.Client.id,
-            "name": r.Client.name,
-            "owner_id": r.Client.user_id,
-            "owner_email": r.owner_email,
-            "is_active": r.Client.is_active,
-            "archived_at": r.Client.archived_at,
-        }
+        AdminClientResponse(
+            id=r.Client.id,
+            name=r.Client.name,
+            owner_id=r.Client.user_id,
+            owner_email=r.owner_email,
+            is_active=r.Client.is_active,
+            archived_at=r.Client.archived_at,
+        )
         for r in rows
     ]
 

@@ -1,10 +1,12 @@
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import EmailStr, field_validator
 import re
 
+from app.schemas._base import BaseSchema
 
-class UserRegisterRequest(BaseModel):
+
+class UserRegisterRequest(BaseSchema):
     email: EmailStr
     password: str
 
@@ -23,12 +25,12 @@ class UserRegisterRequest(BaseModel):
         return password
 
 
-class UserLoginRequest(BaseModel):
+class UserLoginRequest(BaseSchema):
     email: EmailStr
     password: str
 
 
-class UserResponse(BaseModel):
+class UserResponse(BaseSchema):
     id: int
     email: str
     role: str = "user"
@@ -36,8 +38,6 @@ class UserResponse(BaseModel):
     is_demo_active: bool = False
     real_email: str | None = None
 
-    model_config = {"from_attributes": True}
 
-
-class UserUpdateRequest(BaseModel):
+class UserUpdateRequest(BaseSchema):
     locale: Literal["es-ES", "fr-FR"]

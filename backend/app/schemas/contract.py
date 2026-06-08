@@ -1,22 +1,21 @@
 from datetime import datetime, date
 from typing import Optional
-from pydantic import BaseModel
+
+from app.schemas._base import BaseSchema
 
 
-class DaySchedule(BaseModel):
-    """Horario de un día de la semana: hora de inicio y fin en formato HH:MM."""
-    start: str  # "HH:MM"
-    end: str    # "HH:MM"
+class DaySchedule(BaseSchema):
+    start: str
+    end: str
 
 
-class ContractCreateRequest(BaseModel):
+class ContractCreateRequest(BaseSchema):
     description: str
     start_date: date
     end_date: Optional[date] = None
     hourly_rate: float
     is_active: bool = True
     notes: Optional[str] = None
-    # weekday (as str "0"=Mon…"6"=Sun) → {start, end} in "HH:MM"
     schedule_days: Optional[dict[str, DaySchedule]] = None
     calendar_description: Optional[str] = None
     calendar_reminders: Optional[list[dict]] = None
@@ -24,7 +23,7 @@ class ContractCreateRequest(BaseModel):
     notify: bool = False
 
 
-class ContractUpdateRequest(BaseModel):
+class ContractUpdateRequest(BaseSchema):
     description: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
@@ -38,7 +37,7 @@ class ContractUpdateRequest(BaseModel):
     notify: Optional[bool] = None
 
 
-class ContractResponse(BaseModel):
+class ContractResponse(BaseSchema):
     id: int
     client_id: int
     description: str
@@ -53,5 +52,3 @@ class ContractResponse(BaseModel):
     phone: Optional[str]
     notify: bool
     created_at: datetime
-
-    model_config = {"from_attributes": True}

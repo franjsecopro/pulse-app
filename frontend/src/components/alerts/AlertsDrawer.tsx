@@ -38,7 +38,9 @@ const severityStyles: Record<
 
 export function AlertsDrawer({ isOpen, onClose, alerts, isLoading, title }: AlertsDrawerProps) {
   const { t } = useTranslation()
-  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
+  const months: string[] = t('common.months.full', {
+    returnObjects: true,
+  }) as unknown as string[]
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -94,7 +96,7 @@ export function AlertsDrawer({ isOpen, onClose, alerts, isLoading, title }: Aler
           ) : (
             alerts.map((alert, i) => (
               <AlertItem
-                key={`${alert.type}-${alert.client_id ?? 'sys'}-${i}`}
+                key={`${alert.type}-${alert.clientId ?? 'sys'}-${i}`}
                 alert={alert}
                 months={months}
               />
@@ -114,17 +116,20 @@ function AlertItem({ alert, months }: { alert: Alert; months: string[] }) {
   const message =
     alert.type === 'debt'
       ? t('alerts.drawer.debtMessage', {
-          name: alert.client_name ?? '?',
+          name: alert.clientName ?? '?',
           month: monthName,
           year: alert.year,
         })
       : alert.type === 'credit'
         ? t('alerts.drawer.creditMessage', {
-            name: alert.client_name ?? '?',
+            name: alert.clientName ?? '?',
             month: monthName,
             year: alert.year,
           })
-        : t('alerts.drawer.statementMissingMessage', { month: monthName, year: alert.year })
+        : t('alerts.drawer.statementMissingMessage', {
+            month: monthName,
+            year: alert.year,
+          })
   const amount = alert.amount > 0 ? `€${alert.amount.toFixed(2)}` : null
 
   return (

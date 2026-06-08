@@ -1,4 +1,3 @@
-// biome-ignore-all lint/style/useNamingConvention: backend wire format uses snake_case
 import type {
   AppNotification,
   NotificationLogFilters,
@@ -7,26 +6,6 @@ import type {
 } from '../types'
 import { api } from './api'
 import { buildQuery } from './query'
-
-/** Backend response uses snake_case; the public TS shape uses camelCase. */
-type NotificationSettingsWire = {
-  default_channel: NotificationSettings['defaultChannel']
-  message_template: NotificationSettings['messageTemplate']
-}
-
-function fromWire(wire: NotificationSettingsWire): NotificationSettings {
-  return {
-    defaultChannel: wire.default_channel,
-    messageTemplate: wire.message_template,
-  }
-}
-
-function toWire(data: Partial<NotificationSettings>): Partial<NotificationSettingsWire> {
-  const wire: Partial<NotificationSettingsWire> = {}
-  if (data.defaultChannel !== undefined) wire.default_channel = data.defaultChannel
-  if (data.messageTemplate !== undefined) wire.message_template = data.messageTemplate
-  return wire
-}
 
 export const notificationsService = {
   getPending(date?: string): Promise<AppNotification[]> {
@@ -40,7 +19,7 @@ export const notificationsService = {
     )
   },
 
-  markSent(id: number): Promise<{ id: number; status: string; sent_at: string }> {
+  markSent(id: number): Promise<{ id: number; status: string; sentAt: string }> {
     return api.post(`/notifications/${id}/mark-sent`, {})
   },
 
@@ -49,10 +28,10 @@ export const notificationsService = {
   },
 
   getSettings(): Promise<NotificationSettings> {
-    return api.get<NotificationSettingsWire>('/notifications/settings').then(fromWire)
+    return api.get<NotificationSettings>('/notifications/settings')
   },
 
   updateSettings(data: Partial<NotificationSettings>): Promise<NotificationSettings> {
-    return api.put<NotificationSettingsWire>('/notifications/settings', toWire(data)).then(fromWire)
+    return api.put<NotificationSettings>('/notifications/settings', data)
   },
 }

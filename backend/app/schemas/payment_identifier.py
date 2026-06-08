@@ -1,23 +1,22 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+
+from app.schemas._base import BaseSchema
 
 
-class PayerCreateRequest(BaseModel):
+class PayerCreateRequest(BaseSchema):
     name: str
     info: Optional[str] = None
 
 
-class PayerUpdateRequest(BaseModel):
+class PayerUpdateRequest(BaseSchema):
     name: Optional[str] = None
     info: Optional[str] = None
 
 
-class PayerResponse(BaseModel):
+class PayerResponse(BaseSchema):
     id: int
     client_id: int
     name: str
     info: Optional[str]
     created_at: datetime
-
-    model_config = {"from_attributes": True}

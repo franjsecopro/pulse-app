@@ -20,15 +20,15 @@ export function ClientCard({
   onHardDelete,
 }: ClientCardProps) {
   const { t } = useTranslation()
-  const activeContracts = client.contracts?.filter((contract) => contract.is_active) ?? []
-  const isArchived = !!client.archived_at
+  const activeContracts = client.contracts?.filter((contract) => contract.isActive) ?? []
+  const isArchived = !!client.archivedAt
 
   return (
     <div
       className={`bg-white border rounded-xl p-5 flex flex-col lg:flex-row lg:items-center gap-5 shadow-sm hover:border-primary/50 transition-colors ${
         isArchived
           ? 'opacity-50 border-slate-100'
-          : !client.is_active
+          : !client.isActive
             ? 'opacity-60 border-slate-200'
             : 'border-slate-200'
       }`}
@@ -36,7 +36,7 @@ export function ClientCard({
       <div className='flex items-center gap-4 flex-1'>
         <div
           className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-            client.is_active && !isArchived
+            client.isActive && !isArchived
               ? 'bg-primary/10 text-primary'
               : 'bg-slate-100 text-slate-400'
           }`}
@@ -50,7 +50,7 @@ export function ClientCard({
               <span className='px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200'>
                 {t('clients.status.archived')}
               </span>
-            ) : client.is_active ? (
+            ) : client.isActive ? (
               <span className='px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200'>
                 {t('clients.status.active')}
               </span>
@@ -76,7 +76,7 @@ export function ClientCard({
                 key={contract.id}
                 className='bg-slate-50 text-slate-600 px-2 py-1 rounded text-xs border border-slate-200'
               >
-                {contract.description} — €{contract.hourly_rate}/h
+                {contract.description} — €{contract.hourlyRate}/h
               </span>
             ))}
           </div>

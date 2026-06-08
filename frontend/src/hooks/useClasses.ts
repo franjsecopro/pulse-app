@@ -29,7 +29,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
       const { data, total } = await classService.getAll({
         month: filterMonth,
         year: filterYear,
-        client_id: filterClient || undefined,
+        clientId: filterClient || undefined,
         limit: PAGE_LIMIT,
         offset: (targetPage - 1) * PAGE_LIMIT,
       })
@@ -99,7 +99,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     }
   }
 
-  const totalRevenue = classes.reduce((sum, c) => sum + (c.total_amount ?? 0), 0)
+  const totalRevenue = classes.reduce((sum, c) => sum + (c.totalAmount ?? 0), 0)
   const pageCount = Math.ceil(totalCount / PAGE_LIMIT)
 
   return {

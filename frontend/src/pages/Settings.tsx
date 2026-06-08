@@ -12,17 +12,24 @@ export function Settings() {
   const [isLoading, setIsLoading] = useState(true)
   const [isConnecting, setIsConnecting] = useState(false)
   const [isDisconnecting, setIsDisconnecting] = useState(false)
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
-  const [fiscal, setFiscal] = useState({ business_name: '', tax_id: '', fiscal_address: '' })
+  const [toast, setToast] = useState<{
+    type: 'success' | 'error'
+    message: string
+  } | null>(null)
+  const [fiscal, setFiscal] = useState({
+    businessName: '',
+    taxId: '',
+    fiscalAddress: '',
+  })
   const [isSavingFiscal, setIsSavingFiscal] = useState(false)
 
   const handleSaveFiscal = async () => {
     setIsSavingFiscal(true)
     try {
       await businessProfileService.update({
-        business_name: fiscal.business_name || null,
-        tax_id: fiscal.tax_id || null,
-        fiscal_address: fiscal.fiscal_address || null,
+        businessName: fiscal.businessName || null,
+        taxId: fiscal.taxId || null,
+        fiscalAddress: fiscal.fiscalAddress || null,
       })
       setToast({ type: 'success', message: t('settings.toast.fiscalSaved') })
     } catch {
@@ -64,9 +71,15 @@ export function Settings() {
     try {
       await googleCalendarService.disconnect()
       setStatus({ connected: false })
-      setToast({ type: 'success', message: t('settings.toast.gcalDisconnected') })
+      setToast({
+        type: 'success',
+        message: t('settings.toast.gcalDisconnected'),
+      })
     } catch {
-      setToast({ type: 'error', message: t('settings.toast.gcalDisconnectError') })
+      setToast({
+        type: 'error',
+        message: t('settings.toast.gcalDisconnectError'),
+      })
     } finally {
       setIsDisconnecting(false)
     }
@@ -214,8 +227,8 @@ export function Settings() {
             </label>
             <input
               id='business-name'
-              value={fiscal.business_name}
-              onChange={(e) => setFiscal((prev) => ({ ...prev, business_name: e.target.value }))}
+              value={fiscal.businessName}
+              onChange={(e) => setFiscal((prev) => ({ ...prev, businessName: e.target.value }))}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>
@@ -226,8 +239,8 @@ export function Settings() {
             <input
               id='tax-id'
               placeholder={t('settings.fiscal.taxIdPlaceholder')}
-              value={fiscal.tax_id}
-              onChange={(e) => setFiscal((prev) => ({ ...prev, tax_id: e.target.value }))}
+              value={fiscal.taxId}
+              onChange={(e) => setFiscal((prev) => ({ ...prev, taxId: e.target.value }))}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>
@@ -240,8 +253,13 @@ export function Settings() {
             </label>
             <input
               id='fiscal-address'
-              value={fiscal.fiscal_address}
-              onChange={(e) => setFiscal((prev) => ({ ...prev, fiscal_address: e.target.value }))}
+              value={fiscal.fiscalAddress}
+              onChange={(e) =>
+                setFiscal((prev) => ({
+                  ...prev,
+                  fiscalAddress: e.target.value,
+                }))
+              }
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
           </div>

@@ -13,9 +13,9 @@ interface PaymentFormProps {
 export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormProps) {
   const { t } = useTranslation()
   const [form, setForm] = useState({
-    client_id: initial?.client_id ?? (null as number | null),
+    clientId: initial?.clientId ?? (null as number | null),
     amount: initial?.amount ?? 0,
-    payment_date: initial?.payment_date ?? new Date().toISOString().split('T')[0],
+    paymentDate: initial?.paymentDate ?? new Date().toISOString().split('T')[0],
     concept: initial?.concept ?? '',
     source: initial?.source ?? 'manual',
     status: initial?.status ?? 'confirmed',
@@ -29,7 +29,11 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
     setError(null)
     setIsSubmitting(true)
     try {
-      await onSave({ ...form, concept: form.concept || null, notes: form.notes || null })
+      await onSave({
+        ...form,
+        concept: form.concept || null,
+        notes: form.notes || null,
+      })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('common.errors.save'))
     } finally {
@@ -54,9 +58,12 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
           </label>
           <select
             id='payment-client'
-            value={form.client_id ?? ''}
+            value={form.clientId ?? ''}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, client_id: parseInt(e.target.value, 10) || null }))
+              setForm((prev) => ({
+                ...prev,
+                clientId: parseInt(e.target.value, 10) || null,
+              }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
@@ -87,7 +94,10 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
               min='0.01'
               value={form.amount || ''}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))
+                setForm((prev) => ({
+                  ...prev,
+                  amount: parseFloat(e.target.value) || 0,
+                }))
               }
               className='w-full pl-8 pr-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
             />
@@ -101,8 +111,8 @@ export function PaymentForm({ initial, clients, onSave, onCancel }: PaymentFormP
             required
             type='date'
             id='payment-date'
-            value={form.payment_date}
-            onChange={(e) => setForm((prev) => ({ ...prev, payment_date: e.target.value }))}
+            value={form.paymentDate}
+            onChange={(e) => setForm((prev) => ({ ...prev, paymentDate: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>

@@ -114,19 +114,19 @@ class TestGetSummary:
         response = await app_client.get("/api/dashboard/summary")
 
         body = response.json()
-        assert body["total_expected"] == 0
-        assert body["total_paid"] == 0
-        assert body["total_pending"] == 0
-        assert body["active_clients"] == 0
-        assert body["monthly_classes"] == 0
-        assert body["monthly_payments"] == 0
+        assert body["totalExpected"] == 0
+        assert body["totalPaid"] == 0
+        assert body["totalPending"] == 0
+        assert body["activeClients"] == 0
+        assert body["monthlyClasses"] == 0
+        assert body["monthlyPayments"] == 0
 
     async def test_response_has_all_required_fields(self, app_client: AsyncClient):
         response = await app_client.get("/api/dashboard/summary")
 
         body = response.json()
-        for field in ("total_expected", "total_paid", "total_pending",
-                      "active_clients", "monthly_classes", "monthly_payments",
+        for field in ("totalExpected", "totalPaid", "totalPending",
+                      "activeClients", "monthlyClasses", "monthlyPayments",
                       "month", "year"):
             assert field in body
 
@@ -138,7 +138,7 @@ class TestGetSummary:
 
         response = await app_client.get("/api/dashboard/summary")
 
-        assert response.json()["total_expected"] == 40.0
+        assert response.json()["totalExpected"] == 40.0
 
     async def test_total_paid_only_counts_confirmed_payments(
         self, db: AsyncSession, app_client: AsyncClient
@@ -152,7 +152,7 @@ class TestGetSummary:
 
         response = await app_client.get("/api/dashboard/summary")
 
-        assert response.json()["total_paid"] == 30.0
+        assert response.json()["totalPaid"] == 30.0
 
     async def test_total_pending_is_expected_minus_paid(
         self, db: AsyncSession, app_client: AsyncClient
@@ -167,9 +167,9 @@ class TestGetSummary:
         response = await app_client.get("/api/dashboard/summary")
 
         body = response.json()
-        assert body["total_expected"] == 40.0
-        assert body["total_paid"] == 30.0
-        assert body["total_pending"] == 10.0
+        assert body["totalExpected"] == 40.0
+        assert body["totalPaid"] == 30.0
+        assert body["totalPending"] == 10.0
 
     async def test_active_clients_excludes_archived(
         self, db: AsyncSession, app_client: AsyncClient
@@ -183,7 +183,7 @@ class TestGetSummary:
 
         response = await app_client.get("/api/dashboard/summary")
 
-        assert response.json()["active_clients"] == 2
+        assert response.json()["activeClients"] == 2
 
     async def test_monthly_classes_counts_current_month(
         self, db: AsyncSession, app_client: AsyncClient
@@ -193,7 +193,7 @@ class TestGetSummary:
 
         response = await app_client.get("/api/dashboard/summary")
 
-        assert response.json()["monthly_classes"] == 2
+        assert response.json()["monthlyClasses"] == 2
 
     async def test_cancelled_without_payment_not_counted(
         self, db: AsyncSession, app_client: AsyncClient
@@ -207,7 +207,7 @@ class TestGetSummary:
 
         response = await app_client.get("/api/dashboard/summary")
 
-        assert response.json()["total_expected"] == 40.0
+        assert response.json()["totalExpected"] == 40.0
 
 
 class TestGetAlerts:
@@ -235,7 +235,7 @@ class TestGetAlerts:
 
         debts = [a for a in response.json() if a["type"] == "debt"]
         assert len(debts) == 1
-        assert debts[0]["client_id"] == client.id
+        assert debts[0]["clientId"] == client.id
         assert debts[0]["amount"] == 40.0
 
     async def test_credit_alert_when_payments_exceed_classes(
@@ -253,7 +253,7 @@ class TestGetAlerts:
 
         credits = [a for a in response.json() if a["type"] == "credit"]
         assert len(credits) == 1
-        assert credits[0]["client_id"] == client.id
+        assert credits[0]["clientId"] == client.id
         assert credits[0]["amount"] == 30.0
 
     async def test_no_alert_when_paid_equals_expected(
@@ -286,7 +286,7 @@ class TestGetAlerts:
 
         debt_alerts = [a for a in response.json() if a["type"] == "debt"]
         assert len(debt_alerts) == 1
-        for field in ("client_id", "client_name", "type", "severity", "amount", "month", "year"):
+        for field in ("clientId", "clientName", "type", "severity", "amount", "month", "year"):
             assert field in debt_alerts[0]
 
     async def test_multiple_clients_each_get_own_alert(
@@ -303,7 +303,7 @@ class TestGetAlerts:
 
         response = await app_client.get("/api/alerts")
 
-        client_ids = {a["client_id"] for a in response.json() if a["type"] == "debt"}
+        client_ids = {a["clientId"] for a in response.json() if a["type"] == "debt"}
         assert client_a.id in client_ids
         assert client_b.id in client_ids
 

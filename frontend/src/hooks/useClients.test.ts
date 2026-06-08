@@ -37,37 +37,37 @@ beforeEach(() => {
 // ─── filterActive mapping ────────────────────────────────────────────────────
 
 describe('filterActive → service arguments', () => {
-  it('active → is_active=true, deleted_filter="exclude"', async () => {
+  it('active → isActive=true, deleted_filter="exclude"', async () => {
     renderHook(() => useClients('', 'active'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
         search: undefined,
-        is_active: true,
+        isActive: true,
         deleted_filter: 'exclude',
       }),
     )
   })
 
-  it('archived → is_active=undefined, deleted_filter="only"', async () => {
+  it('archived → isActive=undefined, deleted_filter="only"', async () => {
     renderHook(() => useClients('', 'archived'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
         search: undefined,
-        is_active: undefined,
+        isActive: undefined,
         deleted_filter: 'only',
       }),
     )
   })
 
-  it('all → is_active=undefined, deleted_filter="include"', async () => {
+  it('all → isActive=undefined, deleted_filter="include"', async () => {
     renderHook(() => useClients('', 'all'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
         search: undefined,
-        is_active: undefined,
+        isActive: undefined,
         deleted_filter: 'include',
       }),
     )
@@ -99,8 +99,8 @@ describe('search forwarding', () => {
 describe('sorting', () => {
   it('active clients appear before archived ones', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 1, name: 'Archivado', is_active: false },
-      { id: 2, name: 'Activo', is_active: true },
+      { id: 1, name: 'Archivado', isActive: false },
+      { id: 2, name: 'Activo', isActive: true },
     ] as never)
 
     const { result } = renderHook(() => useClients('', 'all'))
@@ -129,7 +129,7 @@ describe('loading state', () => {
 describe('updateClientContracts', () => {
   it('replaces contracts for the target client without re-fetching', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 1, name: 'Cliente', is_active: true, contracts: [] },
+      { id: 1, name: 'Cliente', isActive: true, contracts: [] },
     ] as never)
     const { result } = renderHook(() => useClients('', 'all'))
 
@@ -145,8 +145,8 @@ describe('updateClientContracts', () => {
 
   it('does not affect other clients', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 1, name: 'A', is_active: true, contracts: [] },
-      { id: 2, name: 'B', is_active: true, contracts: [] },
+      { id: 1, name: 'A', isActive: true, contracts: [] },
+      { id: 2, name: 'B', isActive: true, contracts: [] },
     ] as never)
     const { result } = renderHook(() => useClients('', 'all'))
 
@@ -160,7 +160,7 @@ describe('updateClientContracts', () => {
 
 describe('updateClientPayers', () => {
   it('replaces payers for the target client without re-fetching', async () => {
-    mockGetAll.mockResolvedValue([{ id: 1, name: 'Cliente', is_active: true, payers: [] }] as never)
+    mockGetAll.mockResolvedValue([{ id: 1, name: 'Cliente', isActive: true, payers: [] }] as never)
     const { result } = renderHook(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))

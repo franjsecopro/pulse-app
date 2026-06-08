@@ -100,10 +100,10 @@ class TestReconciliationGate:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        debts = [a for a in alerts if a["type"] == "debt"]
+        debts = [a for a in alerts if a.type == "debt"]
         assert len(debts) == 1
-        assert debts[0]["client_id"] == client.id
-        assert debts[0]["amount"] == 20.0
+        assert debts[0].client_id == client.id
+        assert debts[0].amount == 20.0
 
     @pytest.mark.asyncio
     async def test_debt_fires_when_statement_is_imported(self, db):
@@ -119,9 +119,9 @@ class TestReconciliationGate:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        debts = [a for a in alerts if a["type"] == "debt"]
+        debts = [a for a in alerts if a.type == "debt"]
         assert len(debts) == 1
-        assert debts[0]["client_id"] == client.id
+        assert debts[0].client_id == client.id
 
 
 class TestArrearsAsSourceOfTruth:
@@ -140,7 +140,7 @@ class TestArrearsAsSourceOfTruth:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        debts = [a for a in alerts if a["type"] == "debt"]
+        debts = [a for a in alerts if a.type == "debt"]
         assert debts == [], f"Expected no April debt, got: {debts}"
 
 
@@ -160,7 +160,7 @@ class TestManualPayments:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        debts = [a for a in alerts if a["type"] == "debt"]
+        debts = [a for a in alerts if a.type == "debt"]
         assert debts == []
 
 
@@ -180,10 +180,10 @@ class TestCredit:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        credits = [a for a in alerts if a["type"] == "credit"]
+        credits = [a for a in alerts if a.type == "credit"]
         assert len(credits) == 1
-        assert credits[0]["client_id"] == client.id
-        assert credits[0]["amount"] == 30.0
+        assert credits[0].client_id == client.id
+        assert credits[0].amount == 30.0
 
 
 class TestStatementMissing:
@@ -197,9 +197,9 @@ class TestStatementMissing:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        missing = [a for a in alerts if a["type"] == "statement_missing"]
+        missing = [a for a in alerts if a.type == "statement_missing"]
         assert len(missing) == 1
-        assert missing[0]["client_id"] is None
+        assert missing[0].client_id is None
 
     @pytest.mark.asyncio
     async def test_does_not_fire_before_day5(self, db):
@@ -211,7 +211,7 @@ class TestStatementMissing:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        missing = [a for a in alerts if a["type"] == "statement_missing"]
+        missing = [a for a in alerts if a.type == "statement_missing"]
         assert missing == []
 
     @pytest.mark.asyncio
@@ -228,7 +228,7 @@ class TestStatementMissing:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        missing = [a for a in alerts if a["type"] == "statement_missing"]
+        missing = [a for a in alerts if a.type == "statement_missing"]
         assert missing == []
 
     @pytest.mark.asyncio
@@ -238,7 +238,7 @@ class TestStatementMissing:
 
         alerts = await service.get_alerts(USER_ID, month=4, year=2026)
 
-        missing = [a for a in alerts if a["type"] == "statement_missing"]
+        missing = [a for a in alerts if a.type == "statement_missing"]
         assert missing == []
 
 
@@ -286,7 +286,7 @@ class TestTypeFilter:
         debts_only = await service.get_alerts(
             USER_ID, month=4, year=2026, types=["debt"]
         )
-        assert all(a["type"] == "debt" for a in debts_only)
+        assert all(a.type == "debt" for a in debts_only)
         assert len(debts_only) == 1
 
         all_alerts = await service.get_alerts(USER_ID, month=4, year=2026)

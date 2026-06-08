@@ -12,7 +12,9 @@ const YEARS = [CURRENT_YEAR - 1, CURRENT_YEAR]
 
 export function Alerts() {
   const { t } = useTranslation()
-  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
+  const months: string[] = t('common.months.full', {
+    returnObjects: true,
+  }) as unknown as string[]
   const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1)
   const [filterYear, setFilterYear] = useState(CURRENT_YEAR)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -193,18 +195,18 @@ function AlertList({
           const monthName = months[alert.month - 1]
           const message = isDebt
             ? t('alerts.drawer.debtMessage', {
-                name: alert.client_name ?? '?',
+                name: alert.clientName ?? '?',
                 month: monthName,
                 year: alert.year,
               })
             : t('alerts.drawer.creditMessage', {
-                name: alert.client_name ?? '?',
+                name: alert.clientName ?? '?',
                 month: monthName,
                 year: alert.year,
               })
           return (
             <div
-              key={alert.client_id}
+              key={alert.clientId}
               className={`rounded-xl border p-5 ${isDebt ? 'border-red-200 bg-red-50' : 'border-blue-200 bg-blue-50'}`}
             >
               <div className='flex items-center justify-between gap-4'>
@@ -212,11 +214,11 @@ function AlertList({
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 ${isDebt ? 'bg-red-500' : 'bg-blue-500'}`}
                   >
-                    {(alert.client_name ?? '??').slice(0, 2).toUpperCase()}
+                    {(alert.clientName ?? '??').slice(0, 2).toUpperCase()}
                   </div>
                   <div className='min-w-0'>
                     <p className={`font-bold ${isDebt ? 'text-red-900' : 'text-blue-900'}`}>
-                      {alert.client_name}
+                      {alert.clientName}
                     </p>
                     <p className={`text-sm ${isDebt ? 'text-red-700' : 'text-blue-700'}`}>
                       {message}

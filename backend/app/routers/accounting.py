@@ -46,7 +46,7 @@ async def get_monthly_report(
     """Generates the monthly accounting report as a downloadable Excel (.xlsx)."""
     summary = await AccountingService(db).get_monthly_summary(current_user.id, month, year)
     if client_id is not None:
-        summary = [entry for entry in summary if entry["client_id"] == client_id]
+        summary = [entry for entry in summary if entry.client_id == client_id]
 
     xlsx_bytes = build_monthly_report_xlsx(summary, month, year)
     filename = f"contabilidad_{MONTH_NAMES[month - 1].lower()}_{year}.xlsx"

@@ -13,6 +13,7 @@ from app.models.client import Client
 from app.models.contract import Contract
 from app.models.class_ import Class
 from app.models.payment import Payment
+from app.schemas.accounting import AccountingSummaryEntryResponse
 from app.services.accounting_service import AccountingService
 
 USER_ID = 1
@@ -60,8 +61,10 @@ def _payment(client_id: int, when: date, amount: float = 20.0) -> Payment:
     )
 
 
-def _entry_for(summary: list[dict], client_id: int) -> dict | None:
-    return next((e for e in summary if e["client_id"] == client_id), None)
+def _entry_for(
+    summary: list[AccountingSummaryEntryResponse], client_id: int
+) -> AccountingSummaryEntryResponse | None:
+    return next((e for e in summary if e.client_id == client_id), None)
 
 
 class TestPaymentTimingOffset:
@@ -74,9 +77,9 @@ class TestPaymentTimingOffset:
 
         entry = _entry_for(summary, client.id)
         assert entry is not None
-        assert entry["expected"] == 20.0
-        assert entry["paid"] == 20.0       # the May payment, attributed to April
-        assert entry["balance"] == 0.0
+        assert entry.expected == 20.0
+        assert entry.paid == 20.0       # the May payment, attributed to April
+        assert entry.balance == 0.0
 
     async def test_next_month_payment_absent_from_payment_month(self, db: AsyncSession):
         """That same May payment must NOT appear in May's summary."""
@@ -87,7 +90,7 @@ class TestPaymentTimingOffset:
 
         entry = _entry_for(summary, client.id)
         # May has no classes and (correctly) no paid amount for this client.
-        assert entry is None or entry["paid"] == 0.0
+        assert entry is None or entry.paid == 0.0
 
     async def test_same_month_client_unchanged(self, db: AsyncSession):
         """Regression: a same_month client's April payment stays in April."""
@@ -98,8 +101,8 @@ class TestPaymentTimingOffset:
 
         entry = _entry_for(summary, client.id)
         assert entry is not None
-        assert entry["paid"] == 20.0
-        assert entry["balance"] == 0.0
+        assert entry.paid == 20.0
+        assert entry.balance == 0.0
 
     async def test_next_month_january_rolls_back_to_previous_december(self, db: AsyncSession):
         """Year boundary: a Jan 2027 payment covers Dec 2026 for a next_month client."""
@@ -114,8 +117,8 @@ class TestPaymentTimingOffset:
 
         entry = _entry_for(summary, client.id)
         assert entry is not None
-        assert entry["paid"] == 20.0
-        assert entry["balance"] == 0.0
+        assert entry.paid == 20.0
+        assert entry.balance == 0.0
 
     async def test_next_month_historical_credit_uses_offset(self, db: AsyncSession):
         """A next_month client who prepaid carries the surplus into the right month.
@@ -135,7 +138,7 @@ class TestPaymentTimingOffset:
 
         entry = _entry_for(summary, client.id)
         assert entry is not None
-        assert entry["expected"] == 20.0
-        assert entry["paid"] == 20.0            # the May payment, applied to April
-        assert entry["previous_credit"] == 20.0  # the March payment surplus
-        assert entry["balance"] == 20.0
+        assert entry.expected == 20.0
+        assert entry.paid == 20.0            # the May payment, applied to April
+        assert entry.previous_credit == 20.0  # the March payment surplus
+        assert entry.balance == 20.0

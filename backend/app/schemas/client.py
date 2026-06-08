@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import Literal, Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
 
+from app.schemas._base import BaseSchema
 from app.schemas.contract import ContractResponse
 from app.schemas.payment_identifier import PayerResponse
 
-# When a client pays relative to the month being billed.
 PaymentTiming = Literal["same_month", "next_month"]
 
 
-class ClientCreateRequest(BaseModel):
+class ClientCreateRequest(BaseSchema):
     name: str
     payment_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -21,7 +21,7 @@ class ClientCreateRequest(BaseModel):
     is_active: bool = True
 
 
-class ClientUpdateRequest(BaseModel):
+class ClientUpdateRequest(BaseSchema):
     name: Optional[str] = None
     payment_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -33,7 +33,7 @@ class ClientUpdateRequest(BaseModel):
     is_active: Optional[bool] = None
 
 
-class ClientResponse(BaseModel):
+class ClientResponse(BaseSchema):
     id: int
     name: str
     payment_name: Optional[str]
@@ -50,10 +50,8 @@ class ClientResponse(BaseModel):
     contracts: list[ContractResponse] = []
     payers: list[PayerResponse] = []
 
-    model_config = {"from_attributes": True}
 
-
-class ClientListResponse(BaseModel):
+class ClientListResponse(BaseSchema):
     id: int
     name: str
     payment_name: Optional[str]
@@ -65,5 +63,3 @@ class ClientListResponse(BaseModel):
     archived_at: Optional[datetime]
     contracts: list[ContractResponse] = []
     payers: list[PayerResponse] = []
-
-    model_config = {"from_attributes": True}

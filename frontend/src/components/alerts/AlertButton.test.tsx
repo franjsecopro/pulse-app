@@ -5,8 +5,8 @@ import { AlertButton } from './AlertButton'
 
 function makeAlert(month: number, year: number, clientId = 1): Alert {
   return {
-    client_id: clientId,
-    client_name: `Client ${clientId}`,
+    clientId: clientId,
+    clientName: `Client ${clientId}`,
     type: 'debt',
     severity: 'error',
     amount: 100,

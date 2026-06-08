@@ -1,12 +1,13 @@
 from datetime import datetime, date, time
 from typing import Optional
-from pydantic import BaseModel
+
+from app.schemas._base import BaseSchema
 
 
 CLASS_STATUSES = ("normal", "cancelled_with_payment", "cancelled_without_payment")
 
 
-class ClassCreateRequest(BaseModel):
+class ClassCreateRequest(BaseSchema):
     client_id: int
     contract_id: int
     class_date: date
@@ -17,7 +18,7 @@ class ClassCreateRequest(BaseModel):
     notes: Optional[str] = None
 
 
-class ClassUpdateRequest(BaseModel):
+class ClassUpdateRequest(BaseSchema):
     client_id: Optional[int] = None
     contract_id: Optional[int] = None
     class_date: Optional[date] = None
@@ -28,7 +29,7 @@ class ClassUpdateRequest(BaseModel):
     notes: Optional[str] = None
 
 
-class ClassResponse(BaseModel):
+class ClassResponse(BaseSchema):
     id: int
     user_id: int
     client_id: int
@@ -41,9 +42,6 @@ class ClassResponse(BaseModel):
     notes: Optional[str]
     created_at: datetime
     google_calendar_id: Optional[str] = None
-    # Computed fields
     client_name: Optional[str] = None
     contract_description: Optional[str] = None
     total_amount: Optional[float] = None
-
-    model_config = {"from_attributes": True}

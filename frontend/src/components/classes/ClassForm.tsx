@@ -13,13 +13,13 @@ interface ClassFormProps {
 
 export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: ClassFormProps) {
   const { t } = useTranslation()
-  const [selectedClientId, setSelectedClientId] = useState<number | ''>(initial?.client_id ?? '')
+  const [selectedClientId, setSelectedClientId] = useState<number | ''>(initial?.clientId ?? '')
   const [form, setForm] = useState({
-    contract_id: initial?.contract_id ?? null,
-    class_date: initial?.class_date ?? new Date().toISOString().split('T')[0],
-    class_time: initial?.class_time ?? '',
-    duration_hours: initial?.duration_hours ?? 1,
-    hourly_rate: initial?.hourly_rate ?? 0,
+    contractId: initial?.contractId ?? null,
+    classDate: initial?.classDate ?? new Date().toISOString().split('T')[0],
+    classTime: initial?.classTime ?? '',
+    durationHours: initial?.durationHours ?? 1,
+    hourlyRate: initial?.hourlyRate ?? 0,
     status: (initial?.status ?? 'normal') as ClassStatus,
     notes: initial?.notes ?? '',
   })
@@ -28,21 +28,21 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
 
   const selectedClient = clients.find((client) => client.id === selectedClientId)
   const activeContracts: Contract[] =
-    selectedClient?.contracts?.filter((contract) => contract.is_active) ?? []
+    selectedClient?.contracts?.filter((contract) => contract.isActive) ?? []
 
   const handleClientChange = (clientId: string) => {
     const cid = parseInt(clientId, 10) || ''
     setSelectedClientId(cid)
     const client = clients.find((entry) => entry.id === cid)
-    const contracts = client?.contracts?.filter((contract) => contract.is_active) ?? []
+    const contracts = client?.contracts?.filter((contract) => contract.isActive) ?? []
     if (contracts.length === 1) {
       setForm((prev) => ({
         ...prev,
-        contract_id: contracts[0].id,
-        hourly_rate: contracts[0].hourly_rate,
+        contractId: contracts[0].id,
+        hourlyRate: contracts[0].hourlyRate,
       }))
     } else {
-      setForm((prev) => ({ ...prev, contract_id: null }))
+      setForm((prev) => ({ ...prev, contractId: null }))
     }
   }
 
@@ -52,8 +52,8 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
       const contract = activeContracts.find((entry) => entry.id === cid)
       return {
         ...prev,
-        contract_id: cid,
-        hourly_rate: contract?.hourly_rate ?? prev.hourly_rate,
+        contractId: cid,
+        hourlyRate: contract?.hourlyRate ?? prev.hourlyRate,
       }
     })
   }
@@ -64,7 +64,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
       setError(t('classes.errors.selectClient'))
       return
     }
-    if (activeContracts.length > 1 && !form.contract_id) {
+    if (activeContracts.length > 1 && !form.contractId) {
       setError(t('classes.errors.multipleContracts'))
       return
     }
@@ -72,9 +72,9 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
     setIsSubmitting(true)
     try {
       await onSave({
-        client_id: selectedClientId as number,
+        clientId: selectedClientId as number,
         ...form,
-        class_time: form.class_time || null,
+        classTime: form.classTime || null,
       })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('common.errors.save'))
@@ -83,7 +83,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
     }
   }
 
-  const totalAmount = form.duration_hours * form.hourly_rate
+  const totalAmount = form.durationHours * form.hourlyRate
 
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
@@ -106,7 +106,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           >
             <option value=''>{t('classes.form.selectClientPlaceholder')}</option>
             {clients
-              .filter((client) => client.is_active)
+              .filter((client) => client.isActive)
               .map((client) => (
                 <option key={client.id} value={client.id}>
                   {client.name}
@@ -118,8 +118,8 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           <div className='sm:col-span-2'>
             <p className='text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2'>
               {t('classes.form.contractInfo', {
-                rate: activeContracts[0].hourly_rate,
-                duration: form.duration_hours,
+                rate: activeContracts[0].hourlyRate,
+                duration: form.durationHours,
               })}
             </p>
           </div>
@@ -132,14 +132,14 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             <select
               required
               id='contract'
-              value={form.contract_id ?? ''}
+              value={form.contractId ?? ''}
               onChange={(e) => handleContractChange(e.target.value)}
               className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
             >
               <option value=''>{t('classes.form.selectContractPlaceholder')}</option>
               {activeContracts.map((contract) => (
                 <option key={contract.id} value={contract.id}>
-                  {contract.description} — €{contract.hourly_rate}/h
+                  {contract.description} — €{contract.hourlyRate}/h
                 </option>
               ))}
             </select>
@@ -154,8 +154,8 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             type='date'
             lang='es-ES'
             id='class-date'
-            value={form.class_date}
-            onChange={(e) => setForm((prev) => ({ ...prev, class_date: e.target.value }))}
+            value={form.classDate}
+            onChange={(e) => setForm((prev) => ({ ...prev, classDate: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -166,8 +166,8 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           <input
             type='time'
             id='class-time'
-            value={form.class_time}
-            onChange={(e) => setForm((prev) => ({ ...prev, class_time: e.target.value }))}
+            value={form.classTime}
+            onChange={(e) => setForm((prev) => ({ ...prev, classTime: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -181,9 +181,12 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             type='number'
             step='0.5'
             min='0.5'
-            value={form.duration_hours}
+            value={form.durationHours}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, duration_hours: parseFloat(e.target.value) || 0 }))
+              setForm((prev) => ({
+                ...prev,
+                durationHours: parseFloat(e.target.value) || 0,
+              }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
@@ -198,9 +201,12 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             type='number'
             step='0.01'
             min='0'
-            value={form.hourly_rate}
+            value={form.hourlyRate}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, hourly_rate: parseFloat(e.target.value) || 0 }))
+              setForm((prev) => ({
+                ...prev,
+                hourlyRate: parseFloat(e.target.value) || 0,
+              }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
@@ -213,7 +219,10 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             id='status'
             value={form.status}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, status: e.target.value as ClassStatus }))
+              setForm((prev) => ({
+                ...prev,
+                status: e.target.value as ClassStatus,
+              }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
@@ -238,7 +247,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           />
         </div>
       </div>
-      {form.duration_hours > 0 && form.hourly_rate > 0 && (
+      {form.durationHours > 0 && form.hourlyRate > 0 && (
         <div className='bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center justify-between'>
           <span className='text-sm text-slate-600 font-medium'>{t('classes.form.total')}</span>
           <span className='text-primary font-black text-xl'>€{totalAmount.toFixed(2)}</span>

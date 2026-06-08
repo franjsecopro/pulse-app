@@ -49,7 +49,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
   const startOffset = (firstDay.getDay() + 6) % 7
 
   const byDate = classes.reduce<Record<string, ClassSession[]>>((acc, classSession) => {
-    const key = classSession.class_date
+    const key = classSession.classDate
     if (!acc[key]) acc[key] = []
     acc[key].push(classSession)
     return acc
@@ -104,7 +104,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           const visibleClasses = dayClasses.slice(0, MAX_VISIBLE)
           const hiddenCount = dayClasses.length - MAX_VISIBLE
           const total = dayClasses.reduce(
-            (sum, classSession) => sum + (classSession.total_amount ?? 0),
+            (sum, classSession) => sum + (classSession.totalAmount ?? 0),
             0,
           )
 
@@ -140,9 +140,9 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
                     onMouseEnter={(e) => handleChipEnter(e, classSession)}
                     onMouseLeave={() => setTooltip(null)}
                     className={`w-full text-left text-[10px] font-semibold px-1.5 py-0.5 rounded border truncate
-                      hover:opacity-80 transition-opacity ${clientColor(classSession.client_id)}`}
+                      hover:opacity-80 transition-opacity ${clientColor(classSession.clientId)}`}
                   >
-                    {classSession.contract_description ?? classSession.client_name ?? '?'}
+                    {classSession.contractDescription ?? classSession.clientName ?? '?'}
                   </Button>
                 ))}
 
@@ -181,14 +181,14 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           }}
           className='w-48 bg-slate-800 text-white text-[10px] rounded-lg p-2 shadow-xl pointer-events-none'
         >
-          <p className='font-bold text-slate-200 truncate'>{tooltip.class.client_name}</p>
-          {tooltip.class.contract_description && (
-            <p className='text-slate-400 truncate'>{tooltip.class.contract_description}</p>
+          <p className='font-bold text-slate-200 truncate'>{tooltip.class.clientName}</p>
+          {tooltip.class.contractDescription && (
+            <p className='text-slate-400 truncate'>{tooltip.class.contractDescription}</p>
           )}
-          {tooltip.class.class_time ? (
+          {tooltip.class.classTime ? (
             <p className='mt-0.5 flex items-center gap-1 font-semibold text-slate-100'>
               <span className='material-symbols-outlined text-[12px]'>schedule</span>
-              {formatTimeRange(tooltip.class.class_time, tooltip.class.duration_hours)}
+              {formatTimeRange(tooltip.class.classTime, tooltip.class.durationHours)}
             </p>
           ) : (
             <p className='mt-0.5 flex items-center gap-1 font-semibold text-amber-400'>
@@ -197,10 +197,10 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
             </p>
           )}
           <div className='mt-1 pt-1 border-t border-slate-700 flex justify-between gap-2'>
-            <span>{tooltip.class.duration_hours}h</span>
-            <span>€{tooltip.class.hourly_rate}/h</span>
+            <span>{tooltip.class.durationHours}h</span>
+            <span>€{tooltip.class.hourlyRate}/h</span>
             <span className='font-bold text-emerald-400'>
-              €{(tooltip.class.total_amount ?? 0).toFixed(0)}
+              €{(tooltip.class.totalAmount ?? 0).toFixed(0)}
             </span>
           </div>
         </div>

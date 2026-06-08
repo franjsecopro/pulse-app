@@ -1,17 +1,15 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from app.schemas._base import BaseSchema
 
 
-class BusinessProfileUpdate(BaseModel):
+class BusinessProfileUpdate(BaseSchema):
     business_name: Optional[str] = None
     tax_id: Optional[str] = None
     fiscal_address: Optional[str] = None
 
 
-class BusinessProfileResponse(BaseModel):
+class BusinessProfileResponse(BaseSchema):
     business_name: Optional[str] = None
     tax_id: Optional[str] = None
     fiscal_address: Optional[str] = None
-
-    model_config = {"from_attributes": True}

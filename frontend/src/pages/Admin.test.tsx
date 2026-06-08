@@ -66,26 +66,36 @@ const mockDemoReset = vi.mocked(adminService.demoReset)
 const mockReloadUser = vi.fn()
 
 const fakeUsers = [
-  { id: 1, email: 'admin@test.com', role: 'admin' as const, created_at: '2026-01-01' },
-  { id: 2, email: 'user@test.com', role: 'user' as const, created_at: '2026-01-02' },
+  {
+    id: 1,
+    email: 'admin@test.com',
+    role: 'admin' as const,
+    createdAt: '2026-01-01',
+  },
+  {
+    id: 2,
+    email: 'user@test.com',
+    role: 'user' as const,
+    createdAt: '2026-01-02',
+  },
 ]
 
 const fakeClients: AdminClient[] = [
   {
     id: 10,
     name: 'Juan',
-    owner_id: 1,
-    owner_email: 'admin@test.com',
-    is_active: true,
-    archived_at: null,
+    ownerId: 1,
+    ownerEmail: 'admin@test.com',
+    isActive: true,
+    archivedAt: null,
   },
   {
     id: 11,
     name: 'María',
-    owner_id: 1,
-    owner_email: 'admin@test.com',
-    is_active: false,
-    archived_at: '2026-01-01',
+    ownerId: 1,
+    ownerEmail: 'admin@test.com',
+    isActive: false,
+    archivedAt: '2026-01-01',
   },
 ]
 
@@ -101,7 +111,7 @@ beforeEach(() => {
       email: 'admin@test.com',
       role: 'admin',
       locale: 'es',
-      is_demo_active: false,
+      isDemoActive: false,
     },
     isLoading: false,
     isDemoActive: false,
@@ -116,7 +126,11 @@ beforeEach(() => {
   mockDeleteUser.mockResolvedValue(undefined as never)
   mockDemoEnter.mockResolvedValue({} as never)
   mockDemoExit.mockResolvedValue({} as never)
-  mockDemoReset.mockResolvedValue({ clients_count: 1, classes_count: 5, reseed_at: '' } as never)
+  mockDemoReset.mockResolvedValue({
+    clients_count: 1,
+    classes_count: 5,
+    reseed_at: '',
+  } as never)
 })
 
 describe('Admin', () => {
@@ -245,7 +259,7 @@ describe('Admin', () => {
           email: 'admin@test.com',
           role: 'admin',
           locale: 'es',
-          is_demo_active: true,
+          isDemoActive: true,
         },
         isLoading: false,
         isDemoActive: true,
@@ -265,7 +279,7 @@ describe('Admin', () => {
           email: 'admin@test.com',
           role: 'admin',
           locale: 'es',
-          is_demo_active: true,
+          isDemoActive: true,
         },
         isLoading: false,
         isDemoActive: true,

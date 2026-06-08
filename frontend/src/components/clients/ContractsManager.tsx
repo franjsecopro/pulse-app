@@ -51,7 +51,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
   const handleCreate = async (data: Partial<Contract>) => {
     await clientService.createContract(
       client.id,
-      data as Omit<Contract, 'id' | 'client_id' | 'created_at'>,
+      data as Omit<Contract, 'id' | 'clientId' | 'createdAt'>,
     )
     await reload()
     setShowNewForm(false)
@@ -112,7 +112,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                 className={`flex items-center justify-between gap-4 p-4 border transition-colors ${
                   viewingContractId === contract.id
                     ? 'rounded-t-xl border-primary/30 bg-primary/5'
-                    : contract.is_active
+                    : contract.isActive
                       ? 'rounded-xl border-slate-200 bg-white'
                       : 'rounded-xl border-slate-100 bg-slate-50 opacity-60'
                 }`}
@@ -120,21 +120,23 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                 <div className='min-w-0 flex-1'>
                   <p className='font-semibold text-slate-900 text-sm'>{contract.description}</p>
                   <p className='text-xs text-slate-500'>
-                    €{contract.hourly_rate}/h ·{' '}
-                    {t('contracts.manager.since', { date: formatDate(contract.start_date) })}
-                    {contract.end_date
-                      ? ` ${t('contracts.manager.until', { date: formatDate(contract.end_date) })}`
+                    €{contract.hourlyRate}/h ·{' '}
+                    {t('contracts.manager.since', {
+                      date: formatDate(contract.startDate),
+                    })}
+                    {contract.endDate
+                      ? ` ${t('contracts.manager.until', { date: formatDate(contract.endDate) })}`
                       : ''}
                   </p>
-                  {contract.schedule_days && Object.keys(contract.schedule_days).length > 0 && (
+                  {contract.scheduleDays && Object.keys(contract.scheduleDays).length > 0 && (
                     <p className='text-xs text-primary/70 mt-0.5'>
                       {weekdays
-                        .filter((d) => d.index in (contract.schedule_days ?? {}))
+                        .filter((d) => d.index in (contract.scheduleDays ?? {}))
                         .map((d) => d.label)
                         .join(', ')}
                       {' · '}
                       {formatHours(
-                        Object.values(contract.schedule_days).reduce(
+                        Object.values(contract.scheduleDays).reduce(
                           (sum, d) => sum + calcDuration(d.start, d.end),
                           0,
                         ),
@@ -144,7 +146,7 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
                   )}
                 </div>
                 <div className='flex items-center gap-2 shrink-0'>
-                  {contract.is_active ? (
+                  {contract.isActive ? (
                     <span className='text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full'>
                       {t('contracts.status.active')}
                     </span>

@@ -44,7 +44,7 @@ export function Clients() {
 
   const handleCreate = async (data: Partial<Client>) => {
     await createClient(
-      data as Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>,
+      data as Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'archivedAt' | 'contracts'>,
     )
     setShowCreateModal(false)
   }
@@ -153,7 +153,7 @@ export function Clients() {
               key={client.id}
               client={client}
               onEdit={async () => {
-                const fullClient = await clientService.getById(client.id, !!client.archived_at)
+                const fullClient = await clientService.getById(client.id, !!client.archivedAt)
                 setEditingClient(fullClient)
               }}
               onDelete={() => setConfirmDialog({ action: 'archive', client })}
@@ -230,7 +230,9 @@ export function Clients() {
       <ConfirmDialog
         isOpen={!!hardDeleteTarget}
         title={t('clients.hardDeleteTitle', { name: hardDeleteTarget?.name })}
-        message={t('clients.hardDeleteMessage', { name: hardDeleteTarget?.name })}
+        message={t('clients.hardDeleteMessage', {
+          name: hardDeleteTarget?.name,
+        })}
         confirmText={t('actions.delete')}
         isDangerous
         isLoading={isHardDeleting}

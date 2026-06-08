@@ -72,16 +72,16 @@ function renderClients() {
 const makeClient = (overrides: Partial<Client> = {}): Client => ({
   id: 1,
   name: 'Juan García',
-  payment_name: null,
+  paymentName: null,
   email: 'juan@test.com',
   phone: '+34666555444',
-  whatsapp_phone: null,
+  whatsappPhone: null,
   address: null,
-  tax_id: null,
-  payment_timing: 'same_month',
-  is_active: true,
-  created_at: '2026-01-01',
-  archived_at: null,
+  taxId: null,
+  paymentTiming: 'same_month',
+  isActive: true,
+  createdAt: '2026-01-01',
+  archivedAt: null,
   contracts: [],
   payers: [],
   ...overrides,
@@ -107,7 +107,9 @@ describe('Clients', () => {
 
     it('renders the new client primary button in the header', () => {
       renderClients()
-      const newClientButton = screen.getByRole('button', { name: /clients\.newClient/ })
+      const newClientButton = screen.getByRole('button', {
+        name: /clients\.newClient/,
+      })
       expect(newClientButton).toBeTruthy()
       expect(newClientButton.getAttribute('type')).toBe('button')
     })
@@ -134,7 +136,9 @@ describe('Clients', () => {
 
     it('renders the addFirst button in the empty state', () => {
       renderClients()
-      const addFirstButton = screen.getByRole('button', { name: /clients\.addFirst/ })
+      const addFirstButton = screen.getByRole('button', {
+        name: /clients\.addFirst/,
+      })
       expect(addFirstButton).toBeTruthy()
     })
   })
@@ -153,7 +157,9 @@ describe('Clients', () => {
 
     it('opens the create modal when the newClient button is clicked', () => {
       renderClients()
-      const newClientButton = screen.getByRole('button', { name: /clients\.newClient/ })
+      const newClientButton = screen.getByRole('button', {
+        name: /clients\.newClient/,
+      })
       fireEvent.click(newClientButton)
       const closeButton = screen.getByLabelText('Close')
       expect(closeButton).toBeTruthy()
@@ -188,7 +194,10 @@ describe('Clients', () => {
   })
 
   describe('archived client', () => {
-    const archivedClient = makeClient({ archived_at: '2026-01-01', is_active: false })
+    const archivedClient = makeClient({
+      archivedAt: '2026-01-01',
+      isActive: false,
+    })
 
     beforeEach(() => {
       mockUseClients.mockReturnValue(
@@ -212,7 +221,10 @@ describe('Clients', () => {
   })
 
   describe('admin-only hard delete', () => {
-    const archivedClient = makeClient({ archived_at: '2026-01-01', is_active: false })
+    const archivedClient = makeClient({
+      archivedAt: '2026-01-01',
+      isActive: false,
+    })
 
     it('passes onHardDelete to ClientCard when user role is admin', () => {
       mockUseAuth.mockReturnValue({

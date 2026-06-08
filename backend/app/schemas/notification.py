@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel
+
+from app.schemas._base import BaseSchema
 
 
-class NotificationResponse(BaseModel):
+class NotificationResponse(BaseSchema):
     id: int
     client_id: int
     client_name: str
@@ -16,23 +17,19 @@ class NotificationResponse(BaseModel):
     whatsapp_url: Optional[str]
     sent_at: Optional[datetime]
 
-    model_config = {"from_attributes": True}
 
-
-class NotificationLogPage(BaseModel):
+class NotificationLogPage(BaseSchema):
     items: List[NotificationResponse]
     total: int
     page: int
     page_size: int
 
 
-class NotificationSettingsResponse(BaseModel):
+class NotificationSettingsResponse(BaseSchema):
     default_channel: str
     message_template: str
 
-    model_config = {"from_attributes": True}
 
-
-class NotificationSettingsUpdate(BaseModel):
+class NotificationSettingsUpdate(BaseSchema):
     default_channel: Optional[str] = None
     message_template: Optional[str] = None

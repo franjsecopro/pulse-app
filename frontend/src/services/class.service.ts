@@ -3,14 +3,14 @@ import { api } from './api'
 
 export const classService = {
   getAll: (params?: {
-    client_id?: number
+    clientId?: number
     month?: number
     year?: number
     limit?: number
     offset?: number
   }) => {
     const query = new URLSearchParams()
-    if (params?.client_id) query.set('client_id', String(params.client_id))
+    if (params?.clientId) query.set('clientId', String(params.clientId))
     if (params?.month) query.set('month', String(params.month))
     if (params?.year) query.set('year', String(params.year))
     if (params?.limit != null) query.set('limit', String(params.limit))
@@ -20,12 +20,12 @@ export const classService = {
   },
 
   create: (data: {
-    client_id: number
-    contract_id?: number | null
-    class_date: string
-    class_time?: string | null
-    duration_hours: number
-    hourly_rate: number
+    clientId: number
+    contractId?: number | null
+    classDate: string
+    classTime?: string | null
+    durationHours: number
+    hourlyRate: number
     notes?: string | null
   }) => api.post<ClassSession>('/classes', data),
 

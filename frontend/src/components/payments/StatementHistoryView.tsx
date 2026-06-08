@@ -81,7 +81,7 @@ export function StatementHistoryView({
                 {record.month && record.year ? `${months[record.month - 1]} ${record.year}` : '—'}
               </td>
               <td className='px-4 py-4 text-slate-500'>
-                {new Date(record.imported_at).toLocaleDateString('es-ES', {
+                {new Date(record.importedAt).toLocaleDateString('es-ES', {
                   day: '2-digit',
                   month: 'short',
                   year: 'numeric',
@@ -90,10 +90,10 @@ export function StatementHistoryView({
                 })}
               </td>
               <td className='px-4 py-4 text-right text-slate-700 font-medium'>
-                {record.transaction_count}
+                {record.transactionCount}
               </td>
               <td className='px-5 py-4 text-right font-bold text-slate-900'>
-                €{record.total_amount.toFixed(2)}
+                €{record.totalAmount.toFixed(2)}
               </td>
               {isAdmin && (
                 <td className='px-4 py-4 text-right'>

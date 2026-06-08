@@ -70,8 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(updated)
   }
 
-  const isDemoActive = user?.is_demo_active ?? false
-  const realEmail = user?.real_email ?? null
+  const isDemoActive = user?.isDemoActive ?? false
+  const realEmail = user?.realEmail ?? null
 
   return (
     <AuthContext.Provider

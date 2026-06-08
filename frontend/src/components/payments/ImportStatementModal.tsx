@@ -8,22 +8,22 @@ interface ParsedTransaction {
   date: string
   concept: string
   amount: number
-  suggested_client_id: number | null
-  suggested_client_name: string | null
-  match_type: string
+  suggested_clientId: number | null
+  suggested_clientName: string | null
+  matchType: string
   confidence: number
-  already_imported: boolean
+  alreadyImported: boolean
 }
 
 interface ParseResponse {
   transactions: ParsedTransaction[]
-  file_hash: string
-  file_already_imported_at: string | null
-  duplicate_count: number
+  fileHash: string
+  file_alreadyimportedAt: string | null
+  duplicateCount: number
 }
 
 interface ParsedRow extends ParsedTransaction {
-  selected_client_id: number | null
+  selected_clientId: number | null
   skip: boolean
 }
 
@@ -94,15 +94,15 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
 
       const data = await api.postForm<ParseResponse>('/imports/statement', formData)
 
-      setFileHash(data.file_hash)
-      setFileAlreadyImportedAt(data.file_already_imported_at)
-      setDuplicateCount(data.duplicate_count)
+      setFileHash(data.fileHash)
+      setFileAlreadyImportedAt(data.file_alreadyimportedAt)
+      setDuplicateCount(data.duplicateCount)
       setRows(
         data.transactions.map((row) => ({
           ...row,
-          selected_client_id: row.suggested_client_id,
+          selected_clientId: row.suggested_clientId,
           // Pre-check only matched rows that are NOT already imported.
-          skip: row.match_type === 'none' || row.already_imported,
+          skip: row.matchType === 'none' || row.alreadyImported,
         })),
       )
     } catch (err: unknown) {
@@ -125,12 +125,12 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
           date: row.date,
           concept: row.concept,
           amount: row.amount,
-          client_id: row.selected_client_id,
+          clientId: row.selected_clientId,
         })),
         filename: fileName ?? 'extracto.csv',
         month,
         year,
-        file_hash: fileHash,
+        fileHash: fileHash,
       })
       onImported(month, year)
       onClose()
@@ -313,18 +313,18 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                           {row.concept}
                         </span>
                         <div className='flex flex-wrap gap-1 mt-0.5'>
-                          {row.match_type !== 'none' && (
+                          {row.matchType !== 'none' && (
                             <span
-                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${row.match_type === 'exact' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${row.matchType === 'exact' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}
                             >
-                              {row.match_type === 'exact'
+                              {row.matchType === 'exact'
                                 ? t('import.match.exact')
                                 : t('import.match.partial', {
                                     pct: Math.round(row.confidence * 100),
                                   })}
                             </span>
                           )}
-                          {row.already_imported && (
+                          {row.alreadyImported && (
                             <span className='text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600'>
                               {t('import.match.alreadyImported')}
                             </span>
@@ -336,14 +336,14 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                       </td>
                       <td className='px-4 py-3'>
                         <select
-                          value={row.selected_client_id ?? ''}
+                          value={row.selected_clientId ?? ''}
                           onChange={(e) =>
                             setRows((prev) =>
                               prev.map((row) =>
                                 row.date + row.amount === rowKey
                                   ? {
                                       ...row,
-                                      selected_client_id: parseInt(e.target.value, 10) || null,
+                                      selected_clientId: parseInt(e.target.value, 10) || null,
                                     }
                                   : row,
                               ),

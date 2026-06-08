@@ -37,7 +37,7 @@ export function usePayments({
       const { data, total } = await paymentService.getAll({
         month: filterMonth || undefined,
         year: filterMonth ? filterYear : undefined,
-        client_id: filterClient || undefined,
+        clientId: filterClient || undefined,
         status: filterStatus || undefined,
         limit: PAGE_LIMIT,
         offset: (targetPage - 1) * PAGE_LIMIT,

@@ -14,28 +14,28 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
   const { t } = useTranslation()
   const [form, setForm] = useState({
     description: initial?.description ?? '',
-    start_date: initial?.start_date ?? new Date().toISOString().split('T')[0],
-    end_date: initial?.end_date ?? '',
-    hourly_rate: initial?.hourly_rate ?? 0,
-    is_active: initial?.is_active ?? true,
+    startDate: initial?.startDate ?? new Date().toISOString().split('T')[0],
+    endDate: initial?.endDate ?? '',
+    hourlyRate: initial?.hourlyRate ?? 0,
+    isActive: initial?.isActive ?? true,
     notes: initial?.notes ?? '',
     phone: initial?.phone ?? '',
     notify: initial?.notify ?? false,
-    calendar_description: initial?.calendar_description ?? '',
+    calendarDescription: initial?.calendarDescription ?? '',
   })
 
   const [reminderEmail24h, setReminderEmail24h] = useState(() => {
-    const reminders = initial?.calendar_reminders
+    const reminders = initial?.calendarReminders
     return reminders
       ? reminders.some((row) => row.method === 'email' && row.minutes === 1440)
       : true
   })
   const [reminderPopup1h, setReminderPopup1h] = useState(() => {
-    const reminders = initial?.calendar_reminders
+    const reminders = initial?.calendarReminders
     return reminders ? reminders.some((row) => row.method === 'popup' && row.minutes === 60) : true
   })
   const [scheduleDays, setScheduleDays] = useState<Record<string, DaySchedule>>(
-    (initial?.schedule_days as Record<string, DaySchedule> | null) ?? {},
+    (initial?.scheduleDays as Record<string, DaySchedule> | null) ?? {},
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -70,7 +70,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
     (sum, d) => sum + calcDuration(d.start, d.end),
     0,
   )
-  const weeklyRevenue = weeklyHours * form.hourly_rate
+  const weeklyRevenue = weeklyHours * form.hourlyRate
 
   const buildReminders = (): Array<{
     method: 'email' | 'popup'
@@ -86,7 +86,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
     e.preventDefault()
     setError(null)
 
-    if (form.end_date && form.start_date > form.end_date) {
+    if (form.endDate && form.startDate > form.endDate) {
       setError(t('contracts.errors.startAfterEnd'))
       return
     }
@@ -103,11 +103,11 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
     try {
       await onSave({
         ...form,
-        end_date: form.end_date || null,
+        endDate: form.endDate || null,
         phone: form.phone || null,
-        schedule_days: Object.keys(scheduleDays).length > 0 ? scheduleDays : null,
-        calendar_description: form.calendar_description || null,
-        calendar_reminders: buildReminders(),
+        scheduleDays: Object.keys(scheduleDays).length > 0 ? scheduleDays : null,
+        calendarDescription: form.calendarDescription || null,
+        calendarReminders: buildReminders(),
       })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('common.errors.save'))
@@ -156,9 +156,9 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
             type='date'
             lang='es-ES'
             id='contract-start-date'
-            value={form.start_date}
-            max={form.end_date || undefined}
-            onChange={(e) => setForm((prev) => ({ ...prev, start_date: e.target.value }))}
+            value={form.startDate}
+            max={form.endDate || undefined}
+            onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -173,9 +173,9 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
             type='date'
             lang='es-ES'
             id='contract-end-date'
-            value={form.end_date}
-            min={form.start_date || undefined}
-            onChange={(e) => setForm((prev) => ({ ...prev, end_date: e.target.value }))}
+            value={form.endDate}
+            min={form.startDate || undefined}
+            onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
         </div>
@@ -192,11 +192,11 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
             type='number'
             step='0.01'
             min='0'
-            value={form.hourly_rate}
+            value={form.hourlyRate}
             onChange={(e) =>
               setForm((prev) => ({
                 ...prev,
-                hourly_rate: parseFloat(e.target.value),
+                hourlyRate: parseFloat(e.target.value),
               }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
@@ -207,8 +207,8 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
             <input
               type='checkbox'
               id='contract-is-active'
-              checked={form.is_active}
-              onChange={(e) => setForm((prev) => ({ ...prev, is_active: e.target.checked }))}
+              checked={form.isActive}
+              onChange={(e) => setForm((prev) => ({ ...prev, isActive: e.target.checked }))}
               className='w-4 h-4 accent-primary'
             />
             <span className='text-sm font-medium text-slate-700'>
@@ -305,7 +305,7 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
                 <span className='font-bold text-slate-700'>{formatHours(weeklyHours)}</span>{' '}
                 {t('contracts.form.perWeek')}
               </span>
-              {form.hourly_rate > 0 && (
+              {form.hourlyRate > 0 && (
                 <span>
                   <span className='font-bold text-primary'>€{weeklyRevenue.toFixed(2)}</span>{' '}
                   {t('contracts.form.perWeek')}
@@ -359,8 +359,13 @@ export function ContractForm({ initial, onSave, onCancel }: ContractFormProps) {
           </label>
           <textarea
             id='contract-calendar-description'
-            value={form.calendar_description}
-            onChange={(e) => setForm((prev) => ({ ...prev, calendar_description: e.target.value }))}
+            value={form.calendarDescription}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                calendarDescription: e.target.value,
+              }))
+            }
             rows={3}
             placeholder={t('contracts.form.eventDescriptionPlaceholder')}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none'

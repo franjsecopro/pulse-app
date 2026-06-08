@@ -146,7 +146,9 @@ export function Payments() {
             trailing={
               payments.length > 0 ? (
                 <div className='bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary'>
-                  {t('payments.totalAmount', { amount: totalAmount.toFixed(2) })}
+                  {t('payments.totalAmount', {
+                    amount: totalAmount.toFixed(2),
+                  })}
                 </div>
               ) : undefined
             }
@@ -208,10 +210,10 @@ export function Payments() {
                           <td className='px-6 py-4'>
                             <div className='flex items-center gap-3'>
                               <div className='w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold'>
-                                {(payment.client_name ?? '?').slice(0, 2).toUpperCase()}
+                                {(payment.clientName ?? '?').slice(0, 2).toUpperCase()}
                               </div>
                               <span className='font-medium text-slate-900'>
-                                {payment.client_name ?? t('payments.table.noClient')}
+                                {payment.clientName ?? t('payments.table.noClient')}
                               </span>
                             </div>
                           </td>
@@ -220,7 +222,7 @@ export function Payments() {
                             €{payment.amount.toFixed(2)}
                           </td>
                           <td className='px-6 py-4 text-slate-500 text-sm whitespace-nowrap'>
-                            {payment.payment_date}
+                            {payment.paymentDate}
                           </td>
                           <td className='px-6 py-4'>
                             <span

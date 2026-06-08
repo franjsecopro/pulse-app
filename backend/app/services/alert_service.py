@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.class_ import Class
 from app.models.client import Client
 from app.models.statement_import import StatementImport
+from app.schemas.alert import AlertResponse
 from app.services.accounting_service import AccountingService
 
 
@@ -24,36 +25,36 @@ class AlertService:
         month: int,
         year: int,
         types: Optional[list[str]] = None,
-    ) -> list[dict]:
+    ) -> list[AlertResponse]:
         summary = await AccountingService(self._db).get_monthly_summary(
             user_id, month, year
         )
 
-        client_ids_with_balance = [s["client_id"] for s in summary if s["balance"] != 0.0]
+        client_ids_with_balance = [s.client_id for s in summary if s.balance != 0.0]
         timings = await self._get_payment_timings(user_id, client_ids_with_balance)
 
-        alerts: list[dict] = []
+        alerts: list[AlertResponse] = []
         for entry in summary:
-            if entry["balance"] == 0.0:
+            if entry.balance == 0.0:
                 continue
-            client_id = entry["client_id"]
+            client_id = entry.client_id
             timing = timings.get(client_id, "same_month")
             closing_month, closing_year = self._closing_period(month, year, timing)
             if not await self._is_period_reconciled(
                 user_id, closing_month, closing_year
             ):
                 continue
-            balance = entry["balance"]
+            balance = entry.balance
             alert_type = "debt" if balance < 0 else "credit"
-            alerts.append({
-                "client_id": client_id,
-                "client_name": entry["client_name"],
-                "type": alert_type,
-                "severity": "error" if alert_type == "debt" else "info",
-                "amount": abs(balance),
-                "month": month,
-                "year": year,
-            })
+            alerts.append(AlertResponse(
+                client_id=client_id,
+                client_name=entry.client_name,
+                type=alert_type,
+                severity="error" if alert_type == "debt" else "info",
+                amount=abs(balance),
+                month=month,
+                year=year,
+            ))
 
         if not types or "statement_missing" in types:
             stmt_alert = await self._check_statement_missing(user_id, month, year)
@@ -61,7 +62,7 @@ class AlertService:
                 alerts.append(stmt_alert)
 
         if types:
-            alerts = [a for a in alerts if a["type"] in types]
+            alerts = [a for a in alerts if a.type in types]
 
         return alerts
 
@@ -115,7 +116,7 @@ class AlertService:
 
     async def _check_statement_missing(
         self, user_id: int, month: int, year: int
-    ) -> Optional[dict]:
+    ) -> Optional[AlertResponse]:
         activity = await self._db.execute(
             select(Class.id)
             .where(
@@ -143,12 +144,12 @@ class AlertService:
         if not self._fallback_active(month, year):
             return None
 
-        return {
-            "client_id": None,
-            "client_name": None,
-            "type": "statement_missing",
-            "severity": "warning",
-            "amount": 0.0,
-            "month": month,
-            "year": year,
-        }
+        return AlertResponse(
+            client_id=None,
+            client_name=None,
+            type="statement_missing",
+            severity="warning",
+            amount=0.0,
+            month=month,
+            year=year,
+        )

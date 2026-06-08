@@ -1,229 +1,234 @@
-import type { Locale } from '../i18n'
+import type { Locale } from "../i18n";
 
 export interface User {
-  id: number
-  email: string
-  role: 'admin' | 'user'
-  locale: Locale
-  is_demo_active?: boolean
-  real_email?: string | null
+	id: number;
+	email: string;
+	role: "admin" | "user";
+	locale: Locale;
+	isDemoActive?: boolean;
+	realEmail?: string | null;
 }
 
 export interface AdminClient {
-  id: number
-  name: string
-  owner_id: number
-  owner_email: string
-  is_active: boolean
-  archived_at: string | null
+	id: number;
+	name: string;
+	ownerId: number;
+	ownerEmail: string;
+	isActive: boolean;
+	archivedAt: string | null;
 }
 
 export interface PaymentIdentifier {
-  id: number
-  client_id: number
-  name: string
-  info: string | null
-  created_at: string
+	id: number;
+	clientId: number;
+	name: string;
+	info: string | null;
+	createdAt: string;
 }
 
 export interface DaySchedule {
-  start: string // "HH:MM"
-  end: string // "HH:MM"
+	start: string; // "HH:MM"
+	end: string; // "HH:MM"
 }
 
 export interface Contract {
-  id: number
-  client_id: number
-  description: string
-  start_date: string
-  end_date: string | null
-  hourly_rate: number
-  is_active: boolean
-  notes: string | null
-  // weekday ("0"=Mon…"6"=Sun) → {start, end} in "HH:MM"
-  schedule_days: Record<string, DaySchedule> | null
-  calendar_description: string | null
-  calendar_reminders: Array<{ method: 'email' | 'popup'; minutes: number }> | null
-  phone: string | null
-  notify: boolean
-  created_at: string
+	id: number;
+	clientId: number;
+	description: string;
+	startDate: string;
+	endDate: string | null;
+	hourlyRate: number;
+	isActive: boolean;
+	notes: string | null;
+	// weekday ("0"=Mon…"6"=Sun) → {start, end} in "HH:MM"
+	scheduleDays: Record<string, DaySchedule> | null;
+	calendarDescription: string | null;
+	calendarReminders: Array<{
+		method: "email" | "popup";
+		minutes: number;
+	}> | null;
+	phone: string | null;
+	notify: boolean;
+	createdAt: string;
 }
 
-export type PaymentTiming = 'same_month' | 'next_month'
+export type PaymentTiming = "same_month" | "next_month";
 
 export interface Client {
-  id: number
-  name: string
-  payment_name: string | null
-  email: string | null
-  phone: string | null
-  whatsapp_phone: string | null
-  address: string | null
-  tax_id: string | null
-  payment_timing: PaymentTiming
-  is_active: boolean
-  created_at: string
-  updated_at?: string
-  archived_at?: string | null
-  contracts: Contract[]
-  payers: PaymentIdentifier[]
+	id: number;
+	name: string;
+	paymentName: string | null;
+	email: string | null;
+	phone: string | null;
+	whatsappPhone: string | null;
+	address: string | null;
+	taxId: string | null;
+	paymentTiming: PaymentTiming;
+	isActive: boolean;
+	createdAt: string;
+	updatedAt?: string;
+	archivedAt?: string | null;
+	contracts: Contract[];
+	payers: PaymentIdentifier[];
 }
 
 export interface BusinessProfile {
-  business_name: string | null
-  tax_id: string | null
-  fiscal_address: string | null
+	businessName: string | null;
+	taxId: string | null;
+	fiscalAddress: string | null;
 }
 
-export type ClassStatus = 'normal' | 'cancelled_with_payment' | 'cancelled_without_payment'
+export type ClassStatus =
+	| "normal"
+	| "cancelled_with_payment"
+	| "cancelled_without_payment";
 
 export interface ClassSession {
-  id: number
-  user_id: number
-  client_id: number
-  contract_id: number | null
-  class_date: string
-  class_time: string | null
-  duration_hours: number
-  hourly_rate: number
-  status: ClassStatus
-  notes: string | null
-  google_calendar_id: string | null
-  created_at: string
-  client_name: string | null
-  contract_description: string | null
-  total_amount: number | null
+	id: number;
+	userId: number;
+	clientId: number;
+	contractId: number | null;
+	classDate: string;
+	classTime: string | null;
+	durationHours: number;
+	hourlyRate: number;
+	status: ClassStatus;
+	notes: string | null;
+	googleCalendarId: string | null;
+	createdAt: string;
+	clientName: string | null;
+	contractDescription: string | null;
+	totalAmount: number | null;
 }
 
 export interface StatementImportRecord {
-  id: number
-  filename: string
-  imported_at: string
-  month: number | null
-  year: number | null
-  transaction_count: number
-  total_amount: number
+	id: number;
+	filename: string;
+	importedAt: string;
+	month: number | null;
+	year: number | null;
+	transactionCount: number;
+	totalAmount: number;
 }
 
 export interface ContractBreakdown {
-  contract_id: number | null
-  contract_description: string
-  hourly_rate: number
-  class_count: number
-  normal_count: number
-  cancelled_with_payment_count: number
-  cancelled_without_payment_count: number
-  expected: number
+	contractId: number | null;
+	contractDescription: string;
+	hourlyRate: number;
+	classCount: number;
+	normalCount: number;
+	cancelledWithPaymentCount: number;
+	cancelledWithoutPaymentCount: number;
+	expected: number;
 }
 
 export interface AccountingSummaryEntry {
-  client_id: number
-  client_name: string
-  expected: number
-  paid: number
-  previous_credit: number
-  balance: number
-  month: number
-  year: number
-  month_name: string
-  contracts: ContractBreakdown[]
+	clientId: number;
+	clientName: string;
+	expected: number;
+	paid: number;
+	previousCredit: number;
+	balance: number;
+	month: number;
+	year: number;
+	monthName: string;
+	contracts: ContractBreakdown[];
 }
 
 export interface GoogleCalendarStatus {
-  connected: boolean
-  email?: string
-  calendar_id?: string
+	connected: boolean;
+	email?: string;
 }
 
 export interface Payment {
-  id: number
-  user_id: number
-  client_id: number | null
-  amount: number
-  payment_date: string
-  concept: string | null
-  source: string
-  status: string
-  notes: string | null
-  created_at: string
-  client_name: string | null
+	id: number;
+	userId: number;
+	clientId: number | null;
+	amount: number;
+	paymentDate: string;
+	concept: string | null;
+	source: string;
+	status: string;
+	notes: string | null;
+	createdAt: string;
+	clientName: string | null;
 }
 
 export interface DashboardSummary {
-  total_expected: number
-  total_paid: number
-  total_pending: number
-  active_clients: number
-  monthly_classes: number
-  monthly_payments: number
-  month: number
-  year: number
+	totalExpected: number;
+	totalPaid: number;
+	totalPending: number;
+	activeClients: number;
+	monthlyClasses: number;
+	monthlyPayments: number;
+	month: number;
+	year: number;
 }
 
-export type NotificationStatus = 'pending' | 'sent' | 'skipped'
-export type NotificationChannel = 'whatsapp' | 'email'
+export type NotificationStatus = "pending" | "sent" | "skipped";
+export type NotificationChannel = "whatsapp" | "email";
 
 export interface AppNotification {
-  id: number
-  client_id: number
-  client_name: string
-  class_id: number
-  class_date: string
-  class_time: string | null
-  channel: NotificationChannel
-  status: NotificationStatus
-  message: string
-  whatsapp_url: string | null
-  sent_at: string | null
+	id: number;
+	clientId: number;
+	clientName: string;
+	classId: number;
+	classDate: string;
+	classTime: string | null;
+	channel: NotificationChannel;
+	status: NotificationStatus;
+	message: string;
+	whatsappUrl: string | null;
+	sentAt: string | null;
 }
 
 export interface NotificationLogFilters {
-  mode: 'day' | 'week' | 'month'
-  date: string
-  status?: NotificationStatus
-  client_id?: number
-  channel?: NotificationChannel
-  page: number
-  page_size: number
+	mode: "day" | "week" | "month";
+	date: string;
+	status?: NotificationStatus;
+	clientId?: number;
+	channel?: NotificationChannel;
+	page: number;
+	pageSize: number;
 }
 
 export interface NotificationLogPage {
-  items: AppNotification[]
-  total: number
-  page: number
-  page_size: number
+	items: AppNotification[];
+	total: number;
+	page: number;
+	pageSize: number;
 }
 
 export interface NotificationSettings {
-  defaultChannel: NotificationChannel
-  messageTemplate: string
+	defaultChannel: NotificationChannel;
+	messageTemplate: string;
 }
 
 export interface UpcomingClass {
-  id: number
-  client_name: string | null
-  contract_description: string | null
-  class_date: string
-  class_time: string | null
-  duration_hours: number
-  total_amount: number
-  status: ClassStatus
+	id: number;
+	clientName: string | null;
+	contractDescription: string | null;
+	classDate: string;
+	classTime: string | null;
+	durationHours: number;
+	totalAmount: number;
+	status: ClassStatus;
 }
 
 export interface UpcomingClasses {
-  today: UpcomingClass[]
-  tomorrow: UpcomingClass[]
+	today: UpcomingClass[];
+	tomorrow: UpcomingClass[];
 }
 
-export type AlertType = 'debt' | 'credit' | 'statement_missing'
-export type AlertSeverity = 'error' | 'info' | 'warning'
+export type AlertType = "debt" | "credit" | "statement_missing";
+export type AlertSeverity = "error" | "info" | "warning";
 
 export interface Alert {
-  client_id: number | null
-  client_name: string | null
-  type: AlertType
-  severity: AlertSeverity
-  amount: number
-  month: number
-  year: number
+	clientId: number | null;
+	clientName: string | null;
+	type: AlertType;
+	severity: AlertSeverity;
+	amount: number;
+	month: number;
+	year: number;
 }

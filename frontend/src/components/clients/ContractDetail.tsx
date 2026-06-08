@@ -34,9 +34,9 @@ export function ContractDetail({
   const [deleteResult, setDeleteResult] = useState<number | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const hasSchedule = !!(contract.schedule_days && Object.keys(contract.schedule_days).length > 0)
+  const hasSchedule = !!(contract.scheduleDays && Object.keys(contract.scheduleDays).length > 0)
   const weeklyHours = hasSchedule
-    ? Object.values(contract.schedule_days ?? {}).reduce(
+    ? Object.values(contract.scheduleDays ?? {}).reduce(
         (sum, d) => sum + calcDuration(d.start, d.end),
         0,
       )
@@ -95,25 +95,25 @@ export function ContractDetail({
               <p className='text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5'>
                 {t('contracts.detail.startDate')}
               </p>
-              <p className='text-sm text-slate-700'>{formatDate(contract.start_date)}</p>
+              <p className='text-sm text-slate-700'>{formatDate(contract.startDate)}</p>
             </div>
             <div>
               <p className='text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5'>
                 {t('contracts.detail.endDate')}
               </p>
-              <p className='text-sm text-slate-700'>{formatDate(contract.end_date)}</p>
+              <p className='text-sm text-slate-700'>{formatDate(contract.endDate)}</p>
             </div>
             <div>
               <p className='text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5'>
                 {t('contracts.detail.rate')}
               </p>
-              <p className='text-sm text-slate-700'>€{contract.hourly_rate}/h</p>
+              <p className='text-sm text-slate-700'>€{contract.hourlyRate}/h</p>
             </div>
             <div>
               <p className='text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5'>
                 {t('contracts.detail.status')}
               </p>
-              {contract.is_active ? (
+              {contract.isActive ? (
                 <span className='text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full'>
                   {t('contracts.status.active')}
                 </span>
@@ -134,11 +134,16 @@ export function ContractDetail({
                   .map(({ index, label }) => ({
                     index,
                     label,
-                    day: contract.schedule_days?.[index],
+                    day: contract.scheduleDays?.[index],
                   }))
                   .filter(
-                    (entry): entry is { index: string; label: string; day: DaySchedule } =>
-                      entry.day !== undefined,
+                    (
+                      entry,
+                    ): entry is {
+                      index: string
+                      label: string
+                      day: DaySchedule
+                    } => entry.day !== undefined,
                   )
                   .map(({ index, label, day }) => {
                     const duration = calcDuration(day.start, day.end)
@@ -159,12 +164,12 @@ export function ContractDetail({
                   {formatHours(weeklyHours)}
                   {t('contracts.detail.perWeek')}
                 </span>
-                {contract.hourly_rate > 0 && (
+                {contract.hourlyRate > 0 && (
                   <>
                     {' '}
                     ·{' '}
                     <span className='font-bold text-primary'>
-                      €{(weeklyHours * contract.hourly_rate).toFixed(2)}
+                      €{(weeklyHours * contract.hourlyRate).toFixed(2)}
                       {t('contracts.detail.perWeek')}
                     </span>
                   </>

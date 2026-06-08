@@ -13,13 +13,16 @@ const mockOnSave = vi.fn()
 const mockOnCancel = vi.fn()
 
 const mockClients = [
-  { id: 1, name: 'Alice', is_active: true, contracts: [] },
-  { id: 2, name: 'Bob', is_active: true, contracts: [] },
+  { id: 1, name: 'Alice', isActive: true, contracts: [] },
+  { id: 2, name: 'Bob', isActive: true, contracts: [] },
 ] as never
 
 function renderForm(
   initial?: Record<string, unknown>,
-  overrides: { onSave?: ReturnType<typeof vi.fn>; onCancel?: ReturnType<typeof vi.fn> } = {},
+  overrides: {
+    onSave?: ReturnType<typeof vi.fn>
+    onCancel?: ReturnType<typeof vi.fn>
+  } = {},
 ) {
   return render(
     <PaymentForm
@@ -39,14 +42,18 @@ describe('PaymentForm', () => {
   describe('native buttons present', () => {
     it('renders the create button with submit type', () => {
       renderForm()
-      const createButton = screen.getByRole('button', { name: /payments\.create/ })
+      const createButton = screen.getByRole('button', {
+        name: /payments\.create/,
+      })
       expect(createButton).toBeTruthy()
       expect(createButton.getAttribute('type')).toBe('submit')
     })
 
     it('renders the cancel button with type button', () => {
       renderForm()
-      const cancelButton = screen.getByRole('button', { name: /actions\.cancel/ })
+      const cancelButton = screen.getByRole('button', {
+        name: /actions\.cancel/,
+      })
       expect(cancelButton).toBeTruthy()
       expect(cancelButton.getAttribute('type')).toBe('button')
     })
@@ -125,14 +132,18 @@ describe('PaymentForm', () => {
   describe('button visual state', () => {
     it('create button has primary styling (bg-primary)', () => {
       renderForm()
-      const createButton = screen.getByRole('button', { name: /payments\.create/ })
+      const createButton = screen.getByRole('button', {
+        name: /payments\.create/,
+      })
       expect(createButton.className).toContain('bg-primary')
       expect(createButton.className).toContain('text-white')
     })
 
     it('cancel button has secondary styling (text-slate-600)', () => {
       renderForm()
-      const cancelButton = screen.getByRole('button', { name: /actions\.cancel/ })
+      const cancelButton = screen.getByRole('button', {
+        name: /actions\.cancel/,
+      })
       expect(cancelButton.className).toContain('text-slate-600')
     })
   })

@@ -30,10 +30,10 @@ export function useClients(search: string, filterActive: FilterActive) {
 
       const data = await clientService.getAll({
         search: search || undefined,
-        is_active: isActive,
+        isActive: isActive,
         deleted_filter: deletedFilter,
       })
-      setClients(data.sort((a, b) => Number(b.is_active) - Number(a.is_active)))
+      setClients(data.sort((a, b) => Number(b.isActive) - Number(a.isActive)))
     } finally {
       setIsLoading(false)
     }
@@ -44,7 +44,7 @@ export function useClients(search: string, filterActive: FilterActive) {
   }, [loadClients])
 
   const createClient = async (
-    data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'archived_at' | 'contracts'>,
+    data: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'archivedAt' | 'contracts'>,
   ) => {
     try {
       await clientService.create(data)

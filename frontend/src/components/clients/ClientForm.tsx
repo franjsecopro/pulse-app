@@ -15,11 +15,11 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
     name: initial?.name ?? '',
     email: initial?.email ?? '',
     phone: initial?.phone ?? '',
-    whatsapp_phone: initial?.whatsapp_phone ?? '',
+    whatsappPhone: initial?.whatsappPhone ?? '',
     address: initial?.address ?? '',
-    tax_id: initial?.tax_id ?? '',
-    payment_timing: (initial?.payment_timing ?? 'same_month') as PaymentTiming,
-    is_active: initial?.is_active ?? true,
+    taxId: initial?.taxId ?? '',
+    paymentTiming: (initial?.paymentTiming ?? 'same_month') as PaymentTiming,
+    isActive: initial?.isActive ?? true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -30,11 +30,11 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
     form.name !== (initial?.name ?? '') ||
     form.email !== (initial?.email ?? '') ||
     form.phone !== (initial?.phone ?? '') ||
-    form.whatsapp_phone !== (initial?.whatsapp_phone ?? '') ||
+    form.whatsappPhone !== (initial?.whatsappPhone ?? '') ||
     form.address !== (initial?.address ?? '') ||
-    form.tax_id !== (initial?.tax_id ?? '') ||
-    form.payment_timing !== (initial?.payment_timing ?? 'same_month') ||
-    form.is_active !== (initial?.is_active ?? true)
+    form.taxId !== (initial?.taxId ?? '') ||
+    form.paymentTiming !== (initial?.paymentTiming ?? 'same_month') ||
+    form.isActive !== (initial?.isActive ?? true)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -102,8 +102,8 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <input
             id='client-whatsapp'
             placeholder={t('clients.form.whatsappPlaceholder')}
-            value={form.whatsapp_phone}
-            onChange={(e) => setForm((prev) => ({ ...prev, whatsapp_phone: e.target.value }))}
+            value={form.whatsappPhone}
+            onChange={(e) => setForm((prev) => ({ ...prev, whatsappPhone: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.whatsappHint')}</p>
@@ -132,8 +132,8 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           <input
             id='client-tax-id'
             placeholder={t('clients.form.taxIdPlaceholder')}
-            value={form.tax_id}
-            onChange={(e) => setForm((prev) => ({ ...prev, tax_id: e.target.value }))}
+            value={form.taxId}
+            onChange={(e) => setForm((prev) => ({ ...prev, taxId: e.target.value }))}
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
           />
           <p className='text-xs text-slate-400 mt-1'>{t('clients.form.taxIdHint')}</p>
@@ -147,9 +147,12 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
           </label>
           <select
             id='client-payment-timing'
-            value={form.payment_timing}
+            value={form.paymentTiming}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, payment_timing: e.target.value as PaymentTiming }))
+              setForm((prev) => ({
+                ...prev,
+                paymentTiming: e.target.value as PaymentTiming,
+              }))
             }
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
@@ -161,12 +164,12 @@ export function ClientForm({ initial, onSave, onCancel }: ClientFormProps) {
         <div className='flex items-center gap-3 mt-2'>
           <input
             type='checkbox'
-            id='is_active'
-            checked={form.is_active}
-            onChange={(e) => setForm((prev) => ({ ...prev, is_active: e.target.checked }))}
+            id='isActive'
+            checked={form.isActive}
+            onChange={(e) => setForm((prev) => ({ ...prev, isActive: e.target.checked }))}
             className='w-4 h-4 accent-primary'
           />
-          <label htmlFor='is_active' className='text-sm font-medium text-slate-700'>
+          <label htmlFor='isActive' className='text-sm font-medium text-slate-700'>
             {t('clients.form.isActive')}
           </label>
         </div>

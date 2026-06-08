@@ -1,9 +1,10 @@
 from datetime import datetime, date
 from typing import Optional
-from pydantic import BaseModel
+
+from app.schemas._base import BaseSchema
 
 
-class PaymentCreateRequest(BaseModel):
+class PaymentCreateRequest(BaseSchema):
     client_id: Optional[int] = None
     amount: float
     payment_date: date
@@ -13,7 +14,7 @@ class PaymentCreateRequest(BaseModel):
     notes: Optional[str] = None
 
 
-class PaymentUpdateRequest(BaseModel):
+class PaymentUpdateRequest(BaseSchema):
     client_id: Optional[int] = None
     amount: Optional[float] = None
     payment_date: Optional[date] = None
@@ -22,7 +23,7 @@ class PaymentUpdateRequest(BaseModel):
     notes: Optional[str] = None
 
 
-class PaymentResponse(BaseModel):
+class PaymentResponse(BaseSchema):
     id: int
     user_id: int
     client_id: Optional[int]
@@ -34,5 +35,3 @@ class PaymentResponse(BaseModel):
     notes: Optional[str]
     created_at: datetime
     client_name: Optional[str] = None
-
-    model_config = {"from_attributes": True}

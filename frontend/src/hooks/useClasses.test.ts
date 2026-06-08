@@ -3,7 +3,7 @@
  *
  * Key behaviors:
  *  - requestDelete / cancelDelete manage pendingDeleteId
- *  - totalRevenue sums class total_amounts (null treated as 0)
+ *  - totalRevenue sums class totalAmounts (null treated as 0)
  *  - filters (month, year, client) are forwarded to classService.getAll
  */
 import { act, renderHook, waitFor } from '@testing-library/react'
@@ -81,11 +81,11 @@ describe('requestDelete / cancelDelete', () => {
 // ─── totalRevenue ─────────────────────────────────────────────────────────────
 
 describe('totalRevenue', () => {
-  it('sums total_amount across all loaded classes', async () => {
+  it('sums totalAmount across all loaded classes', async () => {
     mockGetAllClasses.mockResolvedValue({
       data: [
-        { id: 1, total_amount: 40.0 },
-        { id: 2, total_amount: 20.0 },
+        { id: 1, totalAmount: 40.0 },
+        { id: 2, totalAmount: 20.0 },
       ] as never,
       total: 2,
     })
@@ -97,11 +97,11 @@ describe('totalRevenue', () => {
     expect(result.current.totalRevenue).toBe(60.0)
   })
 
-  it('treats null total_amount as 0', async () => {
+  it('treats null totalAmount as 0', async () => {
     mockGetAllClasses.mockResolvedValue({
       data: [
-        { id: 1, total_amount: null },
-        { id: 2, total_amount: 30.0 },
+        { id: 1, totalAmount: null },
+        { id: 2, totalAmount: 30.0 },
       ] as never,
       total: 2,
     })
@@ -125,22 +125,22 @@ describe('totalRevenue', () => {
 // ─── filter forwarding ───────────────────────────────────────────────────────
 
 describe('filter forwarding to classService.getAll', () => {
-  it('passes month, year, and client_id to the service', async () => {
+  it('passes month, year, and clientId to the service', async () => {
     renderHook(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
 
     await waitFor(() =>
       expect(mockGetAllClasses).toHaveBeenCalledWith(
-        expect.objectContaining({ month: 5, year: 2026, client_id: 10 }),
+        expect.objectContaining({ month: 5, year: 2026, clientId: 10 }),
       ),
     )
   })
 
-  it('passes client_id as undefined when filterClient is empty string', async () => {
+  it('passes clientId as undefined when filterClient is empty string', async () => {
     renderHook(() => useClasses({ filterMonth: 4, filterYear: 2026, filterClient: '' }))
 
     await waitFor(() =>
       expect(mockGetAllClasses).toHaveBeenCalledWith(
-        expect.objectContaining({ client_id: undefined }),
+        expect.objectContaining({ clientId: undefined }),
       ),
     )
   })

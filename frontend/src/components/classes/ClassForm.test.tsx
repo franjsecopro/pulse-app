@@ -7,8 +7,8 @@ vi.mock('../../i18n', () => ({
 }))
 
 const mockClients = [
-  { id: 1, name: 'Alice', is_active: true, contracts: [] },
-  { id: 2, name: 'Bob', is_active: true, contracts: [] },
+  { id: 1, name: 'Alice', isActive: true, contracts: [] },
+  { id: 2, name: 'Bob', isActive: true, contracts: [] },
 ] as never
 
 function renderForm(
@@ -49,14 +49,18 @@ describe('ClassForm', () => {
 
     it('renders the cancel button', () => {
       renderForm()
-      const cancelButton = screen.getByRole('button', { name: /actions\.cancel/ })
+      const cancelButton = screen.getByRole('button', {
+        name: /actions\.cancel/,
+      })
       expect(cancelButton).toBeTruthy()
       expect(cancelButton.getAttribute('type')).toBe('button')
     })
 
     it('renders the delete button when onDelete prop is provided', () => {
       renderForm({ onDelete: vi.fn() })
-      const deleteButton = screen.getByRole('button', { name: /classes\.delete/ })
+      const deleteButton = screen.getByRole('button', {
+        name: /classes\.delete/,
+      })
       expect(deleteButton).toBeTruthy()
       expect(deleteButton.getAttribute('type')).toBe('button')
     })
@@ -93,13 +97,17 @@ describe('ClassForm', () => {
 
     it('delete button has danger styling (text-red)', () => {
       renderForm({ onDelete: vi.fn() })
-      const deleteButton = screen.getByRole('button', { name: /classes\.delete/ })
+      const deleteButton = screen.getByRole('button', {
+        name: /classes\.delete/,
+      })
       expect(deleteButton.className).toContain('text-red-500')
     })
 
     it('cancel button has secondary styling (text-slate-600)', () => {
       renderForm()
-      const cancelButton = screen.getByRole('button', { name: /actions\.cancel/ })
+      const cancelButton = screen.getByRole('button', {
+        name: /actions\.cancel/,
+      })
       expect(cancelButton.className).toContain('text-slate-600')
     })
   })

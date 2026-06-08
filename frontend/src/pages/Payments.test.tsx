@@ -17,12 +17,16 @@ vi.mock('../components/payments/PaymentForm', () => ({
 
 vi.mock('../components/payments/ImportStatementModal', () => ({
   ImportStatementModal: () =>
-    React.createElement('div', { 'data-testid': 'mock-import-statement-modal' }),
+    React.createElement('div', {
+      'data-testid': 'mock-import-statement-modal',
+    }),
 }))
 
 vi.mock('../components/payments/StatementHistoryView', () => ({
   StatementHistoryView: () =>
-    React.createElement('div', { 'data-testid': 'mock-statement-history-view' }),
+    React.createElement('div', {
+      'data-testid': 'mock-statement-history-view',
+    }),
 }))
 
 vi.mock('../components/finance/FinanceFilters', () => ({
@@ -64,16 +68,16 @@ const mockDeleteStatementImport = vi.fn()
 function makePayment(overrides: Partial<Payment> = {}): Payment {
   return {
     id: 1,
-    user_id: 1,
-    client_id: 1,
+    userId: 1,
+    clientId: 1,
     amount: 100,
-    payment_date: '2026-06-15',
+    paymentDate: '2026-06-15',
     concept: 'Pago mensual',
     status: 'pending',
     source: 'manual',
     notes: null,
-    created_at: '2026-06-01',
-    client_name: 'Juan García',
+    createdAt: '2026-06-01',
+    clientName: 'Juan García',
     ...overrides,
   }
 }
@@ -126,13 +130,17 @@ describe('Payments', () => {
 
     it('renders the import statement secondary button', () => {
       renderPayments()
-      const importButton = screen.getByRole('button', { name: /payments\.importStatement/ })
+      const importButton = screen.getByRole('button', {
+        name: /payments\.importStatement/,
+      })
       expect(importButton).toBeTruthy()
     })
 
     it('renders the new payment primary button', () => {
       renderPayments()
-      const newPaymentButton = screen.getByRole('button', { name: /payments\.newPayment/ })
+      const newPaymentButton = screen.getByRole('button', {
+        name: /payments\.newPayment/,
+      })
       expect(newPaymentButton).toBeTruthy()
     })
 
@@ -226,7 +234,11 @@ describe('Payments', () => {
   describe('delete confirmation', () => {
     it('shows the ConfirmDialog when pendingDeleteId is set', () => {
       mockUsePayments.mockReturnValue(
-        makeHook({ pendingDeleteId: 1, payments: [makePayment()], totalCount: 1 }) as never,
+        makeHook({
+          pendingDeleteId: 1,
+          payments: [makePayment()],
+          totalCount: 1,
+        }) as never,
       )
       renderPayments()
       const confirmDialog = screen.getByTestId('mock-confirm-dialog')

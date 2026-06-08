@@ -16,7 +16,9 @@ function getCurrentMonthYear() {
 
 export function Accounting() {
   const { t } = useTranslation()
-  const months: string[] = t('common.months.full', { returnObjects: true }) as unknown as string[]
+  const months: string[] = t('common.months.full', {
+    returnObjects: true,
+  }) as unknown as string[]
   const monthsLower: string[] = t('common.months.lowercase', {
     returnObjects: true,
   }) as unknown as string[]
@@ -48,7 +50,7 @@ export function Accounting() {
   }, [month, year])
 
   // Client filter is applied on the client side (the summary endpoint is per-month).
-  const visibleSummary = client === '' ? summary : summary.filter((e) => e.client_id === client)
+  const visibleSummary = client === '' ? summary : summary.filter((e) => e.clientId === client)
   const totalExpected = visibleSummary.reduce((sum, e) => sum + e.expected, 0)
   const totalPaid = visibleSummary.reduce((sum, e) => sum + e.paid, 0)
   const totalBalance = visibleSummary.reduce((sum, e) => sum + e.balance, 0)
@@ -120,7 +122,10 @@ export function Accounting() {
           </span>
           <p className='text-slate-700 font-bold text-lg'>{t('accounting.empty.title')}</p>
           <p className='text-slate-500 text-sm mt-1'>
-            {t('accounting.empty.description', { month: months[month - 1], year })}
+            {t('accounting.empty.description', {
+              month: months[month - 1],
+              year,
+            })}
           </p>
         </div>
       ) : (
@@ -164,7 +169,7 @@ export function Accounting() {
               </thead>
               <tbody className='divide-y divide-slate-100'>
                 {visibleSummary.map((entry) => (
-                  <ClientRow key={entry.client_id} entry={entry} t={t} />
+                  <ClientRow key={entry.clientId} entry={entry} t={t} />
                 ))}
               </tbody>
             </table>
@@ -230,16 +235,16 @@ function ClientRow({
               <span className='w-5' />
             )}
             <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0'>
-              {entry.client_name.slice(0, 2).toUpperCase()}
+              {entry.clientName.slice(0, 2).toUpperCase()}
             </div>
-            <span className='font-medium text-slate-900'>{entry.client_name}</span>
+            <span className='font-medium text-slate-900'>{entry.clientName}</span>
           </div>
         </td>
         <td className='px-4 py-4 text-right text-slate-700'>€{entry.expected.toFixed(2)}</td>
         <td className='px-4 py-4 text-right text-slate-700'>€{entry.paid.toFixed(2)}</td>
         <td className='px-4 py-4 text-right'>
-          {entry.previous_credit > 0 ? (
-            <span className='text-blue-600 font-medium'>+€{entry.previous_credit.toFixed(2)}</span>
+          {entry.previousCredit > 0 ? (
+            <span className='text-blue-600 font-medium'>+€{entry.previousCredit.toFixed(2)}</span>
           ) : (
             <span className='text-slate-400'>—</span>
           )}
@@ -255,7 +260,7 @@ function ClientRow({
 
       {expanded &&
         entry.contracts.map((contract, i) => (
-          <ContractRow key={contract.contract_id ?? i} contract={contract} t={t} />
+          <ContractRow key={contract.contractId ?? i} contract={contract} t={t} />
         ))}
     </>
   )
@@ -273,33 +278,33 @@ function ContractRow({
       <td className='pl-16 pr-4 py-3' colSpan={1}>
         <div className='flex items-center gap-2'>
           <span className='material-symbols-outlined text-sm text-slate-400'>description</span>
-          <span className='text-sm font-medium text-slate-700'>
-            {contract.contract_description}
-          </span>
+          <span className='text-sm font-medium text-slate-700'>{contract.contractDescription}</span>
           <span className='text-xs text-slate-400'>
-            · €{contract.hourly_rate}/{t('common.units.hoursShort')}
+            · €{contract.hourlyRate}/{t('common.units.hoursShort')}
           </span>
         </div>
         <div className='flex items-center gap-3 mt-1.5 pl-6 flex-wrap'>
-          {contract.normal_count > 0 && (
+          {contract.normalCount > 0 && (
             <span className='inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full'>
               <span className='w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block' />
-              {t('accounting.contract.normal', { count: contract.normal_count })}
-            </span>
-          )}
-          {contract.cancelled_with_payment_count > 0 && (
-            <span className='inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full'>
-              <span className='w-1.5 h-1.5 rounded-full bg-amber-500 inline-block' />
-              {t('accounting.contract.cancelledWithPayment', {
-                count: contract.cancelled_with_payment_count,
+              {t('accounting.contract.normal', {
+                count: contract.normalCount,
               })}
             </span>
           )}
-          {contract.cancelled_without_payment_count > 0 && (
+          {contract.cancelledWithPaymentCount > 0 && (
+            <span className='inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full'>
+              <span className='w-1.5 h-1.5 rounded-full bg-amber-500 inline-block' />
+              {t('accounting.contract.cancelledWithPayment', {
+                count: contract.cancelledWithPaymentCount,
+              })}
+            </span>
+          )}
+          {contract.cancelledWithoutPaymentCount > 0 && (
             <span className='inline-flex items-center gap-1 text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full'>
               <span className='w-1.5 h-1.5 rounded-full bg-slate-400 inline-block' />
               {t('accounting.contract.cancelledWithoutPayment', {
-                count: contract.cancelled_without_payment_count,
+                count: contract.cancelledWithoutPaymentCount,
               })}
             </span>
           )}
