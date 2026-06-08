@@ -77,3 +77,6 @@ frontend/node_modules/
 .cache/
 .mypy_cache/
 .ruff_cache/
+
+# Agent Skill Registry (regenerated locally by skill-registry skill)
+.atl/
