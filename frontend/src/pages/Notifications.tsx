@@ -484,7 +484,7 @@ function SettingsTab({ t }: { t: (key: string, options?: Record<string, unknown>
             <p className='text-xs font-medium text-slate-500 mb-1'>
               {t('notifications.settings.preview')}
             </p>
-            <p className='text-sm text-slate-700'>{renderPreview(settings.message_template)}</p>
+            <p className='text-sm text-slate-700'>{renderPreview(settings.messageTemplate)}</p>
           </div>
         )}
       </div>
