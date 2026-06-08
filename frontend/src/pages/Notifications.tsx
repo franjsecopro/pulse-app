@@ -169,7 +169,9 @@ function PendingTab({ t }: { t: (key: string, options?: Record<string, unknown>)
           type='button'
           onClick={handleGenerate}
           loading={isGenerating}
-          title={t('notifications.generateTooltip', { date: formatDateEs({ t, dateStr: notificationDay }) })}
+          title={t('notifications.generateTooltip', {
+            date: formatDateEs({ t, dateStr: notificationDay }),
+          })}
           className='inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition-colors min-h-[44px]'
         >
           <span className='material-symbols-outlined text-[16px]'>
