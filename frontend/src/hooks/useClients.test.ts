@@ -37,38 +37,38 @@ beforeEach(() => {
 // ─── filterActive mapping ────────────────────────────────────────────────────
 
 describe('filterActive → service arguments', () => {
-  it('active → isActive=true, deleted_filter="exclude"', async () => {
+  it('active → isActive=true, deletedFilter="exclude"', async () => {
     renderHook(() => useClients('', 'active'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
         search: undefined,
         isActive: true,
-        deleted_filter: 'exclude',
+        deletedFilter: 'exclude',
       }),
     )
   })
 
-  it('archived → isActive=undefined, deleted_filter="only"', async () => {
+  it('archived → isActive=undefined, deletedFilter="only"', async () => {
     renderHook(() => useClients('', 'archived'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
         search: undefined,
         isActive: undefined,
-        deleted_filter: 'only',
+        deletedFilter: 'only',
       }),
     )
   })
 
-  it('all → isActive=undefined, deleted_filter="include"', async () => {
+  it('all → isActive=undefined, deletedFilter="include"', async () => {
     renderHook(() => useClients('', 'all'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
         search: undefined,
         isActive: undefined,
-        deleted_filter: 'include',
+        deletedFilter: 'include',
       }),
     )
   })

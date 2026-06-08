@@ -112,8 +112,8 @@ export function usePayments({
 
   const deleteStatementImport = async (id: number) => {
     try {
-      const { payments_deleted } = await accountingService.deleteStatementImport(id)
-      addToast('toasts.statementDeleted', 'success', payments_deleted)
+      const { paymentsDeleted } = await accountingService.deleteStatementImport(id)
+      addToast('toasts.statementDeleted', 'success', paymentsDeleted)
       loadStatementHistory()
       loadPayments(page)
     } catch {

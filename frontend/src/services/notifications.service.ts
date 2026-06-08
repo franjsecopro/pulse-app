@@ -13,10 +13,7 @@ export const notificationsService = {
   },
 
   generate(targetDate?: string): Promise<AppNotification[]> {
-    return api.post<AppNotification[]>(
-      `/notifications/generate${buildQuery({ target_date: targetDate })}`,
-      {},
-    )
+    return api.post<AppNotification[]>(`/notifications/generate${buildQuery({ targetDate })}`, {})
   },
 
   markSent(id: number): Promise<{ id: number; status: string; sentAt: string }> {

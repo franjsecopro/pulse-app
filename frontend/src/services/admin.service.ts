@@ -9,13 +9,13 @@ interface AdminUser {
 }
 
 interface DemoResetResult {
-  clients_count: number
+  clientsCount: number
   classes_count: number
-  reseed_at: string
+  reseedAt: string
 }
 
 interface DemoStatus {
-  demo_userId: number
+  demoUserId: number
 }
 
 export const adminService = {

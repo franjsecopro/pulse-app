@@ -17,7 +17,7 @@ export const accountingService = {
   getStatementHistory: () => api.get<StatementImportRecord[]>('/imports/history'),
 
   deleteStatementImport: (id: number) =>
-    api.delete<{ deleted: number; payments_deleted: number }>(`/imports/${id}`),
+    api.delete<{ deleted: number; paymentsDeleted: number }>(`/imports/${id}`),
 
   getReport: (month: number, year: number, clientId?: number | '') => {
     const params = new URLSearchParams({

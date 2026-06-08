@@ -425,7 +425,7 @@ function DemoTab({ t }: { t: (key: string, options?: Record<string, unknown>) =>
       const result = await adminService.demoReset()
       setResetResult(
         t('admin.demo.resetResult', {
-          clients: result.clients_count,
+          clients: result.clientsCount,
           classes: result.classes_count,
         }),
       )

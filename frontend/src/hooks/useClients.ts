@@ -31,7 +31,7 @@ export function useClients(search: string, filterActive: FilterActive) {
       const data = await clientService.getAll({
         search: search || undefined,
         isActive: isActive,
-        deleted_filter: deletedFilter,
+        deletedFilter: deletedFilter,
       })
       setClients(data.sort((a, b) => Number(b.isActive) - Number(a.isActive)))
     } finally {

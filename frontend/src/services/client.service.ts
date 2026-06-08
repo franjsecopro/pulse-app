@@ -5,12 +5,12 @@ export const clientService = {
   getAll: (params?: {
     search?: string
     isActive?: boolean
-    deleted_filter?: 'exclude' | 'include' | 'only'
+    deletedFilter?: 'exclude' | 'include' | 'only'
   }) => {
     const query = new URLSearchParams()
     if (params?.search) query.set('search', params.search)
     if (params?.isActive !== undefined) query.set('isActive', String(params.isActive))
-    if (params?.deleted_filter) query.set('deleted_filter', params.deleted_filter)
+    if (params?.deletedFilter) query.set('deletedFilter', params.deletedFilter)
     const qs = query.toString()
     return api.get<Client[]>(`/clients${qs ? `?${qs}` : ''}`)
   },
