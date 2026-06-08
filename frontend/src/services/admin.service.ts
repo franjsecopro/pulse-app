@@ -10,7 +10,7 @@ interface AdminUser {
 
 interface DemoResetResult {
   clientsCount: number
-  classes_count: number
+  classesCount: number
   reseedAt: string
 }
 

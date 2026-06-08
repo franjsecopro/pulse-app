@@ -8,8 +8,8 @@ interface ParsedTransaction {
   date: string
   concept: string
   amount: number
-  suggested_clientId: number | null
-  suggested_clientName: string | null
+  suggestedClientId: number | null
+  suggestedClientName: string | null
   matchType: string
   confidence: number
   alreadyImported: boolean
@@ -18,12 +18,12 @@ interface ParsedTransaction {
 interface ParseResponse {
   transactions: ParsedTransaction[]
   fileHash: string
-  file_alreadyimportedAt: string | null
+  fileAlreadyimportedAt: string | null
   duplicateCount: number
 }
 
 interface ParsedRow extends ParsedTransaction {
-  selected_clientId: number | null
+  selectedClientId: number | null
   skip: boolean
 }
 
@@ -95,12 +95,12 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
       const data = await api.postForm<ParseResponse>('/imports/statement', formData)
 
       setFileHash(data.fileHash)
-      setFileAlreadyImportedAt(data.file_alreadyimportedAt)
+      setFileAlreadyImportedAt(data.fileAlreadyimportedAt)
       setDuplicateCount(data.duplicateCount)
       setRows(
         data.transactions.map((row) => ({
           ...row,
-          selected_clientId: row.suggested_clientId,
+          selectedClientId: row.suggestedClientId,
           // Pre-check only matched rows that are NOT already imported.
           skip: row.matchType === 'none' || row.alreadyImported,
         })),
@@ -125,7 +125,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
           date: row.date,
           concept: row.concept,
           amount: row.amount,
-          clientId: row.selected_clientId,
+          clientId: row.selectedClientId,
         })),
         filename: fileName ?? 'extracto.csv',
         month,
@@ -336,14 +336,14 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
                       </td>
                       <td className='px-4 py-3'>
                         <select
-                          value={row.selected_clientId ?? ''}
+                          value={row.selectedClientId ?? ''}
                           onChange={(e) =>
                             setRows((prev) =>
                               prev.map((row) =>
                                 row.date + row.amount === rowKey
                                   ? {
                                       ...row,
-                                      selected_clientId: parseInt(e.target.value, 10) || null,
+                                      selectedClientId: parseInt(e.target.value, 10) || null,
                                     }
                                   : row,
                               ),

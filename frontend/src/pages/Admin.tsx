@@ -426,7 +426,7 @@ function DemoTab({ t }: { t: (key: string, options?: Record<string, unknown>) =>
       setResetResult(
         t('admin.demo.resetResult', {
           clients: result.clientsCount,
-          classes: result.classes_count,
+          classes: result.classesCount,
         }),
       )
     } finally {

@@ -128,7 +128,7 @@ beforeEach(() => {
   mockDemoExit.mockResolvedValue({} as never)
   mockDemoReset.mockResolvedValue({
     clientsCount: 1,
-    classes_count: 5,
+    classesCount: 5,
     reseedAt: '',
   } as never)
 })
