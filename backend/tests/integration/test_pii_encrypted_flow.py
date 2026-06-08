@@ -29,8 +29,8 @@ class TestEncryptedPiiEndToEndFlow:
         client_id = body["id"]
 
         assert body["email"] == "manuela@example.com"
-        assert body["whatsapp_phone"] == "+34 612 000 111"
-        assert body["tax_id"] == "12345678Z"
+        assert body["whatsappPhone"] == "+34 612 000 111"
+        assert body["taxId"] == "12345678Z"
         assert body["address"] == "Calle Mayor 1"
 
         raw_row = (

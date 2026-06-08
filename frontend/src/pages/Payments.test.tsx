@@ -11,6 +11,10 @@ vi.mock('../hooks/usePayments', () => ({
   usePayments: vi.fn(),
 }))
 
+vi.mock('../hooks/useAlerts', () => ({
+  useAlerts: vi.fn(),
+}))
+
 vi.mock('../components/payments/PaymentForm', () => ({
   PaymentForm: () => React.createElement('div', { 'data-testid': 'mock-payment-form' }),
 }))
@@ -23,10 +27,12 @@ vi.mock('../components/payments/ImportStatementModal', () => ({
 }))
 
 vi.mock('../components/payments/StatementHistoryView', () => ({
-  StatementHistoryView: () =>
-    React.createElement('div', {
+  StatementHistoryView: (props: Record<string, unknown>) => {
+    mockStatementHistoryViewProps = props
+    return React.createElement('div', {
       'data-testid': 'mock-statement-history-view',
-    }),
+    })
+  },
 }))
 
 vi.mock('../components/finance/FinanceFilters', () => ({
@@ -49,11 +55,13 @@ vi.mock('../i18n', () => ({
 }))
 
 import { useAuth } from '../context/AuthContext'
+import { useAlerts } from '../hooks/useAlerts'
 import { usePayments } from '../hooks/usePayments'
 import type { Payment } from '../types'
 
 const mockUseAuth = vi.mocked(useAuth)
 const mockUsePayments = vi.mocked(usePayments)
+const mockUseAlerts = vi.mocked(useAlerts)
 
 const mockCreatePayment = vi.fn()
 const mockUpdatePayment = vi.fn()
@@ -64,6 +72,8 @@ const mockGoToPage = vi.fn()
 const mockLoadStatementHistory = vi.fn()
 const mockHandleImported = vi.fn()
 const mockDeleteStatementImport = vi.fn()
+
+let mockStatementHistoryViewProps: Record<string, unknown> = {}
 
 function makePayment(overrides: Partial<Payment> = {}): Payment {
   return {
@@ -113,11 +123,13 @@ function renderPayments() {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockStatementHistoryViewProps = {}
   mockUseAuth.mockReturnValue({
     user: { id: 1, email: 'admin@test.com', role: 'admin' },
     isLoading: false,
   } as never)
   mockUsePayments.mockReturnValue(makeHook() as never)
+  mockUseAlerts.mockReturnValue({ alerts: [], isLoading: false, count: 0 } as never)
 })
 
 describe('Payments', () => {
@@ -258,6 +270,7 @@ describe('Payments', () => {
       await waitFor(() => {
         expect(screen.getByTestId('mock-statement-history-view')).toBeTruthy()
       })
+      expect(mockStatementHistoryViewProps.isAdmin).toBe(true)
     })
 
     it('passes isAdmin=false to StatementHistoryView when user role is not admin', async () => {
@@ -270,6 +283,7 @@ describe('Payments', () => {
       await waitFor(() => {
         expect(screen.getByTestId('mock-statement-history-view')).toBeTruthy()
       })
+      expect(mockStatementHistoryViewProps.isAdmin).toBe(false)
     })
   })
 })
