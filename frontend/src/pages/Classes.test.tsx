@@ -85,7 +85,7 @@ function makeHook(overrides: Partial<ReturnType<typeof useClasses>> = {}) {
     isLoading: false,
     isSyncing: false,
     pendingDeleteId: null,
-    totalRevenue: 0,
+    effectiveRevenue: 0,
     page: 1,
     pageCount: 1,
     totalCount: 0,

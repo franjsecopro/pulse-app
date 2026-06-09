@@ -227,10 +227,8 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
             className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm bg-white'
           >
             <option value='normal'>{t('classes.status.normalDesc')}</option>
-            <option value='cancelled_with_payment'>
-              {t('classes.status.cancelledPaymentDesc')}
-            </option>
-            <option value='cancelled_without_payment'>
+            <option value='cancelledWithPayment'>{t('classes.status.cancelledPaymentDesc')}</option>
+            <option value='cancelledWithoutPayment'>
               {t('classes.status.cancelledNoPaymentDesc')}
             </option>
           </select>

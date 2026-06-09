@@ -78,7 +78,7 @@ export interface BusinessProfile {
   fiscalAddress: string | null
 }
 
-export type ClassStatus = 'normal' | 'cancelled_with_payment' | 'cancelled_without_payment'
+export type ClassStatus = 'normal' | 'cancelledWithPayment' | 'cancelledWithoutPayment'
 
 export interface ClassSession {
   id: number

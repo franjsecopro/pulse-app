@@ -56,6 +56,18 @@
               {
                 "selector": { "kind": "variable" },
                 "match": "hh|mm|sh|sm|eh|em|id|db|qs|[ijethmkvd]|(.{3,})"
+              },
+              {
+                "selector": { "kind": "class" },
+                "match": ".+"
+              },
+              {
+                "selector": { "kind": "typeLike" },
+                "match": ".+"
+              },
+              {
+                "selector": { "kind": "objectLiteralMember" },
+                "match": ".+"
               }
             ]
           }

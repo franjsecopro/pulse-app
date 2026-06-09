@@ -93,25 +93,33 @@ export function DateRangeMode({
             <div
               className={`flex gap-1 bg-slate-100 p-1 rounded-lg ${modeLocked ? 'opacity-60' : ''}`}
               role='radiogroup'
+              aria-label={t('notifications.mode.label')}
               aria-disabled={modeLocked}
             >
-              {(['day', 'week', 'month'] as const).map((m) => (
-                <button
-                  key={m}
-                  type='button'
-                  role='radio'
-                  aria-checked={mode === m}
-                  disabled={modeLocked}
-                  onClick={() => onModeChange?.(m)}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors disabled:cursor-not-allowed ${
-                    mode === m
-                      ? 'bg-white text-indigo-600 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-800'
-                  }`}
-                >
-                  {t(`notifications.mode.${m}`)}
-                </button>
-              ))}
+              {(['day', 'week', 'month'] as const).map((m) => {
+                const isSelected = mode === m
+                return (
+                  <label
+                    key={m}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      isSelected
+                        ? 'bg-white text-indigo-600 shadow-sm'
+                        : 'text-slate-600 hover:text-slate-800'
+                    } ${modeLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    <input
+                      type='radio'
+                      name='date-range-mode'
+                      value={m}
+                      checked={isSelected}
+                      disabled={modeLocked}
+                      onChange={() => onModeChange?.(m)}
+                      className='sr-only'
+                    />
+                    {t(`notifications.mode.${m}`)}
+                  </label>
+                )
+              })}
             </div>
           </div>
         )}

@@ -3,7 +3,8 @@
  *
  * Key behaviors:
  *  - requestDelete / cancelDelete manage pendingDeleteId
- *  - totalRevenue sums class totalAmounts (null treated as 0)
+ *  - effectiveRevenue sums class totalAmounts (null treated as 0,
+ *    cancelledWithoutPayment excluded per business policy)
  *  - filters (month, year, client) are forwarded to classService.getAll
  */
 import { act, renderHook, waitFor } from '@testing-library/react'
@@ -78,14 +79,14 @@ describe('requestDelete / cancelDelete', () => {
   })
 })
 
-// ─── totalRevenue ─────────────────────────────────────────────────────────────
+// ─── effectiveRevenue ────────────────────────────────────────────────────────
 
-describe('totalRevenue', () => {
-  it('sums totalAmount across all loaded classes', async () => {
+describe('effectiveRevenue', () => {
+  it('sums totalAmount across normal and cancelledWithPayment classes', async () => {
     mockGetAllClasses.mockResolvedValue({
       data: [
-        { id: 1, totalAmount: 40.0 },
-        { id: 2, totalAmount: 20.0 },
+        { id: 1, totalAmount: 40.0, status: 'normal' },
+        { id: 2, totalAmount: 20.0, status: 'cancelledWithPayment' },
       ] as never,
       total: 2,
     })
@@ -94,14 +95,14 @@ describe('totalRevenue', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    expect(result.current.totalRevenue).toBe(60.0)
+    expect(result.current.effectiveRevenue).toBe(60.0)
   })
 
   it('treats null totalAmount as 0', async () => {
     mockGetAllClasses.mockResolvedValue({
       data: [
-        { id: 1, totalAmount: null },
-        { id: 2, totalAmount: 30.0 },
+        { id: 1, totalAmount: null, status: 'normal' },
+        { id: 2, totalAmount: 30.0, status: 'normal' },
       ] as never,
       total: 2,
     })
@@ -110,7 +111,7 @@ describe('totalRevenue', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    expect(result.current.totalRevenue).toBe(30.0)
+    expect(result.current.effectiveRevenue).toBe(30.0)
   })
 
   it('returns 0 when class list is empty', async () => {
@@ -118,7 +119,24 @@ describe('totalRevenue', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    expect(result.current.totalRevenue).toBe(0)
+    expect(result.current.effectiveRevenue).toBe(0)
+  })
+
+  it('excludes cancelledWithoutPayment classes from the total', async () => {
+    mockGetAllClasses.mockResolvedValue({
+      data: [
+        { id: 1, totalAmount: 50.0, status: 'normal' },
+        { id: 2, totalAmount: 30.0, status: 'cancelledWithoutPayment' },
+        { id: 3, totalAmount: 20.0, status: 'cancelledWithPayment' },
+      ] as never,
+      total: 3,
+    })
+
+    const { result } = renderHook(() => useClasses(defaultFilters))
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    expect(result.current.effectiveRevenue).toBe(70.0)
   })
 })
 

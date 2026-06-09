@@ -1,0 +1,143 @@
+{
+  "_comment": "PRE-INSTALLED CONFIG for opencode-plugin-preload-skills. Rename to preload-skills.json to activate. See https://github.com/juhas96/opencode-plugin-preload-skills",
+
+  "_stack_audit": {
+    "front": "React 18.3.1 + TypeScript 5.6.3 + Vite 6 + Vitest 4.1.4 + RTL 16.3.2 + Tailwind 3.4.15 (in frontend/)",
+    "back": "FastAPI 0.115.0 + SQLAlchemy 2.0.35 + Pydantic 2.9 + Alembic + asyncpg + pdfplumber + pytest 9.0.3 + pytest-asyncio + httpx (in backend/)",
+    "db": "PostgreSQL (Supabase in production) with Fernet AES-128-CBC PII encryption"
+  },
+
+  "_always_on": {
+    "comment": "Skills loaded on every session start. Keep this list small — these consume context tokens every message.",
+    "skills": []
+  },
+
+  "fileTypeSkills": {
+    ".tsx,.ts": [
+      "vercel-react-best-practices",
+      "design-engineering"
+    ],
+    ".py": [
+      "supabase-postgres-best-practices"
+    ],
+    ".sql": [
+      "supabase-postgres-best-practices"
+    ],
+    ".css,.scss,.pcss": [
+      "design-engineering"
+    ]
+  },
+
+  "pathPatterns": {
+    "frontend/src/components/**": [
+      "design-engineering"
+    ],
+    "frontend/src/hooks/**": [
+      "vercel-react-best-practices"
+    ],
+    "frontend/src/**": [
+      "design-engineering"
+    ],
+    "backend/app/api/**": [
+      "supabase-postgres-best-practices"
+    ],
+    "backend/app/models/**": [
+      "supabase-postgres-best-practices"
+    ],
+    "backend/app/schemas/**": [
+      "supabase-postgres-best-practices"
+    ],
+    "backend/app/services/**": [
+      "supabase-postgres-best-practices"
+    ],
+    "backend/tests/**": [
+      "supabase-postgres-best-practices"
+    ]
+  },
+
+  "contentTriggers": {
+    "design|UI|component|tailwind|css|polish|audit|anti-slop|motion|animation": [
+      "design-engineering"
+    ],
+    "react|hook|useState|useEffect|useMemo|jsx|tsx": [
+      "vercel-react-best-practices"
+    ],
+    "database|query|sqlalchemy|alembic|migration|asyncpg|postgres|fernet": [
+      "supabase-postgres-best-practices"
+    ],
+    "vitest|jest|test|coverage|mock|spy": [
+      "web-testing-vitest"
+    ],
+    "a11y|accessibility|aria|wcag|focus|contrast": [
+      "web-design-guidelines"
+    ],
+    "secret|api[_-]?key|password|token|credential|.env": [
+      "secret-leak-detector"
+    ]
+  },
+
+  "groups": {
+    "comment": "Skill bundles for easier reference",
+    "frontend": [
+      "vercel-react-best-practices",
+      "design-engineering",
+      "web-testing-vitest"
+    ],
+    "backend": [
+      "supabase-postgres-best-practices"
+    ],
+    "ui-design": [
+      "design-engineering",
+      "vercel-react-view-transitions",
+      "web-design-guidelines"
+    ],
+    "database": [
+      "supabase-postgres-best-practices"
+    ]
+  },
+
+  "conditionalSkills": [
+    {
+      "skill": "vercel-react-best-practices",
+      "if": { "fileExists": "frontend/package.json" }
+    },
+    {
+      "skill": "supabase-postgres-best-practices",
+      "if": { "fileExists": "backend/requirements.txt" }
+    },
+    {
+      "skill": "design-engineering",
+      "if": { "fileExists": "frontend/package.json" }
+    }
+  ],
+
+  "skillSettings": {
+    "design-engineering": {
+      "useSummary": false
+    },
+    "vercel-react-best-practices": {
+      "useSummary": false
+    },
+    "supabase-postgres-best-practices": {
+      "useSummary": false
+    }
+  },
+
+  "injectionMethod": "systemPrompt",
+
+  "maxTokens": 12000,
+
+  "useSummaries": false,
+
+  "useMinification": "standard",
+
+  "showToasts": true,
+
+  "enableTools": true,
+
+  "analytics": true,
+
+  "persistAfterCompaction": true,
+
+  "debug": false
+}

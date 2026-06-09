@@ -22,7 +22,12 @@ export function formatMonthLabels(alerts: Alert[], monthNames: string[]): string
   })
 
   const labels = unique.map(({ month, year }) => `${monthNames[month - 1]} ${year}`)
-  if (labels.length === 1) return labels[0]!
-  if (labels.length === 2) return `${labels[0]} y ${labels[1]}`
-  return `${labels.slice(0, -1).join(', ')} y ${labels[labels.length - 1]}`
+
+  if (labels.length === 0) return ''
+  if (labels.length === 1) return labels.join('')
+  if (labels.length === 2) return labels.join(' y ')
+
+  const head = labels.slice(0, -1)
+  const last = labels[labels.length - 1]
+  return `${head.join(', ')} y ${last ?? ''}`
 }

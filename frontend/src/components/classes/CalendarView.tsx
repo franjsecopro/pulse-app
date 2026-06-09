@@ -3,6 +3,7 @@ import { useTranslation } from '../../i18n'
 import type { ClassSession } from '../../types'
 import { formatTimeRange } from '../../utils/formatters'
 import { Button } from '../ui/Button'
+import { chipClassFor, STATUS_OVERLAY, sumEffectiveTotal } from './constants'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -103,10 +104,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           const dayClasses = byDate[key] ?? []
           const visibleClasses = dayClasses.slice(0, MAX_VISIBLE)
           const hiddenCount = dayClasses.length - MAX_VISIBLE
-          const total = dayClasses.reduce(
-            (sum, classSession) => sum + (classSession.totalAmount ?? 0),
-            0,
-          )
+          const total = sumEffectiveTotal(dayClasses)
 
           return (
             <div
@@ -132,19 +130,28 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
               </div>
 
               <div className='flex flex-col gap-0.5'>
-                {visibleClasses.map((classSession) => (
-                  <Button
-                    type='button'
-                    key={classSession.id}
-                    onClick={() => onEdit(classSession)}
-                    onMouseEnter={(e) => handleChipEnter(e, classSession)}
-                    onMouseLeave={() => setTooltip(null)}
-                    className={`w-full text-left text-[10px] font-semibold px-1.5 py-0.5 rounded border truncate
-                      hover:opacity-80 transition-opacity ${clientColor(classSession.clientId)}`}
-                  >
-                    {classSession.contractDescription ?? classSession.clientName ?? '?'}
-                  </Button>
-                ))}
+                {visibleClasses.map((classSession) => {
+                  const overlay = STATUS_OVERLAY[classSession.status]
+                  return (
+                    <Button
+                      type='button'
+                      key={classSession.id}
+                      onClick={() => onEdit(classSession)}
+                      onMouseEnter={(e) => handleChipEnter(e, classSession)}
+                      onMouseLeave={() => setTooltip(null)}
+                      className={`w-full text-left text-[10px] font-semibold px-1.5 py-0.5 rounded border truncate
+                        hover:opacity-80 transition-opacity ${chipClassFor(clientColor(classSession.clientId), classSession.status)}`}
+                    >
+                      {overlay.strike ? (
+                        <span className='line-through'>
+                          {classSession.contractDescription ?? classSession.clientName ?? '?'}
+                        </span>
+                      ) : (
+                        (classSession.contractDescription ?? classSession.clientName ?? '?')
+                      )}
+                    </Button>
+                  )
+                })}
 
                 {hiddenCount > 0 && (
                   <Button
@@ -181,6 +188,18 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           }}
           className='w-48 bg-slate-800 text-white text-[10px] rounded-lg p-2 shadow-xl pointer-events-none'
         >
+          {tooltip.class.status !== 'normal' &&
+            (() => {
+              const overlay = STATUS_OVERLAY[tooltip.class.status]
+              return (
+                <p
+                  className={`mb-1 pb-1 border-b border-slate-700 flex items-center gap-1 font-semibold ${overlay.iconClass}`}
+                >
+                  <span className='material-symbols-outlined text-[12px]'>{overlay.icon}</span>
+                  {t(overlay.labelKey)}
+                </p>
+              )
+            })()}
           <p className='font-bold text-slate-200 truncate'>{tooltip.class.clientName}</p>
           {tooltip.class.contractDescription && (
             <p className='text-slate-400 truncate'>{tooltip.class.contractDescription}</p>

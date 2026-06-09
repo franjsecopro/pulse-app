@@ -1,6 +1,7 @@
 import { useTranslation } from '../../i18n'
 import type { ClassSession } from '../../types'
 import { Button } from '../ui/Button'
+import { chipClassFor, STATUS_OVERLAY } from './constants'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -116,39 +117,52 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
           <p className='text-xs font-bold text-slate-400 uppercase tracking-wider'>
             {t('dayView.untimed')}
           </p>
-          {untimedClasses.map((classSession) => (
-            <div
-              key={classSession.id}
-              className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${clientColor(classSession.clientId)}`}
-            >
-              <div>
-                <span className='font-semibold'>
-                  {classSession.contractDescription ?? classSession.clientName}
-                </span>
-                <span className='ml-2 opacity-60 text-xs'>
-                  {classSession.durationHours}h · €{(classSession.totalAmount ?? 0).toFixed(0)}
-                </span>
+          {untimedClasses.map((classSession) => {
+            const overlay = STATUS_OVERLAY[classSession.status]
+            return (
+              <div
+                key={classSession.id}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${chipClassFor(clientColor(classSession.clientId), classSession.status)}`}
+              >
+                <div className='flex items-center gap-2 min-w-0'>
+                  {overlay.icon && (
+                    <span
+                      className={`material-symbols-outlined text-base shrink-0 ${overlay.iconClass}`}
+                      title={t(overlay.labelKey)}
+                    >
+                      {overlay.icon}
+                    </span>
+                  )}
+                  <div className='min-w-0'>
+                    <span className={`font-semibold ${overlay.strike ? 'line-through' : ''}`}>
+                      {classSession.contractDescription ?? classSession.clientName}
+                    </span>
+                    <span className='ml-2 opacity-60 text-xs'>
+                      {classSession.durationHours}h · €{(classSession.totalAmount ?? 0).toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <Button
+                    type='button'
+                    onClick={() => onEdit(classSession)}
+                    className='p-1 rounded hover:bg-black/10 transition-colors text-slate-500 hover:text-slate-800'
+                    title={t('classes.edit')}
+                  >
+                    <span className='material-symbols-outlined text-sm'>edit</span>
+                  </Button>
+                  <Button
+                    type='button'
+                    onClick={() => onDelete(classSession.id)}
+                    className='p-1 rounded hover:bg-black/10 transition-colors text-red-400 hover:text-red-600'
+                    title={t('classes.delete')}
+                  >
+                    <span className='material-symbols-outlined text-sm'>delete</span>
+                  </Button>
+                </div>
               </div>
-              <div className='flex items-center gap-1'>
-                <Button
-                  type='button'
-                  onClick={() => onEdit(classSession)}
-                  className='p-1 rounded hover:bg-black/10 transition-colors text-slate-500 hover:text-slate-800'
-                  title={t('classes.edit')}
-                >
-                  <span className='material-symbols-outlined text-sm'>edit</span>
-                </Button>
-                <Button
-                  type='button'
-                  onClick={() => onDelete(classSession.id)}
-                  className='p-1 rounded hover:bg-black/10 transition-colors text-red-400 hover:text-red-600'
-                  title={t('classes.delete')}
-                >
-                  <span className='material-symbols-outlined text-sm'>delete</span>
-                </Button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -181,11 +195,12 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
             const height = getHeight(classItem.durationHours)
             const widthPct = 100 / totalColumns
             const leftPct = columnIndex * widthPct
+            const overlay = STATUS_OVERLAY[classItem.status]
 
             return (
               <div
                 key={classItem.id}
-                className={`absolute rounded-lg border px-2 py-1 overflow-hidden group/block ${clientColor(classItem.clientId)}`}
+                className={`absolute rounded-lg border px-2 py-1 overflow-hidden group/block ${chipClassFor(clientColor(classItem.clientId), classItem.status)}`}
                 style={{
                   top,
                   height,
@@ -198,7 +213,17 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                   onClick={() => onEdit(classItem)}
                   className='cursor-pointer h-full pr-10 border-0 bg-transparent w-full text-left'
                 >
-                  <p className='text-[11px] font-bold truncate leading-tight'>
+                  {overlay.icon && (
+                    <span
+                      className={`material-symbols-outlined text-[12px] ${overlay.iconClass}`}
+                      title={t(overlay.labelKey)}
+                    >
+                      {overlay.icon}
+                    </span>
+                  )}{' '}
+                  <p
+                    className={`text-[11px] font-bold truncate leading-tight inline ${overlay.strike ? 'line-through' : ''}`}
+                  >
                     {classItem.contractDescription ?? classItem.clientName}
                   </p>
                   {height >= 40 && (

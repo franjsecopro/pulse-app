@@ -37,7 +37,7 @@ export function Classes() {
     isLoading,
     isSyncing,
     pendingDeleteId,
-    totalRevenue,
+    effectiveRevenue,
     page,
     pageCount,
     totalCount,
@@ -181,7 +181,7 @@ export function Classes() {
         </select>
         {classes.length > 0 && (
           <div className='ml-auto bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary'>
-            {t('classes.totalRevenue', { amount: totalRevenue.toFixed(2) })}
+            {t('classes.totalRevenue', { amount: effectiveRevenue.toFixed(2) })}
           </div>
         )}
       </div>

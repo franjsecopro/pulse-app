@@ -94,9 +94,9 @@ export function AlertsDrawer({ isOpen, onClose, alerts, isLoading, title }: Aler
               <p className='text-slate-500 text-sm mt-1'>{t('alerts.drawer.empty')}</p>
             </div>
           ) : (
-            alerts.map((alert, i) => (
+            alerts.map((alert) => (
               <AlertItem
-                key={`${alert.type}-${alert.clientId ?? 'sys'}-${i}`}
+                key={`${alert.type}-${alert.clientId ?? 'sys'}`}
                 alert={alert}
                 months={months}
               />

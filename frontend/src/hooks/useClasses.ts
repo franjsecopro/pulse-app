@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { sumEffectiveTotal } from '../components/classes/constants'
 import { useToast } from '../context/ToastContext'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
@@ -99,7 +100,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     }
   }
 
-  const totalRevenue = classes.reduce((sum, c) => sum + (c.totalAmount ?? 0), 0)
+  const effectiveRevenue = sumEffectiveTotal(classes)
   const pageCount = Math.ceil(totalCount / PAGE_LIMIT)
 
   return {
@@ -108,7 +109,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     isLoading,
     isSyncing,
     pendingDeleteId,
-    totalRevenue,
+    effectiveRevenue,
     page,
     pageCount,
     totalCount,

@@ -288,11 +288,9 @@ function HistoryTab({ t }: { t: (key: string, options?: Record<string, unknown>)
       mode,
       date,
       status: filters.status === 'all' ? undefined : filters.status,
-      // biome-ignore lint/style/useNamingConvention: matches backend query param
       clientId: filters.clientId === 'all' ? undefined : filters.clientId,
       channel: filters.channel === 'all' ? undefined : filters.channel,
       page,
-      // biome-ignore lint/style/useNamingConvention: matches backend query param
       pageSize: DefaultHistoryPageSize,
     }),
     [mode, date, filters, page],
