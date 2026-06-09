@@ -37,7 +37,7 @@ export function Classes() {
     isLoading,
     isSyncing,
     pendingDeleteId,
-    effectiveRevenue,
+    classStats,
     page,
     pageCount,
     totalCount,
@@ -179,9 +179,9 @@ export function Classes() {
             </option>
           ))}
         </select>
-        {classes.length > 0 && (
+        {classStats.count > 0 && (
           <div className='ml-auto bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary'>
-            {t('classes.totalRevenue', { amount: effectiveRevenue.toFixed(2) })}
+            {t('classes.totalRevenue', { amount: classStats.totalRevenue.toFixed(2) })}
           </div>
         )}
       </div>
@@ -285,7 +285,7 @@ export function Classes() {
                           €{classSession.hourlyRate}/{t('common.units.hoursShort')}
                         </td>
                         <td className='px-6 py-4 font-bold text-slate-900'>
-                          €{(classSession.totalAmount ?? 0).toFixed(2)}
+                          €{(classSession.effectiveRevenue ?? 0).toFixed(2)}
                         </td>
                         <td className='px-6 py-4'>
                           {classSession.status !== 'normal' ? (

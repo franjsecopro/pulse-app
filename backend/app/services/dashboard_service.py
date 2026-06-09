@@ -9,6 +9,7 @@ from app.schemas.dashboard import (
     UpcomingClassItem,
     UpcomingClassesResponse,
 )
+from app.services.class_revenue import effective_revenue
 
 
 class DashboardService:
@@ -59,7 +60,7 @@ class DashboardService:
                 class_date=c.class_date.isoformat(),
                 class_time=c.class_time.isoformat() if c.class_time else None,
                 duration_hours=c.duration_hours,
-                total_amount=round(c.duration_hours * c.hourly_rate, 2),
+                effective_revenue=effective_revenue(c),
                 status=c.status,
             )
 

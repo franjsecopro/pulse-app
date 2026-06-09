@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { sumEffectiveTotal } from '../components/classes/constants'
 import { useToast } from '../context/ToastContext'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
-import type { ClassSession, Client } from '../types'
+import type { ClassSession, ClassStats, Client } from '../types'
 
 const PAGE_LIMIT = 100
 
@@ -23,6 +22,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const [page, setPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [classStats, setClassStats] = useState<ClassStats>({ count: 0, totalRevenue: 0 })
 
   const loadClasses = useCallback(
     async (targetPage = 1) => {
@@ -42,13 +42,31 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     [filterMonth, filterYear, filterClient],
   )
 
+  const loadClassStats = useCallback(async () => {
+    const stats = await classService.getStats({
+      month: filterMonth,
+      year: filterYear,
+      clientId: filterClient || undefined,
+    })
+    setClassStats(stats)
+  }, [filterMonth, filterYear, filterClient])
+
   useEffect(() => {
     clientService.getAll().then(setClients)
   }, [])
 
   useEffect(() => {
     loadClasses(1)
-  }, [loadClasses])
+    loadClassStats()
+  }, [loadClasses, loadClassStats])
+
+  const reloadAll = useCallback(
+    async (targetPage: number = page) => {
+      await loadClasses(targetPage)
+      await loadClassStats()
+    },
+    [loadClasses, loadClassStats, page],
+  )
 
   const goToPage = (n: number) => loadClasses(n)
 
@@ -56,7 +74,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     try {
       await classService.create(data as Parameters<typeof classService.create>[0])
       addToast('toasts.classCreated', 'success')
-      loadClasses(page)
+      reloadAll()
     } catch {
       addToast('toasts.classCreateError', 'error')
     }
@@ -66,7 +84,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     try {
       await classService.update(id, data)
       addToast('toasts.classUpdated', 'success')
-      loadClasses(page)
+      reloadAll()
     } catch {
       addToast('toasts.classUpdateError', 'error')
     }
@@ -84,7 +102,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
       addToast('toasts.classDeleteError', 'error')
     } finally {
       setPendingDeleteId(null)
-      loadClasses(page)
+      reloadAll()
     }
   }
 
@@ -100,7 +118,6 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     }
   }
 
-  const effectiveRevenue = sumEffectiveTotal(classes)
   const pageCount = Math.ceil(totalCount / PAGE_LIMIT)
 
   return {
@@ -109,7 +126,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     isLoading,
     isSyncing,
     pendingDeleteId,
-    effectiveRevenue,
+    classStats,
     page,
     pageCount,
     totalCount,

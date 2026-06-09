@@ -204,9 +204,9 @@ class TestUpdate:
         [cls] = await _seed(db, _class(status="normal"))
         repo = ClassRepository(db)
 
-        updated = await repo.update(cls, ClassUpdateRequest(status="cancelled_with_payment"))
+        updated = await repo.update(cls, ClassUpdateRequest(status="cancelledWithPayment"))
 
-        assert updated.status == "cancelled_with_payment"
+        assert updated.status == "cancelledWithPayment"
 
 
 # ─── delete ──────────────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@ class TestGetMonthlyTotals:
             _class(client_id=10, duration_hours=2.0, hourly_rate=20.0, class_date="2026-04-10"),  # €40 — counted
             _class(
                 client_id=10, duration_hours=1.0, hourly_rate=20.0, class_date="2026-04-15",
-                status="cancelled_without_payment"
+                status="cancelledWithoutPayment"
             ),  # €20 — excluded
         )
         repo = ClassRepository(db)
@@ -255,12 +255,12 @@ class TestGetMonthlyTotals:
         assert totals[10] == 40.0
 
     async def test_includes_cancelled_with_payment(self, db: AsyncSession):
-        """cancelled_with_payment classes ARE billed — should be counted."""
+        """cancelledWithPayment classes ARE billed — should be counted."""
         await _seed(
             db,
             _class(
                 client_id=10, duration_hours=1.0, hourly_rate=20.0, class_date="2026-04-10",
-                status="cancelled_with_payment"
+                status="cancelledWithPayment"
             ),
         )
         repo = ClassRepository(db)

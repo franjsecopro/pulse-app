@@ -170,7 +170,7 @@ export function Dashboard() {
                           <p className='text-xs text-slate-400'>
                             {classSession.durationHours ?? '—'}
                             {t('common.units.hoursShort')} · €
-                            {(classSession.totalAmount ?? 0).toFixed(2)}
+                            {(classSession.effectiveRevenue ?? 0).toFixed(2)}
                           </p>
                         </div>
                       </li>

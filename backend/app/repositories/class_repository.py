@@ -7,6 +7,7 @@ from sqlalchemy.orm import joinedload
 from app.models.class_ import Class
 from app.models.contract import Contract
 from app.schemas.class_ import ClassCreateRequest, ClassUpdateRequest
+from app.services.class_revenue import EXCLUDED_FROM_REVENUE
 
 
 class ClassRepository:
@@ -99,18 +100,47 @@ class ClassRepository:
 
     async def get_monthly_totals(self, user_id: int, year: int, month: int) -> dict[int, float]:
         """Returns a mapping of client_id -> total billable amount for the given month.
-        Excludes cancelled_without_payment classes (those are not charged)."""
+        Excludes statuses in `EXCLUDED_FROM_REVENUE` (see app.services.class_revenue)."""
         result = await self._db.execute(
             select(Class.client_id, func.sum(Class.duration_hours * Class.hourly_rate))
             .where(
                 Class.user_id == user_id,
                 extract("month", Class.class_date) == month,
                 extract("year", Class.class_date) == year,
-                Class.status != "cancelled_without_payment",
+                Class.status.notin_(EXCLUDED_FROM_REVENUE),
             )
             .group_by(Class.client_id)
         )
         return {row[0]: row[1] for row in result.all()}
+
+    async def get_stats(
+        self,
+        user_id: int,
+        year: int,
+        month: int,
+        client_id: Optional[int] = None,
+    ) -> dict[str, float | int]:
+        count_result = await self._db.execute(
+            select(func.count())
+            .select_from(
+                self._base_filter(user_id, client_id=client_id, month=month, year=year).subquery()
+            )
+        )
+        count = count_result.scalar_one()
+
+        revenue_result = await self._db.execute(
+            select(func.coalesce(func.sum(Class.duration_hours * Class.hourly_rate), 0.0))
+            .where(
+                Class.user_id == user_id,
+                Class.status.notin_(EXCLUDED_FROM_REVENUE),
+                extract("month", Class.class_date) == month,
+                extract("year", Class.class_date) == year,
+                *([Class.client_id == client_id] if client_id else []),
+            )
+        )
+        total_revenue = round(float(revenue_result.scalar_one()), 2)
+
+        return {"count": count, "total_revenue": total_revenue}
 
     async def count_current_month(self, user_id: int) -> int:
         now = datetime.now(timezone.utc)

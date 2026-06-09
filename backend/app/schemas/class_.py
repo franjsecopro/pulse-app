@@ -44,4 +44,9 @@ class ClassResponse(BaseSchema):
     google_calendar_id: Optional[str] = None
     client_name: Optional[str] = None
     contract_description: Optional[str] = None
-    total_amount: Optional[float] = None
+    effective_revenue: Optional[float] = None
+
+
+class ClassStatsResponse(BaseSchema):
+    count: int
+    total_revenue: float

@@ -10,8 +10,9 @@ from app.models.class_ import Class
 from app.models.user import User
 from app.repositories.class_repository import ClassRepository
 from app.repositories.google_auth_repository import GoogleAuthRepository
-from app.schemas.class_ import ClassCreateRequest, ClassUpdateRequest, ClassResponse
+from app.schemas.class_ import ClassCreateRequest, ClassUpdateRequest, ClassResponse, ClassStatsResponse
 from app.services import class_calendar_service
+from app.services.class_revenue import effective_revenue
 
 router = APIRouter(prefix="/classes", tags=["classes"])
 
@@ -20,7 +21,7 @@ def _build_response(class_: object) -> ClassResponse:
     data = ClassResponse.model_validate(class_)
     data.client_name = class_.client.name if class_.client else None
     data.contract_description = class_.contract.description if class_.contract else None
-    data.total_amount = round(class_.duration_hours * class_.hourly_rate, 2)
+    data.effective_revenue = effective_revenue(class_)
     return data
 
 
@@ -56,6 +57,21 @@ async def create_class(
     class_ = await repo.get_by_id(class_.id, current_user.id)
     background_tasks.add_task(class_calendar_service.sync_create, class_.id, current_user.id)
     return _build_response(class_)
+
+
+@router.get("/stats", response_model=ClassStatsResponse)
+async def get_class_stats(
+    month: int = Query(..., ge=1, le=12),
+    year: int = Query(...),
+    client_id: Optional[int] = Query(None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    repo = ClassRepository(db)
+    stats = await repo.get_stats(
+        current_user.id, year=year, month=month, client_id=client_id
+    )
+    return ClassStatsResponse(**stats)
 
 
 @router.get("/{class_id}", response_model=ClassResponse)

@@ -73,7 +73,7 @@ function makeClass(overrides: Partial<ClassSession> = {}): ClassSession {
     createdAt: '2026-06-01',
     clientName: 'Juan García',
     contractDescription: null,
-    totalAmount: 45,
+    effectiveRevenue: 45,
     ...overrides,
   }
 }
@@ -85,7 +85,7 @@ function makeHook(overrides: Partial<ReturnType<typeof useClasses>> = {}) {
     isLoading: false,
     isSyncing: false,
     pendingDeleteId: null,
-    effectiveRevenue: 0,
+    classStats: { count: 0, totalRevenue: 0 },
     page: 1,
     pageCount: 1,
     totalCount: 0,
@@ -196,6 +196,24 @@ describe('Classes', () => {
       render(<Classes />)
       expect(screen.getByText('Juan García')).toBeTruthy()
       expect(screen.getByTestId('mock-pagination')).toBeTruthy()
+    })
+
+    it('shows the total revenue from classStats when there are classes', () => {
+      mockUseClasses.mockReturnValue(
+        makeHook({
+          classes: [makeClass()],
+          totalCount: 1,
+          classStats: { count: 25, totalRevenue: 1234.56 },
+        }) as never,
+      )
+      render(<Classes />)
+      expect(screen.getByText('classes.totalRevenue')).toBeTruthy()
+    })
+
+    it('hides the total revenue chip when classStats.count is 0', () => {
+      mockUseClasses.mockReturnValue(makeHook() as never)
+      render(<Classes />)
+      expect(screen.queryByText('classes.totalRevenue')).toBeNull()
     })
   })
 

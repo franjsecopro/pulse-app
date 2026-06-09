@@ -1,4 +1,4 @@
-import type { ClassSession } from '../types'
+import type { ClassSession, ClassStats } from '../types'
 import { api } from './api'
 
 export const classService = {
@@ -17,6 +17,14 @@ export const classService = {
     if (params?.offset != null) query.set('offset', String(params.offset))
     const qs = query.toString()
     return api.getPageable<ClassSession[]>(`/classes${qs ? `?${qs}` : ''}`)
+  },
+
+  getStats: (params: { month: number; year: number; clientId?: number | '' }) => {
+    const query = new URLSearchParams()
+    query.set('month', String(params.month))
+    query.set('year', String(params.year))
+    if (params.clientId) query.set('clientId', String(params.clientId))
+    return api.get<ClassStats>(`/classes/stats?${query.toString()}`)
   },
 
   create: (data: {

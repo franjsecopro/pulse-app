@@ -138,7 +138,8 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                       {classSession.contractDescription ?? classSession.clientName}
                     </span>
                     <span className='ml-2 opacity-60 text-xs'>
-                      {classSession.durationHours}h · €{(classSession.totalAmount ?? 0).toFixed(0)}
+                      {classSession.durationHours}h · €
+                      {(classSession.effectiveRevenue ?? 0).toFixed(0)}
                     </span>
                   </div>
                 </div>
@@ -229,7 +230,7 @@ export function DayView({ date, classes, onEdit, onNewClass, onDelete }: DayView
                   {height >= 40 && (
                     <p className='text-[10px] opacity-70 truncate'>
                       {classItem.classTime?.slice(0, 5)} · {classItem.durationHours}h · €
-                      {(classItem.totalAmount ?? 0).toFixed(0)}
+                      {(classItem.effectiveRevenue ?? 0).toFixed(0)}
                     </p>
                   )}
                 </Button>

@@ -122,7 +122,7 @@ class TestCreateClass:
         assert body["id"] is not None
         assert body["client_id"] == CLIENT_ID
 
-    async def test_total_amount_is_computed_correctly(self, app_client: AsyncClient):
+    async def test_effective_revenue_is_computed_correctly(self, app_client: AsyncClient):
         response = await app_client.post("/api/classes", json={
             "client_id": CLIENT_ID,
             "contract_id": CONTRACT_ID,
@@ -132,7 +132,37 @@ class TestCreateClass:
         })
 
         assert response.status_code == 201
-        assert response.json()["total_amount"] == 50.0
+        assert response.json()["effectiveRevenue"] == 50.0
+
+    async def test_effective_revenue_is_zero_for_cancelled_without_payment(
+        self, app_client: AsyncClient
+    ):
+        response = await app_client.post("/api/classes", json={
+            "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
+            "class_date": "2026-04-10",
+            "duration_hours": 2.0,
+            "hourly_rate": 25.0,
+            "status": "cancelledWithoutPayment",
+        })
+
+        assert response.status_code == 201
+        assert response.json()["effectiveRevenue"] == 0.0
+
+    async def test_effective_revenue_is_full_for_cancelled_with_payment(
+        self, app_client: AsyncClient
+    ):
+        response = await app_client.post("/api/classes", json={
+            "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
+            "class_date": "2026-04-10",
+            "duration_hours": 2.0,
+            "hourly_rate": 25.0,
+            "status": "cancelledWithPayment",
+        })
+
+        assert response.status_code == 201
+        assert response.json()["effectiveRevenue"] == 50.0
 
     async def test_created_class_appears_in_list(self, app_client: AsyncClient):
         await app_client.post("/api/classes", json={
@@ -195,13 +225,13 @@ class TestUpdateClass:
         assert response.status_code == 200
         assert response.json()["hourly_rate"] == 30.0
 
-    async def test_update_recomputes_total_amount(self, db: AsyncSession, app_client: AsyncClient):
+    async def test_update_recomputes_effective_revenue(self, db: AsyncSession, app_client: AsyncClient):
         [cls] = await _seed(db, _class(duration_hours=2.0, hourly_rate=20.0))
 
         response = await app_client.put(f"/api/classes/{cls.id}", json={"hourly_rate": 30.0})
 
         assert response.status_code == 200
-        assert response.json()["total_amount"] == 60.0
+        assert response.json()["effectiveRevenue"] == 60.0
 
     async def test_update_404_for_unknown_class(self, app_client: AsyncClient):
         response = await app_client.put("/api/classes/99999", json={"hourly_rate": 30.0})
@@ -231,3 +261,118 @@ class TestDeleteClass:
         response = await app_client.delete("/api/classes/99999")
 
         assert response.status_code == 404
+
+
+# ─── GET /api/classes/stats ──────────────────────────────────────────────────
+
+def _class_with_status(*, class_date: str, hourly_rate: float, duration_hours: float, status: str = "normal") -> Class:
+    return Class(
+        user_id=FAKE_USER.id,
+        client_id=CLIENT_ID,
+        contract_id=CONTRACT_ID,
+        class_date=date.fromisoformat(class_date),
+        duration_hours=duration_hours,
+        hourly_rate=hourly_rate,
+        status=status,
+    )
+
+
+class TestClassStats:
+    async def test_returns_zero_when_no_classes(self, app_client: AsyncClient):
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        assert response.json() == {"count": 0, "totalRevenue": 0.0}
+
+    async def test_counts_all_classes_in_month(self, db: AsyncSession, app_client: AsyncClient):
+        await _seed(
+            db,
+            _class(class_date="2026-04-10"),
+            _class(class_date="2026-04-15"),
+            _class(class_date="2026-04-20"),
+        )
+
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        assert response.json()["count"] == 3
+
+    async def test_excludes_other_months(self, db: AsyncSession, app_client: AsyncClient):
+        await _seed(
+            db,
+            _class(class_date="2026-04-10"),
+            _class(class_date="2026-05-01"),
+        )
+
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        assert response.json()["count"] == 1
+
+    async def test_total_revenue_sums_duration_times_rate(self, db: AsyncSession, app_client: AsyncClient):
+        await _seed(
+            db,
+            _class(class_date="2026-04-10", duration_hours=2.0, hourly_rate=20.0),
+            _class(class_date="2026-04-11", duration_hours=1.0, hourly_rate=30.0),
+        )
+
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        assert response.json()["totalRevenue"] == 70.0
+
+    async def test_excludes_cancelled_without_payment_from_revenue(
+        self, db: AsyncSession, app_client: AsyncClient
+    ):
+        await _seed(
+            db,
+            _class_with_status(class_date="2026-04-10", duration_hours=1.0, hourly_rate=50.0, status="normal"),
+            _class_with_status(class_date="2026-04-11", duration_hours=1.0, hourly_rate=100.0, status="cancelledWithoutPayment"),
+        )
+
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        assert response.json()["count"] == 2
+        assert response.json()["totalRevenue"] == 50.0
+
+    async def test_includes_cancelled_with_payment_in_revenue(
+        self, db: AsyncSession, app_client: AsyncClient
+    ):
+        await _seed(
+            db,
+            _class_with_status(class_date="2026-04-10", duration_hours=1.0, hourly_rate=50.0, status="normal"),
+            _class_with_status(class_date="2026-04-11", duration_hours=1.0, hourly_rate=75.0, status="cancelledWithPayment"),
+        )
+
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        assert response.json()["totalRevenue"] == 125.0
+
+    async def test_filters_by_client_id(self, db: AsyncSession, app_client: AsyncClient):
+        await _seed(
+            db,
+            _class(client_id=10, class_date="2026-04-10", duration_hours=1.0, hourly_rate=20.0),
+            _class(client_id=20, class_date="2026-04-11", duration_hours=1.0, hourly_rate=30.0),
+        )
+
+        response = await app_client.get(
+            "/api/classes/stats",
+            params={"month": 4, "year": 2026, "client_id": 10},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"count": 1, "totalRevenue": 20.0}
+
+    async def test_returns_422_when_month_missing(self, app_client: AsyncClient):
+        response = await app_client.get("/api/classes/stats", params={"year": 2026})
+
+        assert response.status_code == 422
+
+    async def test_returns_422_when_month_out_of_range(self, app_client: AsyncClient):
+        response = await app_client.get(
+            "/api/classes/stats", params={"month": 13, "year": 2026}
+        )
+
+        assert response.status_code == 422

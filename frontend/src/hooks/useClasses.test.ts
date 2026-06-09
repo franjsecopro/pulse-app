@@ -1,12 +1,3 @@
-/**
- * Tests for useClasses hook.
- *
- * Key behaviors:
- *  - requestDelete / cancelDelete manage pendingDeleteId
- *  - effectiveRevenue sums class totalAmounts (null treated as 0,
- *    cancelledWithoutPayment excluded per business policy)
- *  - filters (month, year, client) are forwarded to classService.getAll
- */
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { classService } from '../services/class.service'
@@ -20,6 +11,7 @@ vi.mock('../context/ToastContext', () => ({
 vi.mock('../services/class.service', () => ({
   classService: {
     getAll: vi.fn(),
+    getStats: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -34,6 +26,7 @@ vi.mock('../services/client.service', () => ({
 }))
 
 const mockGetAllClasses = vi.mocked(classService.getAll)
+const mockGetStats = vi.mocked(classService.getStats)
 const mockGetAllClients = vi.mocked(clientService.getAll)
 
 const defaultFilters = {
@@ -45,6 +38,7 @@ const defaultFilters = {
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetAllClasses.mockResolvedValue({ data: [], total: 0 })
+  mockGetStats.mockResolvedValue({ count: 0, totalRevenue: 0 })
   mockGetAllClients.mockResolvedValue([])
 })
 
@@ -79,71 +73,46 @@ describe('requestDelete / cancelDelete', () => {
   })
 })
 
-// ─── effectiveRevenue ────────────────────────────────────────────────────────
+// ─── classStats ──────────────────────────────────────────────────────────────
 
-describe('effectiveRevenue', () => {
-  it('sums totalAmount across normal and cancelledWithPayment classes', async () => {
-    mockGetAllClasses.mockResolvedValue({
-      data: [
-        { id: 1, totalAmount: 40.0, status: 'normal' },
-        { id: 2, totalAmount: 20.0, status: 'cancelledWithPayment' },
-      ] as never,
-      total: 2,
-    })
-
+describe('classStats', () => {
+  it('starts as zero defaults', async () => {
     const { result } = renderHook(() => useClasses(defaultFilters))
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    expect(result.current.effectiveRevenue).toBe(60.0)
+    expect(result.current.classStats).toEqual({ count: 0, totalRevenue: 0 })
   })
 
-  it('treats null totalAmount as 0', async () => {
-    mockGetAllClasses.mockResolvedValue({
-      data: [
-        { id: 1, totalAmount: null, status: 'normal' },
-        { id: 2, totalAmount: 30.0, status: 'normal' },
-      ] as never,
-      total: 2,
-    })
+  it('exposes the value returned by the backend', async () => {
+    mockGetStats.mockResolvedValue({ count: 12, totalRevenue: 540.5 })
 
     const { result } = renderHook(() => useClasses(defaultFilters))
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    await waitFor(() => expect(result.current.classStats.count).toBe(12))
 
-    expect(result.current.effectiveRevenue).toBe(30.0)
+    expect(result.current.classStats.totalRevenue).toBe(540.5)
   })
 
-  it('returns 0 when class list is empty', async () => {
-    const { result } = renderHook(() => useClasses(defaultFilters))
+  it('is reloaded when filters change', async () => {
+    mockGetStats.mockResolvedValueOnce({ count: 1, totalRevenue: 10 })
+    mockGetStats.mockResolvedValueOnce({ count: 2, totalRevenue: 20 })
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    const { rerender } = renderHook(
+      ({ filters }) => useClasses(filters),
+      { initialProps: { filters: { filterMonth: 4, filterYear: 2026, filterClient: '' as const } } },
+    )
 
-    expect(result.current.effectiveRevenue).toBe(0)
-  })
+    await waitFor(() => expect(mockGetStats).toHaveBeenCalledTimes(1))
 
-  it('excludes cancelledWithoutPayment classes from the total', async () => {
-    mockGetAllClasses.mockResolvedValue({
-      data: [
-        { id: 1, totalAmount: 50.0, status: 'normal' },
-        { id: 2, totalAmount: 30.0, status: 'cancelledWithoutPayment' },
-        { id: 3, totalAmount: 20.0, status: 'cancelledWithPayment' },
-      ] as never,
-      total: 3,
-    })
+    rerender({ filters: { filterMonth: 5, filterYear: 2026, filterClient: '' as const } })
 
-    const { result } = renderHook(() => useClasses(defaultFilters))
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    expect(result.current.effectiveRevenue).toBe(70.0)
+    await waitFor(() => expect(mockGetStats).toHaveBeenCalledTimes(2))
   })
 })
 
 // ─── filter forwarding ───────────────────────────────────────────────────────
 
-describe('filter forwarding to classService.getAll', () => {
-  it('passes month, year, and clientId to the service', async () => {
+describe('filter forwarding to classService', () => {
+  it('passes month, year, and clientId to getAll', async () => {
     renderHook(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
 
     await waitFor(() =>
@@ -159,6 +128,16 @@ describe('filter forwarding to classService.getAll', () => {
     await waitFor(() =>
       expect(mockGetAllClasses).toHaveBeenCalledWith(
         expect.objectContaining({ clientId: undefined }),
+      ),
+    )
+  })
+
+  it('passes the same filters to getStats', async () => {
+    renderHook(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
+
+    await waitFor(() =>
+      expect(mockGetStats).toHaveBeenCalledWith(
+        expect.objectContaining({ month: 5, year: 2026, clientId: 10 }),
       ),
     )
   })

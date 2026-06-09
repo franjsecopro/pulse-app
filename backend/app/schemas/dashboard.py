@@ -10,7 +10,7 @@ class UpcomingClassItem(BaseSchema):
     class_date: str
     class_time: Optional[str]
     duration_hours: float
-    total_amount: float
+    effective_revenue: float
     status: str
 
 

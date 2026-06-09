@@ -3,7 +3,7 @@ import { useTranslation } from '../../i18n'
 import type { ClassSession } from '../../types'
 import { formatTimeRange } from '../../utils/formatters'
 import { Button } from '../ui/Button'
-import { chipClassFor, STATUS_OVERLAY, sumEffectiveTotal } from './constants'
+import { chipClassFor, STATUS_OVERLAY, sumEffectiveRevenue } from './constants'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -104,7 +104,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           const dayClasses = byDate[key] ?? []
           const visibleClasses = dayClasses.slice(0, MAX_VISIBLE)
           const hiddenCount = dayClasses.length - MAX_VISIBLE
-          const total = sumEffectiveTotal(dayClasses)
+          const total = sumEffectiveRevenue(dayClasses)
 
           return (
             <div
@@ -219,7 +219,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
             <span>{tooltip.class.durationHours}h</span>
             <span>€{tooltip.class.hourlyRate}/h</span>
             <span className='font-bold text-emerald-400'>
-              €{(tooltip.class.totalAmount ?? 0).toFixed(0)}
+              €{(tooltip.class.effectiveRevenue ?? 0).toFixed(0)}
             </span>
           </div>
         </div>

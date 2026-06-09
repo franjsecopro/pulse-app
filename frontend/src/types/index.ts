@@ -95,7 +95,7 @@ export interface ClassSession {
   createdAt: string
   clientName: string | null
   contractDescription: string | null
-  totalAmount: number | null
+  effectiveRevenue: number | null
 }
 
 export interface StatementImportRecord {
@@ -208,8 +208,13 @@ export interface UpcomingClass {
   classDate: string
   classTime: string | null
   durationHours: number
-  totalAmount: number
+  effectiveRevenue: number
   status: ClassStatus
+}
+
+export interface ClassStats {
+  count: number
+  totalRevenue: number
 }
 
 export interface UpcomingClasses {

@@ -17,10 +17,6 @@ export const CLASS_STATUS_CONFIG: Record<string, { label: string; className: str
  * (background identity) so the client is still recognizable while the
  * cancellation state is detectable at a glance via ring + opacity +
  * line-through + icon.
- *
- * `cancelledWithoutPayment` does not count toward day totals because the
- * business does not charge when a class is cancelled with more than 24h
- * notice.
  */
 export const STATUS_OVERLAY: Record<
   ClassStatus,
@@ -30,7 +26,6 @@ export const STATUS_OVERLAY: Record<
     labelKey: string
     chipOverlay: string
     strike: boolean
-    countsTowardTotal: boolean
   }
 > = {
   normal: {
@@ -39,7 +34,6 @@ export const STATUS_OVERLAY: Record<
     labelKey: 'classes.status.normal',
     chipOverlay: '',
     strike: false,
-    countsTowardTotal: true,
   },
   cancelledWithPayment: {
     icon: 'payments',
@@ -47,7 +41,6 @@ export const STATUS_OVERLAY: Record<
     labelKey: 'classes.status.cancelledWithPayment',
     chipOverlay: 'ring-1 ring-amber-400/70 opacity-80',
     strike: false,
-    countsTowardTotal: true,
   },
   cancelledWithoutPayment: {
     icon: 'block',
@@ -55,7 +48,6 @@ export const STATUS_OVERLAY: Record<
     labelKey: 'classes.status.cancelledWithoutPayment',
     chipOverlay: 'ring-1 ring-slate-400/60 opacity-60',
     strike: true,
-    countsTowardTotal: false,
   },
 }
 
@@ -65,9 +57,6 @@ export function chipClassFor(baseClass: string, status: ClassStatus): string {
   return `${baseClass} ${overlay.chipOverlay}`.trim()
 }
 
-export function sumEffectiveTotal(classes: ClassSession[]): number {
-  return classes.reduce((sum, c) => {
-    if (!STATUS_OVERLAY[c.status].countsTowardTotal) return sum
-    return sum + (c.totalAmount ?? 0)
-  }, 0)
+export function sumEffectiveRevenue(classes: ClassSession[]): number {
+  return classes.reduce((sum, c) => sum + (c.effectiveRevenue ?? 0), 0)
 }
