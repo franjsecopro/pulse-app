@@ -49,7 +49,7 @@ class AccountingService:
                 Class.user_id == user_id,
                 extract("month", Class.class_date) == month,
                 extract("year", Class.class_date) == year,
-                Class.status != "cancelled_without_payment",
+                Class.status != "cancelledWithoutPayment",
             )
             .group_by(Class.client_id)
         )
@@ -176,11 +176,9 @@ class AccountingService:
             if row.status == "normal":
                 entry["normal_count"] += count
                 entry["expected"] += amount
-            elif row.status == "cancelled_with_payment":
+            elif row.status == "cancelledWithPayment":
                 entry["cancelled_with_payment_count"] += count
-                entry["expected"] += amount
-            elif row.status == "cancelled_without_payment":
-                # excluded from expected: cancellation without compensation is not billable
+            elif row.status == "cancelledWithoutPayment":
                 entry["cancelled_without_payment_count"] += count
 
         by_client: dict[int, list[ContractBreakdownResponse]] = {}
@@ -225,7 +223,7 @@ class AccountingService:
             .where(
                 Class.user_id == user_id,
                 Class.client_id.in_(client_ids),
-                Class.status != "cancelled_without_payment",
+                Class.status != "cancelledWithoutPayment",
                 (extract("year", Class.class_date) * 100 + extract("month", Class.class_date))
                 < (year * 100 + month),
             )
@@ -244,7 +242,7 @@ class AccountingService:
             .where(
                 Class.user_id == user_id,
                 Class.client_id == client_id,
-                Class.status != "cancelled_without_payment",
+                Class.status != "cancelledWithoutPayment",
             )
         )
         return result.scalar_one() or 0.0

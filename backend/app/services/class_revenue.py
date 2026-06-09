@@ -8,6 +8,10 @@ effective amount is 0.
 This module is the only place that knows the rule. The repository, the
 routers, the dashboard service, and any future consumer must import from
 here — never re-derive the rule.
+
+Status values are stored in the database in camelCase to match the wire
+format. The `BaseSchema` alias generator also serializes them as
+camelCase in JSON, so values are stable end-to-end.
 """
 from app.models.class_ import Class
 

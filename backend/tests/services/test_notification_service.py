@@ -496,7 +496,7 @@ class TestGetLogAdditionalFilters:
 
         service = NotificationService(db)
         result = await service.get_log(
-            USER_ID, month=4, year=2026, status="sent", client_id=client_a.id
+            USER_ID, mode="month", date=date(2026, 4, 15), status="sent", client_id=client_a.id
         )
 
         assert result["total"] == 1

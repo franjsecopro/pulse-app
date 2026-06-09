@@ -56,8 +56,8 @@ class TestDemoEnter:
 
         assert response.status_code == 200
         body = response.json()
-        assert body["is_demo_active"] is True
-        assert body["real_email"] == FAKE_ADMIN.email
+        assert body["isDemoActive"] is True
+        assert body["realEmail"] == FAKE_ADMIN.email
 
     async def test_sets_auth_cookies(self, db: AsyncSession, admin_client: AsyncClient):
         await _seed(db, _demo_user())
@@ -80,8 +80,8 @@ class TestDemoExit:
 
         assert response.status_code == 200
         body = response.json()
-        assert body["is_demo_active"] is False
-        assert body["real_email"] is None
+        assert body["isDemoActive"] is False
+        assert body["realEmail"] is None
         assert body["email"] == FAKE_ADMIN.email
 
     async def test_sets_auth_cookies(self, admin_client: AsyncClient):

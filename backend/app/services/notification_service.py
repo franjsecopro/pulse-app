@@ -95,7 +95,7 @@ class NotificationService:
             .where(
                 Class.user_id == user_id,
                 Class.class_date == target_date,
-                Class.status != "cancelled_without_payment",
+                Class.status != "cancelledWithoutPayment",
             )
         )
         classes = result.scalars().all()

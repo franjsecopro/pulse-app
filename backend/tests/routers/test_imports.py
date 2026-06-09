@@ -122,8 +122,8 @@ class TestParseStatementResults:
         assert "date" in tx
         assert "concept" in tx
         assert "amount" in tx
-        assert "suggested_client_id" in tx
-        assert "match_type" in tx
+        assert "suggestedClientId" in tx
+        assert "matchType" in tx
         assert "confidence" in tx
 
     async def test_unmatched_transaction_has_none_client(self, app_client: AsyncClient):
@@ -136,8 +136,8 @@ class TestParseStatementResults:
 
         assert response.status_code == 200
         tx = response.json()["transactions"][0]
-        assert tx["suggested_client_id"] is None
-        assert tx["match_type"] == "none"
+        assert tx["suggestedClientId"] is None
+        assert tx["matchType"] == "none"
 
 
 # ─── POST /api/imports/statement — deduplication ─────────────────────────────
@@ -162,8 +162,8 @@ class TestParseStatementDeduplication:
             )
 
         body = response.json()
-        assert body["transactions"][0]["already_imported"] is True
-        assert body["duplicate_count"] == 1
+        assert body["transactions"][0]["alreadyImported"] is True
+        assert body["duplicateCount"] == 1
 
     async def test_new_transaction_is_not_flagged(self, db: AsyncSession, app_client: AsyncClient):
         tx = _fake_transaction(date="2026-04-10", concept="MOVIMIENTO NUEVO", amount=99.0)
@@ -174,8 +174,8 @@ class TestParseStatementDeduplication:
             )
 
         body = response.json()
-        assert body["transactions"][0]["already_imported"] is False
-        assert body["duplicate_count"] == 0
+        assert body["transactions"][0]["alreadyImported"] is False
+        assert body["duplicateCount"] == 0
 
     async def test_detects_already_imported_file_by_hash(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(db, StatementImport(
@@ -193,7 +193,7 @@ class TestParseStatementDeduplication:
                 files={"file": ("statement.csv", SAMPLE_CSV, "text/csv")},
             )
 
-        assert response.json()["file_already_imported_at"] is not None
+        assert response.json()["fileAlreadyImportedAt"] is not None
 
     async def test_returns_file_hash(self, db: AsyncSession, app_client: AsyncClient):
         with patch("app.routers.imports.parse_statement", return_value=[_fake_transaction()]):
@@ -202,7 +202,7 @@ class TestParseStatementDeduplication:
                 files={"file": ("statement.csv", SAMPLE_CSV, "text/csv")},
             )
 
-        assert response.json()["file_hash"] == hashlib.sha256(SAMPLE_CSV).hexdigest()
+        assert response.json()["fileHash"] == hashlib.sha256(SAMPLE_CSV).hexdigest()
 
 
 # ─── POST /api/imports/statement/confirm ─────────────────────────────────────
@@ -321,8 +321,8 @@ class TestGetStatementHistory:
         assert record["filename"] == "test.csv"
         assert record["month"] == 4
         assert record["year"] == 2026
-        assert record["transaction_count"] == 2
-        assert record["total_amount"] == 200.0
+        assert record["transactionCount"] == 2
+        assert record["totalAmount"] == 200.0
 
     async def test_does_not_return_other_users_imports(self, db: AsyncSession, app_client: AsyncClient):
         """Imports from a different user_id must not appear."""

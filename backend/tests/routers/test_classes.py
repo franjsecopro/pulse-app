@@ -79,7 +79,7 @@ class TestListClasses:
 
         assert response.status_code == 200
         assert len(response.json()) == 1
-        assert response.json()[0]["class_date"] == "2026-04-10"
+        assert response.json()[0]["classDate"] == "2026-04-10"
 
     async def test_filters_by_client_id(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(
@@ -92,7 +92,7 @@ class TestListClasses:
 
         assert response.status_code == 200
         assert len(response.json()) == 1
-        assert response.json()[0]["client_id"] == 10
+        assert response.json()[0]["clientId"] == 10
 
     async def test_client_name_populated_when_client_exists(self, db: AsyncSession, app_client: AsyncClient):
         """When the Client row exists, client_name is populated via joinedload."""
@@ -102,7 +102,7 @@ class TestListClasses:
         response = await app_client.get("/api/classes")
 
         assert response.status_code == 200
-        assert response.json()[0]["client_name"] == "María García"
+        assert response.json()[0]["clientName"] == "María García"
 
 
 # ─── POST /api/classes ───────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ class TestCreateClass:
         assert response.status_code == 201
         body = response.json()
         assert body["id"] is not None
-        assert body["client_id"] == CLIENT_ID
+        assert body["clientId"] == CLIENT_ID
 
     async def test_effective_revenue_is_computed_correctly(self, app_client: AsyncClient):
         response = await app_client.post("/api/classes", json={
@@ -223,7 +223,7 @@ class TestUpdateClass:
         response = await app_client.put(f"/api/classes/{cls.id}", json={"hourly_rate": 30.0})
 
         assert response.status_code == 200
-        assert response.json()["hourly_rate"] == 30.0
+        assert response.json()["hourlyRate"] == 30.0
 
     async def test_update_recomputes_effective_revenue(self, db: AsyncSession, app_client: AsyncClient):
         [cls] = await _seed(db, _class(duration_hours=2.0, hourly_rate=20.0))

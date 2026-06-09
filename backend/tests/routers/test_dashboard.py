@@ -202,7 +202,7 @@ class TestGetSummary:
         await _seed(
             db,
             _class_on(client.id, contract.id, duration_hours=2.0, hourly_rate=20.0, status="normal"),
-            _class_on(client.id, contract.id, duration_hours=1.0, hourly_rate=20.0, status="cancelled_without_payment"),
+            _class_on(client.id, contract.id, duration_hours=1.0, hourly_rate=20.0, status="cancelledWithoutPayment"),
         )
 
         response = await app_client.get("/api/dashboard/summary")

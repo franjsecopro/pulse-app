@@ -82,7 +82,7 @@ class TestListPayments:
 
         assert response.status_code == 200
         assert len(response.json()) == 1
-        assert response.json()[0]["payment_date"] == "2026-04-10"
+        assert response.json()[0]["paymentDate"] == "2026-04-10"
 
     async def test_filters_by_client_id(self, db: AsyncSession, app_client: AsyncClient):
         [client] = await _seed(db, Client(user_id=FAKE_USER.id, name="Test Client", is_active=True))
@@ -96,7 +96,7 @@ class TestListPayments:
 
         assert response.status_code == 200
         assert len(response.json()) == 1
-        assert response.json()[0]["client_id"] == client.id
+        assert response.json()[0]["clientId"] == client.id
 
     async def test_client_name_populated_when_client_exists(self, db: AsyncSession, app_client: AsyncClient):
         [client] = await _seed(db, Client(user_id=FAKE_USER.id, name="Carlos Ruiz", is_active=True))
@@ -105,7 +105,7 @@ class TestListPayments:
         response = await app_client.get("/api/payments")
 
         assert response.status_code == 200
-        assert response.json()[0]["client_name"] == "Carlos Ruiz"
+        assert response.json()[0]["clientName"] == "Carlos Ruiz"
 
     async def test_client_name_is_none_for_unmatched_payment(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(db, _payment(client_id=None))
@@ -113,7 +113,7 @@ class TestListPayments:
         response = await app_client.get("/api/payments")
 
         assert response.status_code == 200
-        assert response.json()[0]["client_name"] is None
+        assert response.json()[0]["clientName"] is None
 
 
 # ─── POST /api/payments ──────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ class TestCreatePayment:
         })
 
         assert response.status_code == 201
-        assert response.json()["client_id"] is None
+        assert response.json()["clientId"] is None
 
     async def test_default_status_is_confirmed(self, app_client: AsyncClient):
         response = await app_client.post("/api/payments", json={
