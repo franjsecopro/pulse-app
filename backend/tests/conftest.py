@@ -2,6 +2,8 @@ import os
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 _TEST_FERNET_KEY = "VdGPZU_Fwo2rTdZ5AYMazTmg8jzjyDRVktJSEhafJm4="
 os.environ.setdefault("FIELD_ENCRYPTION_KEYS", _TEST_FERNET_KEY)
+# Keep 429s out of the suite — rate-limit tests re-enable the limiter explicitly
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 import pytest
 import pytest_asyncio

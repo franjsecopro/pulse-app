@@ -68,6 +68,18 @@ class TestParseStatementValidation:
         assert response.status_code == 400
         assert "vacío" in response.json()["detail"]
 
+    async def test_rejects_file_over_size_limit_with_413(self, app_client: AsyncClient):
+        from app.routers.imports import MAX_STATEMENT_SIZE_BYTES
+
+        oversized = b"x" * (MAX_STATEMENT_SIZE_BYTES + 1)
+
+        response = await app_client.post(
+            "/api/imports/statement",
+            files={"file": ("statement.csv", oversized, "text/csv")},
+        )
+
+        assert response.status_code == 413
+
     async def test_returns_422_when_statement_cannot_be_parsed(self, app_client: AsyncClient):
         """A parser exception is wrapped as 422."""
         with patch("app.routers.imports.parse_statement", side_effect=ValueError("boom")):

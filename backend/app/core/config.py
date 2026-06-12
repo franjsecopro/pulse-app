@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
     APP_ENV: str = "development"   # "development" | "production"
     COOKIE_SECURE: bool = False
+    RATE_LIMIT_ENABLED: bool = True
 
     # Google Calendar OAuth — dejar vacíos si no se usa la integración
     GOOGLE_CLIENT_ID: str = ""

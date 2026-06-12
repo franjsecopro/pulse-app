@@ -6,9 +6,11 @@ so that class CRUD operations are never blocked by Google Calendar issues.
 """
 import base64
 import hashlib
+import hmac
 import json
 import logging
 import secrets
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -233,16 +235,41 @@ def _pkce_pair() -> tuple[str, str]:
     return code_verifier, code_challenge
 
 
+# The state round-trips through Google's redirect as a URL parameter, so an
+# unsigned state could be forged with any user_id (account-linking CSRF).
+STATE_MAX_AGE_SECONDS = 600
+
+
+def _sign(data: str) -> str:
+    return hmac.new(settings.SECRET_KEY.encode(), data.encode(), hashlib.sha256).hexdigest()
+
+
 def _encode_state(user_id: int, code_verifier: str) -> str:
-    """Encode user_id + PKCE code_verifier into the OAuth state parameter."""
-    payload = json.dumps({"uid": user_id, "cv": code_verifier})
-    return base64.urlsafe_b64encode(payload.encode()).decode()
+    """Encode user_id + PKCE code_verifier into a signed OAuth state parameter.
+
+    Format: ``<base64url(payload)>.<hmac-sha256 hex>`` with an embedded
+    timestamp so stale states can be rejected.
+    """
+    payload = json.dumps({"uid": user_id, "cv": code_verifier, "ts": int(time.time())})
+    data = base64.urlsafe_b64encode(payload.encode()).decode().rstrip("=")
+    return f"{data}.{_sign(data)}"
 
 
 def _decode_state(state: str) -> tuple[int, str]:
-    """Decode the OAuth state parameter into (user_id, code_verifier)."""
-    # Add padding in case base64 string is missing it
-    payload = json.loads(base64.urlsafe_b64decode(state + "=="))
+    """Decode and verify the OAuth state parameter into (user_id, code_verifier).
+
+    Raises ValueError for any state that is malformed, not signed by us, or
+    older than STATE_MAX_AGE_SECONDS — before anything touches the database.
+    """
+    data, _, signature = state.rpartition(".")
+    if not data or not hmac.compare_digest(signature, _sign(data)):
+        raise ValueError("Invalid OAuth state signature")
+
+    padded = data + "=" * (-len(data) % 4)
+    payload = json.loads(base64.urlsafe_b64decode(padded))
+
+    if int(time.time()) - int(payload["ts"]) > STATE_MAX_AGE_SECONDS:
+        raise ValueError("OAuth state expired")
     return int(payload["uid"]), payload["cv"]
 
 

@@ -11,6 +11,7 @@ from app.models.class_ import Class
 from app.models.client import Client
 from app.models.notification import Notification
 from app.models.notification_settings import NotificationSettings, DEFAULT_TEMPLATE
+from app.schemas.class_ import STATUS_CANCELLED_WITHOUT_PAYMENT
 from app.schemas.notification import NotificationSettingsUpdate
 
 DAYS_ES = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
@@ -95,7 +96,7 @@ class NotificationService:
             .where(
                 Class.user_id == user_id,
                 Class.class_date == target_date,
-                Class.status != "cancelledWithoutPayment",
+                Class.status != STATUS_CANCELLED_WITHOUT_PAYMENT,
             )
         )
         classes = result.scalars().all()

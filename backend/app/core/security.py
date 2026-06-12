@@ -18,18 +18,20 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(data: dict[str, Any]) -> str:
-    expires = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    now = datetime.now(timezone.utc)
+    expires = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {**data, "iat": now, "exp": expires}, settings.SECRET_KEY, settings.ALGORITHM
     )
-    return jwt.encode({**data, "exp": expires}, settings.SECRET_KEY, settings.ALGORITHM)
 
 
 def create_refresh_token(data: dict[str, Any]) -> str:
-    expires = datetime.now(timezone.utc) + timedelta(
-        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
-    )
+    now = datetime.now(timezone.utc)
+    expires = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     return jwt.encode(
-        {**data, "exp": expires, "type": "refresh"}, settings.SECRET_KEY, settings.ALGORITHM
+        {**data, "iat": now, "exp": expires, "type": "refresh"},
+        settings.SECRET_KEY,
+        settings.ALGORITHM,
     )
 
 

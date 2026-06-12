@@ -1,19 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.rate_limit import limiter
 from app.models.user import User
 from app.schemas.auth import UserRegisterRequest, UserLoginRequest, UserResponse, UserUpdateRequest
 from app.services.auth_service import AuthService
 
 def _token_from_request(request: Request) -> str | None:
     return request.cookies.get("access_token")
-
-limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -74,6 +71,7 @@ async def login(
 
 
 @router.post("/refresh", response_model=UserResponse)
+@limiter.limit("20/minute")
 async def refresh(
     request: Request,
     response: Response,

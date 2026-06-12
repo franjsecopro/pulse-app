@@ -54,7 +54,8 @@ async def oauth_callback(
         await gc_service.exchange_code(code=code, state=state, db=db)
         return RedirectResponse(url=f"{settings.FRONTEND_URL}/settings?google_connected=true")
     except Exception as exc:
-        logger.error("Google OAuth callback failed: %s", exc)
+        # Log only the exception type — the message may echo OAuth params (code/state)
+        logger.error("Google OAuth callback failed: %s", type(exc).__name__)
         return RedirectResponse(url=f"{settings.FRONTEND_URL}/settings?google_error=true")
 
 

@@ -196,6 +196,32 @@ class TestCreateClass:
         assert response.status_code == 201
         assert response.json()["status"] == "normal"
 
+    async def test_rejects_unknown_status_with_422(self, app_client: AsyncClient):
+        response = await app_client.post("/api/classes", json={
+            "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
+            "class_date": "2026-04-10",
+            "duration_hours": 1.0,
+            "hourly_rate": 20.0,
+            "status": "completed",
+        })
+
+        assert response.status_code == 422
+
+    async def test_rejects_snake_case_status_with_422(self, app_client: AsyncClient):
+        # Billing services compare camelCase exactly — a snake_case status would
+        # silently be billed as a normal class, so it must never reach the DB.
+        response = await app_client.post("/api/classes", json={
+            "client_id": CLIENT_ID,
+            "contract_id": CONTRACT_ID,
+            "class_date": "2026-04-10",
+            "duration_hours": 1.0,
+            "hourly_rate": 20.0,
+            "status": "cancelled_without_payment",
+        })
+
+        assert response.status_code == 422
+
 
 # ─── GET /api/classes/{id} ───────────────────────────────────────────────────
 
@@ -237,6 +263,23 @@ class TestUpdateClass:
         response = await app_client.put("/api/classes/99999", json={"hourly_rate": 30.0})
 
         assert response.status_code == 404
+
+    async def test_update_rejects_unknown_status_with_422(self, db: AsyncSession, app_client: AsyncClient):
+        [cls] = await _seed(db, _class())
+
+        response = await app_client.put(f"/api/classes/{cls.id}", json={"status": "bogus"})
+
+        assert response.status_code == 422
+
+    async def test_update_accepts_valid_status(self, db: AsyncSession, app_client: AsyncClient):
+        [cls] = await _seed(db, _class())
+
+        response = await app_client.put(
+            f"/api/classes/{cls.id}", json={"status": "cancelledWithPayment"}
+        )
+
+        assert response.status_code == 200
+        assert response.json()["status"] == "cancelledWithPayment"
 
 
 # ─── DELETE /api/classes/{id} ────────────────────────────────────────────────

@@ -28,6 +28,10 @@ from app.services.payment_matcher import match_transaction
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
+# A real Hello Bank monthly export weighs a few KB — 5 MB leaves ample margin
+# while keeping the full in-memory read bounded.
+MAX_STATEMENT_SIZE_BYTES = 5 * 1024 * 1024
+
 
 @router.post("/statement", response_model=ParseStatementResponse)
 async def parse_statement_file(
@@ -40,7 +44,13 @@ async def parse_statement_file(
         allowed = ', '.join(SUPPORTED_EXTENSIONS)
         raise HTTPException(status_code=400, detail=f"El archivo debe ser {allowed}")
 
-    content = await file.read()
+    content = await file.read(MAX_STATEMENT_SIZE_BYTES + 1)
+    if len(content) > MAX_STATEMENT_SIZE_BYTES:
+        max_mb = MAX_STATEMENT_SIZE_BYTES // (1024 * 1024)
+        raise HTTPException(
+            status_code=413,
+            detail=f"El archivo supera el tamaño máximo de {max_mb} MB",
+        )
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="El archivo está vacío")
 

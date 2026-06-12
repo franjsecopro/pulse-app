@@ -6,19 +6,18 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings
 from app.core.crypto import load_field_encryption_keys, load_google_token_encryption_keys
+from app.core.rate_limit import limiter
 from app.middleware.error_handler import global_error_handler
 from app.routers import auth, clients, classes, payments, dashboard, google_calendar, accounting, notifications, admin
 from app.routers import alerts
 from app.routers import imports as imports_router
 from app.routers import business_profile
-
-limiter = Limiter(key_func=get_remote_address)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,13 +45,15 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# Enforces default_limits on every route without an explicit @limiter.limit
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
     expose_headers=["X-Total-Count"],
 )
 

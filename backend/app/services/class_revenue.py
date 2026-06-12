@@ -14,12 +14,12 @@ format. The `BaseSchema` alias generator also serializes them as
 camelCase in JSON, so values are stable end-to-end.
 """
 from app.models.class_ import Class
+from app.schemas.class_ import STATUS_CANCELLED_WITHOUT_PAYMENT
 
 
-# Statuses that contribute 0 to revenue. Keep this tuple in sync with
-# `schemas.class_.CLASS_STATUSES` and the `status` literal values in the
-# `classes.status` column.
-EXCLUDED_FROM_REVENUE: tuple[str, ...] = ("cancelledWithoutPayment",)
+# Statuses that contribute 0 to revenue. Values come from
+# `schemas.class_.ClassStatus` — the single source of truth.
+EXCLUDED_FROM_REVENUE: tuple[str, ...] = (STATUS_CANCELLED_WITHOUT_PAYMENT,)
 
 
 def effective_revenue(class_: Class) -> float:
