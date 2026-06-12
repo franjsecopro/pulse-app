@@ -37,7 +37,14 @@
       "Bash(./venv/Scripts/python.exe -m pytest tests/services/test_auth_service.py -p no:cacheprovider -q)",
       "Bash(./venv/Scripts/python.exe -m pytest tests/services/test_class_calendar_service.py -p no:cacheprovider -q)",
       "Bash(./venv/Scripts/python.exe -m pytest tests/services/test_dashboard_service.py -p no:cacheprovider -q)",
-      "Bash(./venv/Scripts/python.exe -m pytest -p no:cacheprovider -q)"
+      "Bash(./venv/Scripts/python.exe -m pytest -p no:cacheprovider -q)",
+      "Bash(pnpm add *)",
+      "Bash(node -e ' *)",
+      "Bash(pnpm vitest *)",
+      "Bash(pnpm tsc *)",
+      "Bash(echo \"TSC EXIT: $?\")",
+      "Bash(echo \"TSC: $?\")",
+      "Bash(pnpm biome *)"
     ]
   }
 }

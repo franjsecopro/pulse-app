@@ -744,6 +744,7 @@
     "paymentDeleted": "Pago eliminado",
     "paymentDeleteError": "Error al eliminar el pago",
     "statementImported": "Extracto importado correctamente",
+    "reportExportError": "No se pudo generar el archivo",
     "statementDeleted": "Extracto eliminado ({{count}} pagos)",
     "statementDeleteError": "Error al eliminar el extracto",
     "clientCreated": "Cliente creado correctamente",

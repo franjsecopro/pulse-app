@@ -3,6 +3,7 @@ import { AlertButton } from '../components/alerts/AlertButton'
 import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { Button } from '../components/ui/Button'
+import { useToast } from '../context/ToastContext'
 import { useAlerts } from '../hooks/useAlerts'
 import { useTranslation } from '../i18n'
 import { accountingService } from '../services/accounting.service'
@@ -16,6 +17,7 @@ function getCurrentMonthYear() {
 
 export function Accounting() {
   const { t } = useTranslation()
+  const { addToast } = useToast()
   const months: string[] = t('common.months.full', {
     returnObjects: true,
   }) as unknown as string[]
@@ -65,6 +67,13 @@ export function Accounting() {
       anchor.download = `contabilidad_${monthsLower[month - 1]}_${year}.xlsx`
       anchor.click()
       URL.revokeObjectURL(url)
+    } catch (err: unknown) {
+      addToast(
+        'toasts.reportExportError',
+        'error',
+        undefined,
+        err instanceof Error ? err.message : undefined,
+      )
     } finally {
       setIsExporting(false)
     }

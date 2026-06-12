@@ -1,33 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useState } from 'react'
 import { useTranslation } from '../i18n'
+import { queryKeys } from '../lib/queryKeys'
 import { notificationsService } from '../services/notifications.service'
-import type { AppNotification, NotificationLogFilters, NotificationLogPage } from '../types'
-
-const DAY_MS = 24 * 60 * 60 * 1000
-
-/**
- * Adds ``days`` calendar days to an ISO date string and returns a new ISO date
- * string (``YYYY-MM-DD``). Uses local time so the user's "day" is respected
- * regardless of server timezone — the backend then handles timezone math.
- */
-function addDaysISO(isoDate: string | undefined, days: number): string {
-  if (!isoDate) return todayISO()
-  const [year, month, day] = isoDate.split('-').map(Number)
-  const d = new Date(year, month - 1, day)
-  d.setTime(d.getTime() + days * DAY_MS)
-  const yyyy = d.getFullYear()
-  const monthPadded = String(d.getMonth() + 1).padStart(2, '0')
-  const dayPadded = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${monthPadded}-${dayPadded}`
-}
-
-function todayISO(): string {
-  const now = new Date()
-  const yyyy = now.getFullYear()
-  const monthPadded = String(now.getMonth() + 1).padStart(2, '0')
-  const dayPadded = String(now.getDate()).padStart(2, '0')
-  return `${yyyy}-${monthPadded}-${dayPadded}`
-}
+import type { AppNotification, NotificationLogFilters } from '../types'
+import { addDaysISO, todayISO } from '../utils/formatters'
 
 interface UsePendingNotificationsParams {
   /**
@@ -51,87 +28,78 @@ export function usePendingNotifications({
   date,
 }: UsePendingNotificationsParams): UsePendingNotificationsResult {
   const { t } = useTranslation()
-  const [notifications, setNotifications] = useState<AppNotification[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [generateError, setGenerateError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
   const [sentIds, setSentIds] = useState<Set<number>>(new Set())
 
   const targetDate = addDaysISO(date, 1)
   const isToday = date === todayISO()
+  const pendingKey = queryKeys.notifications.pending(date)
 
-  useEffect(() => {
-    let cancelled = false
-    setIsLoading(true)
-    setGenerateError(null)
+  const query = useQuery({
+    queryKey: pendingKey,
+    // First visit of the day has nothing pending yet — generate transparently.
+    queryFn: async () => {
+      const items = await notificationsService.getPending(date)
+      if (items.length === 0 && isToday) {
+        return notificationsService.generate(targetDate)
+      }
+      return items
+    },
+  })
 
-    const finishLoading = () => {
-      if (!cancelled) setIsLoading(false)
-    }
+  const generateMutation = useMutation({
+    mutationFn: async () => {
+      await notificationsService.generate(targetDate)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: pendingKey }),
+  })
 
-    notificationsService
-      .getPending(date)
-      .then((items) => {
-        if (cancelled) return
-        if (items.length === 0 && isToday) {
-          notificationsService
-            .generate(targetDate)
-            .then((generated) => {
-              if (!cancelled) setNotifications(generated)
-            })
-            .catch((err: unknown) => {
-              if (!cancelled) {
-                setGenerateError(
-                  err instanceof Error ? err.message : t('notifications.errors.load'),
-                )
-              }
-            })
-            .finally(finishLoading)
-        } else {
-          setNotifications(items)
-          finishLoading()
-        }
+  const sendMutation = useMutation({
+    mutationFn: (notification: AppNotification) => notificationsService.markSent(notification.id),
+    // Optimistic: the user already jumped to WhatsApp — show "sent" immediately,
+    // roll back if the server rejects the markSent.
+    onMutate: async (notification) => {
+      await queryClient.cancelQueries({ queryKey: pendingKey })
+      const previous = queryClient.getQueryData<AppNotification[]>(pendingKey)
+      queryClient.setQueryData<AppNotification[]>(pendingKey, (prev) =>
+        prev?.map((item) => (item.id === notification.id ? { ...item, status: 'sent' } : item)),
+      )
+      setSentIds((prev) => new Set(prev).add(notification.id))
+      return { previous }
+    },
+    onError: (_error, notification, context) => {
+      if (context?.previous) queryClient.setQueryData(pendingKey, context.previous)
+      setSentIds((prev) => {
+        const next = new Set(prev)
+        next.delete(notification.id)
+        return next
       })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setGenerateError(err instanceof Error ? err.message : t('notifications.errors.load'))
-          finishLoading()
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [date, targetDate, isToday, t])
+    },
+  })
 
   const handleGenerate = useCallback(async () => {
-    setIsGenerating(true)
-    setGenerateError(null)
-    try {
-      await notificationsService.generate(targetDate)
-      const fresh = await notificationsService.getPending(date)
-      setNotifications(fresh)
-    } catch (err: unknown) {
-      setGenerateError(err instanceof Error ? err.message : t('notifications.errors.generate'))
-    } finally {
-      setIsGenerating(false)
-    }
-  }, [date, targetDate, t])
+    await generateMutation.mutateAsync().catch(() => undefined)
+  }, [generateMutation.mutateAsync])
 
-  const handleSend = useCallback(async (notification: AppNotification) => {
-    if (!notification.whatsappUrl) return
-    window.open(notification.whatsappUrl, '_blank', 'noopener,noreferrer')
-    await notificationsService.markSent(notification.id)
-    setSentIds((prev) => new Set(prev).add(notification.id))
-    setNotifications((prev) =>
-      prev.map((item) => (item.id === notification.id ? { ...item, status: 'sent' } : item)),
-    )
-  }, [])
+  const handleSend = useCallback(
+    async (notification: AppNotification) => {
+      if (!notification.whatsappUrl) return
+      window.open(notification.whatsappUrl, '_blank', 'noopener,noreferrer')
+      await sendMutation.mutateAsync(notification).catch(() => undefined)
+    },
+    [sendMutation.mutateAsync],
+  )
+
+  const generateError = generateMutation.error
+    ? generateMutation.error.message || t('notifications.errors.generate')
+    : query.error
+      ? query.error.message || t('notifications.errors.load')
+      : null
 
   return {
-    notifications,
-    isLoading,
-    isGenerating,
+    notifications: query.data ?? [],
+    isLoading: query.isLoading,
+    isGenerating: generateMutation.isPending,
     generateError,
     sentIds,
     handleGenerate,
@@ -149,28 +117,14 @@ interface UseNotificationLogResult {
 }
 
 export function useNotificationLog(filters: NotificationLogFilters): UseNotificationLogResult {
-  const [page, setPage] = useState<NotificationLogPage | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // Inline `filters={{...}}` at call sites is fine: React Query hashes keys
+  // deterministically, so an equal object is the same key.
+  const query = useQuery({
+    queryKey: queryKeys.notifications.log(filters),
+    queryFn: () => notificationsService.getLog(filters),
+  })
 
-  // Inline `filters={{...}}` at call sites is a new object ref every render — JSON.stringify gives a stable key.
-  const filtersKey = JSON.stringify(filters)
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: filtersKey is derived from filters; using filters directly would re-fire on every render (see filtersKey comment above).
-  useEffect(() => {
-    let cancelled = false
-    setIsLoading(true)
-    notificationsService
-      .getLog(filters)
-      .then((result) => {
-        if (!cancelled) setPage(result)
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [filtersKey])
+  const page = query.data
 
   return {
     items: page?.items ?? [],
@@ -178,6 +132,6 @@ export function useNotificationLog(filters: NotificationLogFilters): UseNotifica
     page: page?.page ?? filters.page,
     pageSize: page?.pageSize ?? filters.pageSize,
     pageCount: Math.max(1, Math.ceil((page?.total ?? 0) / (page?.pageSize ?? filters.pageSize))),
-    isLoading,
+    isLoading: query.isLoading,
   }
 }

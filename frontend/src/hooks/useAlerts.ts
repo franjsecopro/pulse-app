@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '../lib/queryKeys'
 import { alertsService } from '../services/alerts.service'
-import type { Alert, AlertType } from '../types'
+import type { AlertType } from '../types'
 
 interface UseAlertsParams {
   month?: number
@@ -10,25 +11,13 @@ interface UseAlertsParams {
 }
 
 export function useAlerts({ month, year, types, enabled = true }: UseAlertsParams) {
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const query = useQuery({
+    queryKey: queryKeys.alerts.list({ month, year, types }),
+    queryFn: () => alertsService.getAlerts({ month, year, types }),
+    enabled,
+  })
 
-  // Inline `types: [...]` at call sites is a new array ref every render — sort+join makes it a stable key.
-  const typesKey = types ? [...types].sort().join(',') : ''
+  const alerts = enabled ? (query.data ?? []) : []
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: typesKey is derived from types; using types directly would re-fire on every render (see typesKey comment above).
-  useEffect(() => {
-    if (!enabled) {
-      setAlerts([])
-      setIsLoading(false)
-      return
-    }
-    setIsLoading(true)
-    alertsService
-      .getAlerts({ month, year, types })
-      .then(setAlerts)
-      .finally(() => setIsLoading(false))
-  }, [month, year, enabled, typesKey])
-
-  return { alerts, isLoading, count: alerts.length }
+  return { alerts, isLoading: enabled && query.isLoading, count: alerts.length }
 }

@@ -1,112 +1,127 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '../context/ToastContext'
+import { queryKeys } from '../lib/queryKeys'
 import { clientService } from '../services/client.service'
 import type { Client, Contract, PaymentIdentifier } from '../types'
 
 type FilterActive = 'all' | 'active' | 'archived'
 
+/** Maps the UI filter to service arguments. Kept verbatim — pinned by useClients.test.ts. */
+function toServiceArgs(search: string, filterActive: FilterActive) {
+  let isActive: boolean | undefined
+  let deletedFilter: 'exclude' | 'include' | 'only'
+
+  if (filterActive === 'active') {
+    isActive = true
+    deletedFilter = 'exclude'
+  } else if (filterActive === 'archived') {
+    isActive = undefined
+    deletedFilter = 'only'
+  } else {
+    isActive = undefined
+    deletedFilter = 'include'
+  }
+
+  return { search: search || undefined, isActive, deletedFilter }
+}
+
 export function useClients(search: string, filterActive: FilterActive) {
   const { addToast } = useToast()
+  const queryClient = useQueryClient()
 
-  const [clients, setClients] = useState<Client[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const serviceArgs = toServiceArgs(search, filterActive)
+  const listKey = queryKeys.clients.list(serviceArgs)
 
-  const loadClients = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      let isActive: boolean | undefined
-      let deletedFilter: 'exclude' | 'include' | 'only'
+  const query = useQuery({
+    queryKey: listKey,
+    queryFn: () => clientService.getAll(serviceArgs),
+    // Sort runs over the cache on read — never mutate the cached array itself.
+    select: (data) => [...data].sort((a, b) => Number(b.isActive) - Number(a.isActive)),
+  })
 
-      if (filterActive === 'active') {
-        isActive = true
-        deletedFilter = 'exclude'
-      } else if (filterActive === 'archived') {
-        isActive = undefined
-        deletedFilter = 'only'
-      } else {
-        isActive = undefined
-        deletedFilter = 'include'
-      }
+  const invalidateClients = () => queryClient.invalidateQueries({ queryKey: queryKeys.clients.all })
 
-      const data = await clientService.getAll({
-        search: search || undefined,
-        isActive: isActive,
-        deletedFilter: deletedFilter,
-      })
-      setClients(data.sort((a, b) => Number(b.isActive) - Number(a.isActive)))
-    } finally {
-      setIsLoading(false)
-    }
-  }, [search, filterActive])
-
-  useEffect(() => {
-    loadClients()
-  }, [loadClients])
-
-  const createClient = async (
-    data: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'archivedAt' | 'contracts'>,
-  ) => {
-    try {
-      await clientService.create(data)
+  const createMutation = useMutation({
+    mutationFn: clientService.create,
+    onSuccess: () => {
       addToast('toasts.clientCreated', 'success')
-      loadClients()
-    } catch {
-      addToast('toasts.clientCreateError', 'error')
-    }
-  }
+      invalidateClients()
+    },
+    onError: (error) => addToast('toasts.clientCreateError', 'error', undefined, error.message),
+  })
 
-  const updateClient = async (id: number, data: Partial<Client>) => {
-    try {
-      await clientService.update(id, data)
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Client> }) =>
+      clientService.update(id, data),
+    onSuccess: () => {
       addToast('toasts.clientUpdated', 'success')
-      loadClients()
-    } catch {
-      addToast('toasts.clientUpdateError', 'error')
-    }
-  }
+      invalidateClients()
+    },
+    onError: (error) => addToast('toasts.clientUpdateError', 'error', undefined, error.message),
+  })
 
-  const archiveClient = async (id: number) => {
-    try {
-      await clientService.archive(id)
+  const archiveMutation = useMutation({
+    mutationFn: clientService.archive,
+    onSuccess: () => {
       addToast('toasts.clientArchived', 'success')
-      loadClients()
-    } catch {
-      addToast('toasts.clientArchiveError', 'error')
-    }
-  }
+      invalidateClients()
+    },
+    onError: (error) => addToast('toasts.clientArchiveError', 'error', undefined, error.message),
+  })
 
-  const activateClient = async (id: number) => {
-    try {
-      await clientService.activate(id)
+  const activateMutation = useMutation({
+    mutationFn: clientService.activate,
+    onSuccess: () => {
       addToast('toasts.clientActivated', 'success')
-      loadClients()
-    } catch {
-      addToast('toasts.clientActivateError', 'error')
-    }
-  }
+      invalidateClients()
+    },
+    onError: (error) => addToast('toasts.clientActivateError', 'error', undefined, error.message),
+  })
 
-  const hardDeleteClient = async (id: number) => {
-    try {
-      await clientService.hardDelete(id)
+  const hardDeleteMutation = useMutation({
+    mutationFn: clientService.hardDelete,
+    onSuccess: () => {
       addToast('toasts.clientHardDeleted', 'success')
-      loadClients()
-    } catch {
-      addToast('toasts.clientHardDeleteError', 'error')
-    }
-  }
+      invalidateClients()
+    },
+    onError: (error) => addToast('toasts.clientHardDeleteError', 'error', undefined, error.message),
+  })
 
+  // Errors are swallowed (the onError toast already informed the user) so the
+  // public API keeps its pre-React-Query contract: callers `await` and never catch.
+  const swallow = () => undefined
+
+  const createClient = (
+    data: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'archivedAt' | 'contracts'>,
+  ) => createMutation.mutateAsync(data).then(swallow, swallow)
+
+  const updateClient = (id: number, data: Partial<Client>) =>
+    updateMutation.mutateAsync({ id, data }).then(swallow, swallow)
+
+  const archiveClient = (id: number) => archiveMutation.mutateAsync(id).then(swallow, swallow)
+
+  const activateClient = (id: number) => activateMutation.mutateAsync(id).then(swallow, swallow)
+
+  const hardDeleteClient = (id: number) => hardDeleteMutation.mutateAsync(id).then(swallow, swallow)
+
+  // Local cache patches — contracts/payers are edited in nested managers that
+  // already saved server-side; a refetch here would be a wasted round-trip.
   const updateClientContracts = (clientId: number, contracts: Contract[]) => {
-    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, contracts } : c)))
+    queryClient.setQueryData<Client[]>(listKey, (prev) =>
+      prev?.map((c) => (c.id === clientId ? { ...c, contracts } : c)),
+    )
   }
 
   const updateClientPayers = (clientId: number, payers: PaymentIdentifier[]) => {
-    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, payers } : c)))
+    queryClient.setQueryData<Client[]>(listKey, (prev) =>
+      prev?.map((c) => (c.id === clientId ? { ...c, payers } : c)),
+    )
   }
 
   return {
-    clients,
-    isLoading,
-    loadClients,
+    clients: query.data ?? [],
+    isLoading: query.isLoading,
+    loadClients: invalidateClients,
     createClient,
     updateClient,
     archiveClient,

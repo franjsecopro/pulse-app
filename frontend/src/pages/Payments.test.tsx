@@ -43,8 +43,8 @@ vi.mock('../components/ui/Pagination', () => ({
   Pagination: () => React.createElement('div', { 'data-testid': 'mock-pagination' }),
 }))
 
-vi.mock('../components/ui/ConfirmDialog', () => ({
-  ConfirmDialog: ({ isOpen, message }: { isOpen: boolean; message: string }) => {
+vi.mock('../components/ui/ConfirmationModal', () => ({
+  ConfirmationModal: ({ isOpen, message }: { isOpen: boolean; message: string }) => {
     if (!isOpen) return null
     return React.createElement('div', { 'data-testid': 'mock-confirm-dialog' }, message)
   },

@@ -67,3 +67,34 @@ export function calcDuration(start: string, end: string): number {
   const [eh, em] = end.split(':').map(Number)
   return (eh * 60 + em - sh * 60 - sm) / 60
 }
+
+/**
+ * Returns today's date as an ISO string (YYYY-MM-DD) in LOCAL time, so the
+ * user's calendar day is respected regardless of server timezone.
+ */
+export function todayISO(): string {
+  const now = new Date()
+  const yyyy = now.getFullYear()
+  const monthPadded = String(now.getMonth() + 1).padStart(2, '0')
+  const dayPadded = String(now.getDate()).padStart(2, '0')
+  return `${yyyy}-${monthPadded}-${dayPadded}`
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Adds ``days`` calendar days to an ISO date string (local time).
+ * @param isoDate - ISO date string (YYYY-MM-DD); falls back to today when missing
+ * @param days - Number of calendar days to add (can be negative)
+ * @returns New ISO date string (YYYY-MM-DD)
+ */
+export function addDaysISO(isoDate: string | undefined, days: number): string {
+  if (!isoDate) return todayISO()
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const d = new Date(year, month - 1, day)
+  d.setTime(d.getTime() + days * DAY_MS)
+  const yyyy = d.getFullYear()
+  const monthPadded = String(d.getMonth() + 1).padStart(2, '0')
+  const dayPadded = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${monthPadded}-${dayPadded}`
+}

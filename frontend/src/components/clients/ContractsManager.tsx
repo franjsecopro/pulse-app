@@ -4,7 +4,7 @@ import { clientService } from '../../services/client.service'
 import type { Client, Contract } from '../../types'
 import { calcDuration, formatDate, formatHours } from '../../utils/formatters'
 import { Button } from '../ui/Button'
-import { ConfirmModal } from '../ui/ConfirmModal'
+import { ConfirmationModal } from '../ui/ConfirmationModal'
 import { ContractDetail } from './ContractDetail'
 import { ContractForm } from './ContractForm'
 
@@ -210,8 +210,9 @@ export function ContractsManager({ client, onContractsChanged, onClose }: Contra
         </Button>
       </div>
 
-      <ConfirmModal
+      <ConfirmationModal
         isOpen={pendingDeleteContractId !== null}
+        variant='danger'
         message={t('contracts.deleteConfirmMessage')}
         onConfirm={confirmDeleteContract}
         onCancel={() => setPendingDeleteContractId(null)}

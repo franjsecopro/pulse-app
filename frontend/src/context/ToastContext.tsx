@@ -11,10 +11,12 @@ interface Toast {
   type: ToastType
   message: string
   count?: number
+  /** Raw (untranslated) detail line, e.g. the error message from the API. */
+  detail?: string
 }
 
 interface ToastContextValue {
-  addToast: (message: string, type?: ToastType, count?: number) => void
+  addToast: (message: string, type?: ToastType, count?: number, detail?: string) => void
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -56,9 +58,14 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
 
       <span className={`material-symbols-outlined text-xl shrink-0 mt-0.5 ${text}`}>{icon}</span>
 
-      <p className='text-sm font-medium text-slate-800 flex-1 leading-snug pt-0.5'>
-        {t(toast.message, { count: toast.count })}
-      </p>
+      <div className='flex-1 pt-0.5'>
+        <p className='text-sm font-medium text-slate-800 leading-snug'>
+          {t(toast.message, { count: toast.count })}
+        </p>
+        {toast.detail && (
+          <p className='text-xs text-slate-500 leading-snug mt-0.5 break-words'>{toast.detail}</p>
+        )}
+      </div>
 
       <Button
         type='button'
@@ -77,10 +84,13 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const addToast = useCallback((message: string, type: ToastType = 'info', count?: number) => {
-    const id = `${Date.now()}-${Math.random()}`
-    setToasts((prev) => [...prev, { id, type, message, count }])
-  }, [])
+  const addToast = useCallback(
+    (message: string, type: ToastType = 'info', count?: number, detail?: string) => {
+      const id = `${Date.now()}-${Math.random()}`
+      setToasts((prev) => [...prev, { id, type, message, count, detail }])
+    },
+    [],
+  )
 
   const dismiss = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))

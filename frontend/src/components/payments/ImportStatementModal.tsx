@@ -169,7 +169,8 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
         <Button
           type='button'
           onClick={() => fileRef.current?.click()}
-          className='border-2 border-dashed border-slate-200 rounded-xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors w-full'
+          disabled={isParsing}
+          className='border-2 border-dashed border-slate-200 rounded-xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors w-full disabled:opacity-60 disabled:cursor-wait'
         >
           <span className='material-symbols-outlined text-4xl text-slate-300 block mb-2'>
             upload_file
@@ -184,6 +185,7 @@ export function ImportStatementModal({ clients, onClose, onImported }: ImportSta
             type='file'
             accept='.csv'
             className='hidden'
+            disabled={isParsing || isConfirming}
             onChange={handleFileChange}
           />
         </Button>

@@ -797,6 +797,7 @@
     "clientActivated": "Client activé",
     "clientActivateError": "Erreur lors de l'activation du client",
     "clientHardDeleted": "Client définitivement supprimé",
-    "clientHardDeleteError": "Erreur lors de la suppression du client"
+    "clientHardDeleteError": "Erreur lors de la suppression du client",
+    "reportExportError": "Impossible de générer le fichier"
   }
 }

@@ -4,7 +4,7 @@ import { ClassForm } from '../components/classes/ClassForm'
 import { CLASS_STATUS_CONFIG } from '../components/classes/constants'
 import { DayView } from '../components/classes/DayView'
 import { Button } from '../components/ui/Button'
-import { ConfirmModal } from '../components/ui/ConfirmModal'
+import { ConfirmationModal } from '../components/ui/ConfirmationModal'
 import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
 import { useClasses } from '../hooks/useClasses'
@@ -404,8 +404,9 @@ export function Classes() {
         )}
       </Modal>
 
-      <ConfirmModal
+      <ConfirmationModal
         isOpen={pendingDeleteId !== null}
+        variant='danger'
         message={t('classes.deleteConfirm')}
         onConfirm={async () => {
           await confirmDelete()

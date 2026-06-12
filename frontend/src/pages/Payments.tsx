@@ -7,7 +7,7 @@ import { ImportStatementModal } from '../components/payments/ImportStatementModa
 import { PaymentForm } from '../components/payments/PaymentForm'
 import { StatementHistoryView } from '../components/payments/StatementHistoryView'
 import { Button } from '../components/ui/Button'
-import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { ConfirmationModal } from '../components/ui/ConfirmationModal'
 import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
 import { useAuth } from '../context/AuthContext'
@@ -296,22 +296,22 @@ export function Payments() {
         )}
       </Modal>
 
-      <ConfirmDialog
+      <ConfirmationModal
         isOpen={pendingDeleteId !== null}
+        variant='danger'
         title={t('payments.deleteTitle')}
         message={t('payments.deleteMessage')}
-        confirmText={t('actions.delete')}
-        isDangerous
+        confirmLabel={t('actions.delete')}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
       />
 
-      <ConfirmDialog
+      <ConfirmationModal
         isOpen={pendingStatementId !== null}
+        variant='danger'
         title={t('statements.deleteTitle')}
         message={t('statements.deleteMessage')}
-        confirmText={t('statements.deleteConfirm')}
-        isDangerous
+        confirmLabel={t('statements.deleteConfirm')}
         onConfirm={async () => {
           if (pendingStatementId !== null) await deleteStatementImport(pendingStatementId)
           setPendingStatementId(null)

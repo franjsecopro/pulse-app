@@ -4,7 +4,7 @@ import { ClientForm } from '../components/clients/ClientForm'
 import { ContractsManager } from '../components/clients/ContractsManager'
 import { PayersManager } from '../components/clients/PayersManager'
 import { Button } from '../components/ui/Button'
-import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { ConfirmationModal } from '../components/ui/ConfirmationModal'
 import { Modal } from '../components/ui/Modal'
 import { useAuth } from '../context/AuthContext'
 import { useClients } from '../hooks/useClients'
@@ -206,8 +206,9 @@ export function Clients() {
         )}
       </Modal>
 
-      <ConfirmDialog
+      <ConfirmationModal
         isOpen={!!confirmDialog}
+        variant={confirmDialog?.action === 'archive' ? 'danger' : 'simple'}
         title={
           confirmDialog?.action === 'archive'
             ? t('clients.archiveTitle', { name: confirmDialog?.client.name })
@@ -218,23 +219,22 @@ export function Clients() {
             ? t('clients.archiveMessage')
             : t('clients.activateMessage')
         }
-        confirmText={
+        confirmLabel={
           confirmDialog?.action === 'archive' ? t('clients.archive') : t('clients.activate')
         }
-        isDangerous={confirmDialog?.action === 'archive'}
         isLoading={isConfirmingAction}
         onConfirm={handleConfirmAction}
         onCancel={() => setConfirmDialog(null)}
       />
 
-      <ConfirmDialog
+      <ConfirmationModal
         isOpen={!!hardDeleteTarget}
+        variant='danger'
         title={t('clients.hardDeleteTitle', { name: hardDeleteTarget?.name })}
         message={t('clients.hardDeleteMessage', {
           name: hardDeleteTarget?.name,
         })}
-        confirmText={t('actions.delete')}
-        isDangerous
+        confirmLabel={t('actions.delete')}
         isLoading={isHardDeleting}
         onConfirm={handleHardDelete}
         onCancel={() => setHardDeleteTarget(null)}

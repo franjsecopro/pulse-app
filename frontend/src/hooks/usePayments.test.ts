@@ -10,6 +10,7 @@
  */
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createWrapper } from '../lib/test-utils'
 import { clientService } from '../services/client.service'
 import { paymentService } from '../services/payment.service'
 import { usePayments } from './usePayments'
@@ -49,6 +50,8 @@ const defaults = {
   filterStatus: '',
 }
 
+const renderHookWithQuery: typeof renderHook = (cb) => renderHook(cb, { wrapper: createWrapper() })
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetAllPayments.mockResolvedValue({ data: [], total: 0 })
@@ -59,7 +62,7 @@ beforeEach(() => {
 
 describe('month/year filter coupling', () => {
   it('does not pass month or year when filterMonth is empty', async () => {
-    renderHook(() => usePayments({ ...defaults, filterMonth: '' }))
+    renderHookWithQuery(() => usePayments({ ...defaults, filterMonth: '' }))
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
@@ -69,7 +72,7 @@ describe('month/year filter coupling', () => {
   })
 
   it('passes both month and year when filterMonth is set', async () => {
-    renderHook(() => usePayments({ ...defaults, filterMonth: 4, filterYear: 2026 }))
+    renderHookWithQuery(() => usePayments({ ...defaults, filterMonth: 4, filterYear: 2026 }))
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
@@ -83,7 +86,7 @@ describe('month/year filter coupling', () => {
 
 describe('optional filter forwarding', () => {
   it('passes clientId when filterClient is set', async () => {
-    renderHook(() => usePayments({ ...defaults, filterClient: 10 }))
+    renderHookWithQuery(() => usePayments({ ...defaults, filterClient: 10 }))
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(expect.objectContaining({ clientId: 10 })),
@@ -91,7 +94,7 @@ describe('optional filter forwarding', () => {
   })
 
   it('passes clientId as undefined when filterClient is empty', async () => {
-    renderHook(() => usePayments({ ...defaults, filterClient: '' }))
+    renderHookWithQuery(() => usePayments({ ...defaults, filterClient: '' }))
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
@@ -101,7 +104,7 @@ describe('optional filter forwarding', () => {
   })
 
   it('passes status when filterStatus is set', async () => {
-    renderHook(() => usePayments({ ...defaults, filterStatus: 'confirmed' }))
+    renderHookWithQuery(() => usePayments({ ...defaults, filterStatus: 'confirmed' }))
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
@@ -111,7 +114,7 @@ describe('optional filter forwarding', () => {
   })
 
   it('passes status as undefined when filterStatus is empty', async () => {
-    renderHook(() => usePayments({ ...defaults, filterStatus: '' }))
+    renderHookWithQuery(() => usePayments({ ...defaults, filterStatus: '' }))
 
     await waitFor(() =>
       expect(mockGetAllPayments).toHaveBeenCalledWith(
@@ -125,13 +128,13 @@ describe('optional filter forwarding', () => {
 
 describe('requestDelete / cancelDelete', () => {
   it('pendingDeleteId starts as null', async () => {
-    const { result } = renderHook(() => usePayments(defaults))
+    const { result } = renderHookWithQuery(() => usePayments(defaults))
 
     expect(result.current.pendingDeleteId).toBeNull()
   })
 
   it('requestDelete sets pendingDeleteId', async () => {
-    const { result } = renderHook(() => usePayments(defaults))
+    const { result } = renderHookWithQuery(() => usePayments(defaults))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
@@ -141,7 +144,7 @@ describe('requestDelete / cancelDelete', () => {
   })
 
   it('cancelDelete clears pendingDeleteId back to null', async () => {
-    const { result } = renderHook(() => usePayments(defaults))
+    const { result } = renderHookWithQuery(() => usePayments(defaults))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
@@ -164,7 +167,7 @@ describe('totalAmount', () => {
       total: 2,
     })
 
-    const { result } = renderHook(() => usePayments(defaults))
+    const { result } = renderHookWithQuery(() => usePayments(defaults))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
@@ -172,7 +175,7 @@ describe('totalAmount', () => {
   })
 
   it('returns 0 for an empty payment list', async () => {
-    const { result } = renderHook(() => usePayments(defaults))
+    const { result } = renderHookWithQuery(() => usePayments(defaults))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 

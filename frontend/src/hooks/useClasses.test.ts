@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createWrapper } from '../lib/test-utils'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
 import { useClasses } from './useClasses'
@@ -35,6 +36,8 @@ const defaultFilters = {
   filterClient: '' as const,
 }
 
+const renderHookWithQuery: typeof renderHook = (cb) => renderHook(cb, { wrapper: createWrapper() })
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetAllClasses.mockResolvedValue({ data: [], total: 0 })
@@ -46,13 +49,13 @@ beforeEach(() => {
 
 describe('requestDelete / cancelDelete', () => {
   it('pendingDeleteId starts as null', async () => {
-    const { result } = renderHook(() => useClasses(defaultFilters))
+    const { result } = renderHookWithQuery(() => useClasses(defaultFilters))
 
     expect(result.current.pendingDeleteId).toBeNull()
   })
 
   it('requestDelete sets pendingDeleteId to the given id', async () => {
-    const { result } = renderHook(() => useClasses(defaultFilters))
+    const { result } = renderHookWithQuery(() => useClasses(defaultFilters))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
@@ -62,7 +65,7 @@ describe('requestDelete / cancelDelete', () => {
   })
 
   it('cancelDelete clears pendingDeleteId back to null', async () => {
-    const { result } = renderHook(() => useClasses(defaultFilters))
+    const { result } = renderHookWithQuery(() => useClasses(defaultFilters))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
@@ -77,7 +80,7 @@ describe('requestDelete / cancelDelete', () => {
 
 describe('classStats', () => {
   it('starts as zero defaults', async () => {
-    const { result } = renderHook(() => useClasses(defaultFilters))
+    const { result } = renderHookWithQuery(() => useClasses(defaultFilters))
 
     expect(result.current.classStats).toEqual({ count: 0, totalRevenue: 0 })
   })
@@ -85,7 +88,7 @@ describe('classStats', () => {
   it('exposes the value returned by the backend', async () => {
     mockGetStats.mockResolvedValue({ count: 12, totalRevenue: 540.5 })
 
-    const { result } = renderHook(() => useClasses(defaultFilters))
+    const { result } = renderHookWithQuery(() => useClasses(defaultFilters))
 
     await waitFor(() => expect(result.current.classStats.count).toBe(12))
 
@@ -96,10 +99,10 @@ describe('classStats', () => {
     mockGetStats.mockResolvedValueOnce({ count: 1, totalRevenue: 10 })
     mockGetStats.mockResolvedValueOnce({ count: 2, totalRevenue: 20 })
 
-    const { rerender } = renderHook(
-      ({ filters }) => useClasses(filters),
-      { initialProps: { filters: { filterMonth: 4, filterYear: 2026, filterClient: '' as const } } },
-    )
+    const { rerender } = renderHook(({ filters }) => useClasses(filters), {
+      wrapper: createWrapper(),
+      initialProps: { filters: { filterMonth: 4, filterYear: 2026, filterClient: '' as const } },
+    })
 
     await waitFor(() => expect(mockGetStats).toHaveBeenCalledTimes(1))
 
@@ -113,7 +116,7 @@ describe('classStats', () => {
 
 describe('filter forwarding to classService', () => {
   it('passes month, year, and clientId to getAll', async () => {
-    renderHook(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
+    renderHookWithQuery(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
 
     await waitFor(() =>
       expect(mockGetAllClasses).toHaveBeenCalledWith(
@@ -123,7 +126,7 @@ describe('filter forwarding to classService', () => {
   })
 
   it('passes clientId as undefined when filterClient is empty string', async () => {
-    renderHook(() => useClasses({ filterMonth: 4, filterYear: 2026, filterClient: '' }))
+    renderHookWithQuery(() => useClasses({ filterMonth: 4, filterYear: 2026, filterClient: '' }))
 
     await waitFor(() =>
       expect(mockGetAllClasses).toHaveBeenCalledWith(
@@ -133,7 +136,7 @@ describe('filter forwarding to classService', () => {
   })
 
   it('passes the same filters to getStats', async () => {
-    renderHook(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
+    renderHookWithQuery(() => useClasses({ filterMonth: 5, filterYear: 2026, filterClient: 10 }))
 
     await waitFor(() =>
       expect(mockGetStats).toHaveBeenCalledWith(

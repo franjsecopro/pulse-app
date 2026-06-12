@@ -86,7 +86,8 @@ async function requestBlob(path: string, retry = true): Promise<Blob> {
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, 'No se pudo generar el archivo')
+    // Technical message — the UI layer translates user-facing copy (see toasts.reportExportError)
+    throw new ApiError(response.status, 'Failed to generate file')
   }
 
   return response.blob()

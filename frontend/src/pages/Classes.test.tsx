@@ -19,8 +19,8 @@ vi.mock('../components/classes/DayView', () => ({
   DayView: () => React.createElement('div', { 'data-testid': 'mock-day-view' }),
 }))
 
-vi.mock('../components/ui/ConfirmModal', () => ({
-  ConfirmModal: ({ isOpen, message }: { isOpen: boolean; message: string }) => {
+vi.mock('../components/ui/ConfirmationModal', () => ({
+  ConfirmationModal: ({ isOpen, message }: { isOpen: boolean; message: string }) => {
     if (!isOpen) return null
     return React.createElement('div', { 'data-testid': 'mock-confirm-modal' }, message)
   },

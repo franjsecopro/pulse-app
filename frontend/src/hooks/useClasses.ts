@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { useToast } from '../context/ToastContext'
+import { queryKeys } from '../lib/queryKeys'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
-import type { ClassSession, ClassStats, Client } from '../types'
+import type { ClassSession, ClassStats } from '../types'
 
 const PAGE_LIMIT = 100
 
@@ -14,124 +16,115 @@ interface UseClassesFilters {
 
 export function useClasses({ filterMonth, filterYear, filterClient }: UseClassesFilters) {
   const { addToast } = useToast()
+  const queryClient = useQueryClient()
 
-  const [classes, setClasses] = useState<ClassSession[]>([])
-  const [clients, setClients] = useState<Client[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSyncing, setIsSyncing] = useState(false)
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const [page, setPage] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
-  const [classStats, setClassStats] = useState<ClassStats>({ count: 0, totalRevenue: 0 })
 
-  const loadClasses = useCallback(
-    async (targetPage = 1) => {
-      setIsLoading(true)
-      const { data, total } = await classService.getAll({
-        month: filterMonth,
-        year: filterYear,
-        clientId: filterClient || undefined,
-        limit: PAGE_LIMIT,
-        offset: (targetPage - 1) * PAGE_LIMIT,
-      })
-      setClasses(data)
-      setTotalCount(total)
-      setPage(targetPage)
-      setIsLoading(false)
-    },
-    [filterMonth, filterYear, filterClient],
-  )
+  const filters = {
+    month: filterMonth,
+    year: filterYear,
+    clientId: filterClient || undefined,
+  }
 
-  const loadClassStats = useCallback(async () => {
-    const stats = await classService.getStats({
-      month: filterMonth,
-      year: filterYear,
-      clientId: filterClient || undefined,
-    })
-    setClassStats(stats)
+  // Changing a filter must land the user back on page 1 (old loadClasses(1) behavior).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally keyed on raw filters
+  useEffect(() => {
+    setPage(1)
   }, [filterMonth, filterYear, filterClient])
 
-  useEffect(() => {
-    clientService.getAll().then(setClients)
-  }, [])
+  const listQuery = useQuery({
+    queryKey: queryKeys.classes.list({ ...filters, page }),
+    queryFn: () =>
+      classService.getAll({
+        ...filters,
+        limit: PAGE_LIMIT,
+        offset: (page - 1) * PAGE_LIMIT,
+      }),
+  })
 
-  useEffect(() => {
-    loadClasses(1)
-    loadClassStats()
-  }, [loadClasses, loadClassStats])
+  const statsQuery = useQuery({
+    queryKey: queryKeys.classes.stats(filters),
+    queryFn: () => classService.getStats(filters),
+  })
 
-  const reloadAll = useCallback(
-    async (targetPage: number = page) => {
-      await loadClasses(targetPage)
-      await loadClassStats()
-    },
-    [loadClasses, loadClassStats, page],
-  )
+  const clientsQuery = useQuery({
+    queryKey: queryKeys.clients.dropdown,
+    queryFn: () => clientService.getAll(),
+  })
 
-  const goToPage = (n: number) => loadClasses(n)
+  const invalidateClasses = () => queryClient.invalidateQueries({ queryKey: queryKeys.classes.all })
 
-  const createClass = async (data: Partial<ClassSession>) => {
-    try {
-      await classService.create(data as Parameters<typeof classService.create>[0])
+  const createMutation = useMutation({
+    mutationFn: (data: Partial<ClassSession>) =>
+      classService.create(data as Parameters<typeof classService.create>[0]),
+    onSuccess: () => {
       addToast('toasts.classCreated', 'success')
-      reloadAll()
-    } catch {
-      addToast('toasts.classCreateError', 'error')
-    }
-  }
+      invalidateClasses()
+    },
+    onError: (error) => addToast('toasts.classCreateError', 'error', undefined, error.message),
+  })
 
-  const updateClass = async (id: number, data: Partial<ClassSession>) => {
-    try {
-      await classService.update(id, data)
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<ClassSession> }) =>
+      classService.update(id, data),
+    onSuccess: () => {
       addToast('toasts.classUpdated', 'success')
-      reloadAll()
-    } catch {
-      addToast('toasts.classUpdateError', 'error')
-    }
-  }
+      invalidateClasses()
+    },
+    onError: (error) => addToast('toasts.classUpdateError', 'error', undefined, error.message),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => classService.delete(id),
+    onSuccess: () => addToast('toasts.classDeleted', 'success'),
+    onError: (error) => addToast('toasts.classDeleteError', 'error', undefined, error.message),
+    // Old behavior reloaded in `finally` — even a failed delete refreshes the list.
+    onSettled: () => {
+      setPendingDeleteId(null)
+      invalidateClasses()
+    },
+  })
+
+  const syncMutation = useMutation({
+    mutationFn: () => classService.syncGCal(),
+    onSuccess: (result) => addToast('toasts.gcalSynced', 'success', result.scheduled),
+    onError: (error) => addToast('toasts.gcalSyncError', 'error', undefined, error.message),
+  })
+
+  const swallow = () => undefined
+
+  const createClass = (data: Partial<ClassSession>) =>
+    createMutation.mutateAsync(data).then(swallow, swallow)
+
+  const updateClass = (id: number, data: Partial<ClassSession>) =>
+    updateMutation.mutateAsync({ id, data }).then(swallow, swallow)
 
   const requestDelete = (id: number) => setPendingDeleteId(id)
   const cancelDelete = () => setPendingDeleteId(null)
 
   const confirmDelete = async () => {
     if (!pendingDeleteId) return
-    try {
-      await classService.delete(pendingDeleteId)
-      addToast('toasts.classDeleted', 'success')
-    } catch {
-      addToast('toasts.classDeleteError', 'error')
-    } finally {
-      setPendingDeleteId(null)
-      reloadAll()
-    }
+    await deleteMutation.mutateAsync(pendingDeleteId).then(swallow, swallow)
   }
 
-  const syncGCal = async () => {
-    setIsSyncing(true)
-    try {
-      const result = await classService.syncGCal()
-      addToast('toasts.gcalSynced', 'success', result.scheduled)
-    } catch {
-      addToast('toasts.gcalSyncError', 'error')
-    } finally {
-      setIsSyncing(false)
-    }
-  }
+  const syncGCal = () => syncMutation.mutateAsync().then(swallow, swallow)
 
+  const totalCount = listQuery.data?.total ?? 0
   const pageCount = Math.ceil(totalCount / PAGE_LIMIT)
 
   return {
-    classes,
-    clients,
-    isLoading,
-    isSyncing,
+    classes: listQuery.data?.data ?? [],
+    clients: clientsQuery.data ?? [],
+    isLoading: listQuery.isLoading,
+    isSyncing: syncMutation.isPending,
     pendingDeleteId,
-    classStats,
+    classStats: statsQuery.data ?? ({ count: 0, totalRevenue: 0 } satisfies ClassStats),
     page,
     pageCount,
     totalCount,
-    loadClasses,
-    goToPage,
+    loadClasses: invalidateClasses,
+    goToPage: setPage,
     createClass,
     updateClass,
     requestDelete,

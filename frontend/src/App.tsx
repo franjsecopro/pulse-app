@@ -1,7 +1,10 @@
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/Layout/AppLayout'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
+import { queryClient } from './lib/queryClient'
 import { Accounting } from './pages/Accounting'
 import { Admin } from './pages/Admin'
 import { Alerts } from './pages/Alerts'
@@ -27,30 +30,33 @@ function AdminRoute() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path='/login' element={<Login />} />
-            <Route element={<ProtectedRoute />}>
-              <Route element={<AppLayout />}>
-                <Route path='/' element={<Dashboard />} />
-                <Route path='/clients' element={<Clients />} />
-                <Route path='/classes' element={<Classes />} />
-                <Route path='/payments' element={<Payments />} />
-                <Route path='/accounting' element={<Accounting />} />
-                <Route path='/notifications' element={<Notifications />} />
-                <Route element={<AdminRoute />}>
-                  <Route path='/admin' element={<Admin />} />
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path='/login' element={<Login />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<AppLayout />}>
+                  <Route path='/' element={<Dashboard />} />
+                  <Route path='/clients' element={<Clients />} />
+                  <Route path='/classes' element={<Classes />} />
+                  <Route path='/payments' element={<Payments />} />
+                  <Route path='/accounting' element={<Accounting />} />
+                  <Route path='/notifications' element={<Notifications />} />
+                  <Route element={<AdminRoute />}>
+                    <Route path='/admin' element={<Admin />} />
+                  </Route>
+                  <Route path='/alerts' element={<Alerts />} />
+                  <Route path='/settings' element={<Settings />} />
                 </Route>
-                <Route path='/alerts' element={<Alerts />} />
-                <Route path='/settings' element={<Settings />} />
               </Route>
-            </Route>
-            <Route path='*' element={<Navigate to='/' replace />} />
-          </Routes>
-        </AuthProvider>
-      </ToastProvider>
-    </BrowserRouter>
+              <Route path='*' element={<Navigate to='/' replace />} />
+            </Routes>
+          </AuthProvider>
+        </ToastProvider>
+      </BrowserRouter>
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   )
 }

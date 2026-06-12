@@ -24,20 +24,21 @@ vi.mock('../services/admin.service', () => ({
   },
 }))
 
-vi.mock('../components/ui/ConfirmModal', () => ({
-  ConfirmModal: ({ isOpen, message }: { isOpen: boolean; message: string }) => {
-    if (!isOpen) return null
-    return React.createElement('div', { 'data-testid': 'mock-confirm-modal' }, message)
-  },
-}))
-
-vi.mock('../components/ui/DoubleConfirmModal', () => ({
-  DoubleConfirmModal: ({ isOpen, warningMessage }: { isOpen: boolean; warningMessage: string }) => {
+vi.mock('../components/ui/ConfirmationModal', () => ({
+  ConfirmationModal: ({
+    isOpen,
+    message,
+    variant,
+  }: {
+    isOpen: boolean
+    message: string
+    variant?: string
+  }) => {
     if (!isOpen) return null
     return React.createElement(
       'div',
-      { 'data-testid': 'mock-double-confirm-modal' },
-      warningMessage,
+      { 'data-testid': variant === 'typed' ? 'mock-double-confirm-modal' : 'mock-confirm-modal' },
+      message,
     )
   },
 }))

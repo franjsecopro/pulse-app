@@ -9,6 +9,7 @@
  */
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createWrapper } from '../lib/test-utils'
 import { clientService } from '../services/client.service'
 import { useClients } from './useClients'
 
@@ -29,6 +30,8 @@ vi.mock('../services/client.service', () => ({
 
 const mockGetAll = vi.mocked(clientService.getAll)
 
+const renderHookWithQuery: typeof renderHook = (cb) => renderHook(cb, { wrapper: createWrapper() })
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetAll.mockResolvedValue([])
@@ -38,7 +41,7 @@ beforeEach(() => {
 
 describe('filterActive → service arguments', () => {
   it('active → isActive=true, deletedFilter="exclude"', async () => {
-    renderHook(() => useClients('', 'active'))
+    renderHookWithQuery(() => useClients('', 'active'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
@@ -50,7 +53,7 @@ describe('filterActive → service arguments', () => {
   })
 
   it('archived → isActive=undefined, deletedFilter="only"', async () => {
-    renderHook(() => useClients('', 'archived'))
+    renderHookWithQuery(() => useClients('', 'archived'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
@@ -62,7 +65,7 @@ describe('filterActive → service arguments', () => {
   })
 
   it('all → isActive=undefined, deletedFilter="include"', async () => {
-    renderHook(() => useClients('', 'all'))
+    renderHookWithQuery(() => useClients('', 'all'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith({
@@ -78,7 +81,7 @@ describe('filterActive → service arguments', () => {
 
 describe('search forwarding', () => {
   it('passes non-empty search string to the service', async () => {
-    renderHook(() => useClients('ana', 'all'))
+    renderHookWithQuery(() => useClients('ana', 'all'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith(expect.objectContaining({ search: 'ana' })),
@@ -86,7 +89,7 @@ describe('search forwarding', () => {
   })
 
   it('passes undefined when search is empty string', async () => {
-    renderHook(() => useClients('', 'all'))
+    renderHookWithQuery(() => useClients('', 'all'))
 
     await waitFor(() =>
       expect(mockGetAll).toHaveBeenCalledWith(expect.objectContaining({ search: undefined })),
@@ -103,7 +106,7 @@ describe('sorting', () => {
       { id: 2, name: 'Activo', isActive: true },
     ] as never)
 
-    const { result } = renderHook(() => useClients('', 'all'))
+    const { result } = renderHookWithQuery(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
@@ -116,7 +119,7 @@ describe('sorting', () => {
 
 describe('loading state', () => {
   it('isLoading starts true and becomes false after load', async () => {
-    const { result } = renderHook(() => useClients('', 'all'))
+    const { result } = renderHookWithQuery(() => useClients('', 'all'))
 
     expect(result.current.isLoading).toBe(true)
 
@@ -131,14 +134,15 @@ describe('updateClientContracts', () => {
     mockGetAll.mockResolvedValue([
       { id: 1, name: 'Cliente', isActive: true, contracts: [] },
     ] as never)
-    const { result } = renderHook(() => useClients('', 'all'))
+    const { result } = renderHookWithQuery(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     const newContracts = [{ id: 99 }] as never
     act(() => result.current.updateClientContracts(1, newContracts))
 
-    expect(result.current.clients[0].contracts).toEqual(newContracts)
+    // Cache notifications are async (notifyManager batches with setTimeout 0)
+    await waitFor(() => expect(result.current.clients[0].contracts).toEqual(newContracts))
     // Should NOT have triggered an extra fetch
     expect(mockGetAll).toHaveBeenCalledTimes(1)
   })
@@ -148,12 +152,13 @@ describe('updateClientContracts', () => {
       { id: 1, name: 'A', isActive: true, contracts: [] },
       { id: 2, name: 'B', isActive: true, contracts: [] },
     ] as never)
-    const { result } = renderHook(() => useClients('', 'all'))
+    const { result } = renderHookWithQuery(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     act(() => result.current.updateClientContracts(1, [{ id: 99 }] as never))
 
+    await waitFor(() => expect(result.current.clients[0].contracts).toEqual([{ id: 99 }]))
     expect(result.current.clients[1].contracts).toEqual([])
   })
 })
@@ -161,13 +166,13 @@ describe('updateClientContracts', () => {
 describe('updateClientPayers', () => {
   it('replaces payers for the target client without re-fetching', async () => {
     mockGetAll.mockResolvedValue([{ id: 1, name: 'Cliente', isActive: true, payers: [] }] as never)
-    const { result } = renderHook(() => useClients('', 'all'))
+    const { result } = renderHookWithQuery(() => useClients('', 'all'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     const newPayers = [{ id: 55, name: 'Transferencia' }] as never
     act(() => result.current.updateClientPayers(1, newPayers))
 
-    expect(result.current.clients[0].payers).toEqual(newPayers)
+    await waitFor(() => expect(result.current.clients[0].payers).toEqual(newPayers))
   })
 })
