@@ -765,7 +765,7 @@
   },
   "payers": {
     "title": "Identifiants de paiement",
-    "description": "Noms sous lesquels ce client apparaît dans les virements bancaires. Utilisés pour le matching automatique du PDF bancaire.",
+    "description": "Noms sous lesquels ce client apparaît dans les virements bancaires. Utilisés pour le matching automatique du relevé bancaire (CSV).",
     "empty": "Aucun identifiant",
     "namePlaceholder": "Nom en banque (ex : García)",
     "infoPlaceholder": "Info (optionnel)"

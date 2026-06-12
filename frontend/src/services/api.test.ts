@@ -40,7 +40,7 @@ describe('postForm', () => {
   it('sends FormData without forcing a JSON Content-Type', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse([]))
     const formData = new FormData()
-    formData.append('file', new Blob(['pdf'], { type: 'application/pdf' }), 'extracto.pdf')
+    formData.append('file', new Blob(['csv'], { type: 'text/csv' }), 'extracto.csv')
 
     await api.postForm('/imports/statement', formData)
 

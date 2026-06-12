@@ -9,8 +9,8 @@ from app.core.database import Base
 class StatementImport(Base):
     """Registro de cada extracto bancario importado por el usuario.
 
-    El formato del extracto (CSV hoy; Excel / PDF a futuro) es indistinto: este
-    registro guarda el historial de la importación, no el archivo original.
+    El formato del extracto es indistinto: este registro guarda el historial
+    de la importación, no el archivo original.
     """
     __tablename__ = "statement_imports"
 

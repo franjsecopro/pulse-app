@@ -5,7 +5,7 @@ The export is a French-locale, semicolon-delimited file:
 
 A row is income when its ``Crédit`` column is non-empty (``Débit`` rows are
 expenses and are skipped). Columns are read by NAME, so a reordered export
-keeps working — no positional guessing like the PDF parser needed.
+keeps working — no positional guessing needed.
 """
 import csv
 import io

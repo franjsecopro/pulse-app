@@ -11,7 +11,7 @@ from app.services.import_service import confirm_import
 def make_request(
     payments: list[dict],
     *,
-    filename: str | None = "test.pdf",
+    filename: str | None = "test.csv",
     month: int | None = 4,
     year: int | None = 2024,
 ) -> ConfirmImportRequest:
@@ -82,7 +82,7 @@ class TestConfirmImport:
                 {"date": "2024-04-01", "concept": "A", "amount": 100.0},
                 {"date": "2024-04-02", "concept": "B", "amount": 200.0},
             ],
-            filename="abril_2024.pdf",
+            filename="abril_2024.csv",
             month=4,
             year=2024,
         )
@@ -90,7 +90,7 @@ class TestConfirmImport:
         await confirm_import(db, user_id=1, data=request)
 
         record = (await db.execute(select(StatementImport))).scalar_one()
-        assert record.filename == "abril_2024.pdf"
+        assert record.filename == "abril_2024.csv"
         assert record.month == 4
         assert record.year == 2024
         assert record.transaction_count == 2

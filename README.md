@@ -23,8 +23,8 @@ Sistema completo de gestión de clientes, clases y pagos para trabajadores autó
 
 #### **Control de pagos**
 - Registro manual de pagos
-- **Parser automático de PDF bancario** (Hello Bank/BNP Paribas)
-  - Extrae ingresos del estado de cuenta
+- **Parser automático de extracto bancario CSV** (Hello Bank/BNP Paribas)
+  - Extrae ingresos del export CSV del banco
   - Matching inteligente con nombres de clientes
   - Usuario confirma antes de registrar
 - Cálculo automático de "clases cubiertas" por pago
@@ -95,7 +95,7 @@ Sistema completo de gestión de clientes, clases y pagos para trabajadores autó
 │  ├─ Gestión clientes            │     ├─ Visualización       │
 │  ├─ Agenda de clases            │     ├─ Confirmación pagos  │
 │  ├─ Control de pagos            │     ├─ Notificaciones      │
-│  ├─ Upload PDF banco            │     └─ Alertas             │
+│  ├─ Upload extracto CSV         │     └─ Alertas             │
 │  ├─ Reportes y búsqueda         │                            │
 │  ├─ Generación de facturas      │                            │
 │  └─ Configuración notificaciones│                            │
@@ -107,7 +107,7 @@ Sistema completo de gestión de clientes, clases y pagos para trabajadores autó
                     │  FastAPI + OAuth2           │
                     │  (Backend seguro)           │
                     │  ├─ Autenticación           │
-                    │  ├─ PDF Parser (pdfplumber) │
+                    │  ├─ Statement Parser (CSV)  │
                     │  ├─ Reconciliación          │
                     │  ├─ Invoice Generator       │
                     │  ├─ Scheduler (APScheduler) │
@@ -139,7 +139,7 @@ Sistema completo de gestión de clientes, clases y pagos para trabajadores autó
 Client:
   ├─ id: int (PK)
   ├─ name: str              # Nombre en calendario ("Juan García Pérez")
-  ├─ payment_name: str      # Para matching con PDF ("García")
+  ├─ payment_name: str      # Para matching con extracto ("García")
   ├─ email: str             # Para envío de facturas
   ├─ phone: str             # Para WhatsApp (opcional)
   ├─ address: str           # Para facturas (opcional)
@@ -169,7 +169,7 @@ Contract:
 
 ## 🔄 Flujos principales
 
-### **1. Importación de pagos (PDF)**
+### **1. Importación de pagos (CSV)**
 ```
 Usuario → Carga "Relevé de compte" → Parser extrae ingresos
   ↓
@@ -192,7 +192,7 @@ Para cada cliente:
   ├─ Clases en ese mes (Google Calendar)
   ├─ Tarifa según contrato activo en esa fecha
   ├─ Total esperado = clases × tarifa
-  ├─ Total pagado (del PDF o manual)
+  ├─ Total pagado (del extracto o manual)
   └─ Diferencia = alerta si ≠ 0
   ↓
 Genera reporte y alertas automáticas
@@ -432,7 +432,7 @@ El stack original contemplaba una app de escritorio con PyQt6 y móvil con Flutt
 - **Alembic** — Migraciones de BD
 - **Pydantic** 2.9 — Validación de datos y schemas
 - **python-jose + bcrypt** — JWT y hashing de contraseñas
-- **pdfplumber** 0.11 — Parser de extractos bancarios (PDF)
+- **csv (stdlib)** — Parser de extractos bancarios (CSV Hello Bank)
 - **Google Calendar API** — Integración sincronización de clases
 
 #### **Frontend**
@@ -526,7 +526,7 @@ Sprint 3: Testing, sincronización, backup
 
 ### **Fase 2: Automatización + Comunicación (4-5 semanas)**
 ```
-Sprint 4: PDF Parser + Reconciliación
+Sprint 4: Statement Parser (CSV) + Reconciliación
 Sprint 5: Alertas + Facturas
 Sprint 6: Recordatorios
 ```
@@ -602,9 +602,9 @@ notification_log
 - Sincronización manual: Configuración → Sincronizar ahora
 - Los datos nunca se pierden
 
-### **"PDF no se procesa correctamente"**
-- Verifica que PDF sea de Hello Bank/BNP Paribas
-- Formato debe ser "Relevé de compte" estándar
+### **"El extracto no se procesa correctamente"**
+- Verifica que el CSV sea el export de Hello Bank/BNP Paribas
+- Debe conservar las columnas originales (Date; Débit; Crédit; Libellé)
 - Si falla, contacta soporte
 
 ### **"Google Calendar no actualiza"**
@@ -620,7 +620,7 @@ notification_log
 - **Sincronización:** < 5 segundos (cambios)
 - **Reportes:** < 3 segundos (1000+ registros)
 - **Búsqueda avanzada:** < 1 segundo
-- **Parsing PDF:** < 10 segundos (documentos de 50 páginas)
+- **Parsing extracto CSV:** < 1 segundo
 
 ---
 

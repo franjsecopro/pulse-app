@@ -1,9 +1,9 @@
 """Shared building blocks for bank-statement parsing.
 
-A *statement* is a bank export of account movements. It can arrive in several
-formats (CSV today; Excel / PDF in the future). Every format parser converts the
-raw file bytes into the same ``ParsedTransaction`` list, so the rest of the
-pipeline (matching, confirmation, persistence) stays format-agnostic.
+A *statement* is a bank export of account movements (CSV is the only supported
+format). Every format parser converts the raw file bytes into the same
+``ParsedTransaction`` list, so the rest of the pipeline (matching, confirmation,
+persistence) stays format-agnostic.
 
 ``parse_statement`` is the Open/Closed seam: it routes a file to the right parser
 by extension. Adding a format = adding one branch, nothing else changes.
@@ -55,7 +55,7 @@ SUPPORTED_EXTENSIONS = ('.csv',)
 def parse_statement(filename: str, content: bytes) -> list[ParsedTransaction]:
     """Route a statement file to the parser matching its extension.
 
-    Future formats (.xlsx, .pdf) plug in here without touching callers.
+    New formats plug in here without touching callers.
     Raises ValueError for an unsupported extension.
     """
     ext = ('.' + filename.lower().rsplit('.', 1)[-1]) if '.' in filename else ''

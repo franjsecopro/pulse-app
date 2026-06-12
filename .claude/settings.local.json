@@ -32,7 +32,8 @@
       "Bash(ls \"C:\\\\Users\\\\luthe\\\\Desktop\\\\DEV\\\\pulse-app\\\\frontend\\\\src\\\\test\")",
       "Bash(cat \"C:\\\\Users\\\\luthe\\\\Desktop\\\\DEV\\\\pulse-app\\\\frontend\\\\vite.config.ts\")",
       "Bash(cat \"C:\\\\Users\\\\luthe\\\\Desktop\\\\DEV\\\\pulse-app\\\\frontend\\\\biome.jsonc\" 2>nul | head -60)",
-      "Bash(mkdir -p \"C:\\\\Users\\\\luthe\\\\.claude\\\\plans\" 2>nul; echo done)"
+      "Bash(mkdir -p \"C:\\\\Users\\\\luthe\\\\.claude\\\\plans\" 2>nul; echo done)",
+      "Bash(echo \"\\(exit $?\\)\")"
     ]
   }
 }

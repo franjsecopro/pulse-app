@@ -96,7 +96,7 @@ def _payment(
 def _statement() -> StatementImport:
     return StatementImport(
         user_id=FAKE_USER.id,
-        filename="ext.pdf",
+        filename="ext.csv",
         month=date.today().month,
         year=date.today().year,
         transaction_count=0,

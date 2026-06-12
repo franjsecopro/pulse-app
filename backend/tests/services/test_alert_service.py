@@ -69,7 +69,7 @@ def _payment(
 def _statement(month: int, year: int) -> StatementImport:
     return StatementImport(
         user_id=USER_ID,
-        filename=f"ext_{year}_{month:02d}.pdf",
+        filename=f"ext_{year}_{month:02d}.csv",
         month=month,
         year=year,
         transaction_count=0,

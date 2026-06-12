@@ -723,7 +723,7 @@
   },
   "payers": {
     "title": "Identificadores de pago",
-    "description": "Nombres con los que aparece este cliente en las transferencias bancarias. Se usan para el matching automático del PDF bancario.",
+    "description": "Nombres con los que aparece este cliente en las transferencias bancarias. Se usan para el matching automático del extracto bancario (CSV).",
     "empty": "Sin identificadores",
     "namePlaceholder": "Nombre en banco (ej: García)",
     "infoPlaceholder": "Info (opcional)"
