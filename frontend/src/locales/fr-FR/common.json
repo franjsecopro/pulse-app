@@ -349,6 +349,7 @@
     "syncGCal": "Sync GCal",
     "gcalSynced": "Synchronisé avec Google Calendar",
     "gcalNotSynced": "Non synchronisé avec Google Calendar",
+    "gcalSyncFailed": "Échec de synchronisation Google Calendar — cliquez pour réessayer",
     "totalRevenue": "Total : {{amount}} €",
     "view": {
       "list": "Liste",
@@ -770,6 +771,24 @@
     "namePlaceholder": "Nom en banque (ex : García)",
     "infoPlaceholder": "Info (optionnel)"
   },
+  "onboarding": {
+    "title": "Premiers pas",
+    "skip": "Passer",
+    "next": "Suivant",
+    "start": "Créer mon premier client",
+    "step1": {
+      "title": "Créez votre premier client",
+      "text": "Tout commence par un client : son nom, ses coordonnées et les noms sous lesquels il apparaît dans les virements bancaires."
+    },
+    "step2": {
+      "title": "Définissez son contrat",
+      "text": "Le contrat fixe le tarif horaire et l'horaire hebdomadaire. Il sert à générer les cours et à calculer le montant attendu chaque mois."
+    },
+    "step3": {
+      "title": "Planifiez des cours ou importez votre relevé",
+      "text": "Créez des cours dans le calendrier et, en fin de mois, importez le relevé CSV de la banque pour rapprocher les paiements automatiquement."
+    }
+  },
   "toasts": {
     "classCreated": "Cours créé avec succès",
     "classCreateError": "Erreur lors de la création du cours",
@@ -798,6 +817,7 @@
     "clientActivateError": "Erreur lors de l'activation du client",
     "clientHardDeleted": "Client définitivement supprimé",
     "clientHardDeleteError": "Erreur lors de la suppression du client",
-    "reportExportError": "Impossible de générer le fichier"
+    "reportExportError": "Impossible de générer le fichier",
+    "gcalRetryScheduled": "Nouvelle tentative de synchronisation programmée"
   }
 }

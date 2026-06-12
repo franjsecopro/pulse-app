@@ -43,4 +43,7 @@ export const classService = {
   delete: (id: number) => api.delete(`/classes/${id}`),
 
   syncGCal: () => api.post<{ scheduled: number }>('/classes/sync-gcal', {}),
+
+  /** Manually retry the Google Calendar sync for a single class (202 Accepted). */
+  syncCalendar: (id: number) => api.post<{ status: string }>(`/classes/${id}/sync-calendar`, {}),
 }

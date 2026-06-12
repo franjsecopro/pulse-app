@@ -92,6 +92,16 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     onError: (error) => addToast('toasts.gcalSyncError', 'error', undefined, error.message),
   })
 
+  const retrySyncMutation = useMutation({
+    mutationFn: (id: number) => classService.syncCalendar(id),
+    // The sync runs as a background task (202) — the badge updates on the next refetch.
+    onSuccess: () => {
+      addToast('toasts.gcalRetryScheduled', 'info')
+      invalidateClasses()
+    },
+    onError: (error) => addToast('toasts.gcalSyncError', 'error', undefined, error.message),
+  })
+
   const swallow = () => undefined
 
   const createClass = (data: Partial<ClassSession>) =>
@@ -109,6 +119,8 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
   }
 
   const syncGCal = () => syncMutation.mutateAsync().then(swallow, swallow)
+
+  const retrySync = (id: number) => retrySyncMutation.mutateAsync(id).then(swallow, swallow)
 
   const totalCount = listQuery.data?.total ?? 0
   const pageCount = Math.ceil(totalCount / PAGE_LIMIT)
@@ -131,5 +143,6 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     confirmDelete,
     cancelDelete,
     syncGCal,
+    retrySync,
   }
 }

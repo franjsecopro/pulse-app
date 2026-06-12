@@ -48,6 +48,7 @@ export function Classes() {
     confirmDelete,
     cancelDelete,
     syncGCal,
+    retrySync,
   } = useClasses({ filterMonth, filterYear, filterClient })
 
   const dayDetailClasses = dayDetailDate
@@ -303,16 +304,31 @@ export function Classes() {
                         </td>
                         <td className='px-6 py-4 text-right'>
                           <div className='flex items-center justify-end gap-1'>
-                            <span
-                              title={
-                                classSession.googleCalendarId
-                                  ? t('classes.gcalSynced')
-                                  : t('classes.gcalNotSynced')
-                              }
-                              className={`material-symbols-outlined text-base ${classSession.googleCalendarId ? 'text-emerald-400' : 'text-slate-200'}`}
-                            >
-                              {classSession.googleCalendarId ? 'event_available' : 'calendar_month'}
-                            </span>
+                            {classSession.gcalSyncStatus === 'failed' ? (
+                              <Button
+                                type='button'
+                                onClick={() => retrySync(classSession.id)}
+                                title={t('classes.gcalSyncFailed')}
+                                className='p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+                              >
+                                <span className='material-symbols-outlined text-base'>
+                                  sync_problem
+                                </span>
+                              </Button>
+                            ) : (
+                              <span
+                                title={
+                                  classSession.googleCalendarId
+                                    ? t('classes.gcalSynced')
+                                    : t('classes.gcalNotSynced')
+                                }
+                                className={`material-symbols-outlined text-base ${classSession.googleCalendarId ? 'text-emerald-400' : 'text-slate-200'}`}
+                              >
+                                {classSession.googleCalendarId
+                                  ? 'event_available'
+                                  : 'calendar_month'}
+                              </span>
+                            )}
                             <Button
                               type='button'
                               onClick={() => setEditingClass(classSession)}

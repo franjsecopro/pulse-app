@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertButton } from '../components/alerts/AlertButton'
 import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
+import { OnboardingModal } from '../components/onboarding/OnboardingModal'
 import { useAlerts } from '../hooks/useAlerts'
 import { useTranslation } from '../i18n'
 import { dashboardService } from '../services/dashboard.service'
@@ -30,6 +31,8 @@ function StatCard({
   )
 }
 
+const ONBOARDING_SEEN_KEY = 'onboarding_seen'
+
 export function Dashboard() {
   const { t } = useTranslation()
   const months: string[] = t('common.months.full', {
@@ -40,6 +43,14 @@ export function Dashboard() {
   const [upcoming, setUpcoming] = useState<UpcomingClasses | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isAlertsOpen, setIsAlertsOpen] = useState(false)
+  const [onboardingDismissed, setOnboardingDismissed] = useState(
+    () => localStorage.getItem(ONBOARDING_SEEN_KEY) === '1',
+  )
+
+  const dismissOnboarding = () => {
+    localStorage.setItem(ONBOARDING_SEEN_KEY, '1')
+    setOnboardingDismissed(true)
+  }
 
   const now = new Date()
   const currentMonth = now.getMonth() + 1
@@ -335,6 +346,11 @@ export function Dashboard() {
         alerts={alerts}
         isLoading={isAlertsLoading}
         title={t('alerts.drawer.titleDebts')}
+      />
+
+      <OnboardingModal
+        isOpen={!onboardingDismissed && summary?.activeClients === 0}
+        onClose={dismissOnboarding}
       />
     </div>
   )

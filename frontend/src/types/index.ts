@@ -92,6 +92,7 @@ export interface ClassSession {
   status: ClassStatus
   notes: string | null
   googleCalendarId: string | null
+  gcalSyncStatus: 'synced' | 'failed' | null
   createdAt: string
   clientName: string | null
   contractDescription: string | null

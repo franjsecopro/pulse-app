@@ -307,6 +307,7 @@
     "syncGCal": "Sync GCal",
     "gcalSynced": "Sincronizado con Google Calendar",
     "gcalNotSynced": "No sincronizado con Google Calendar",
+    "gcalSyncFailed": "Falló la sincronización con Google Calendar — clic para reintentar",
     "totalRevenue": "Total: €{{amount}}",
     "view": {
       "list": "Lista",
@@ -728,6 +729,24 @@
     "namePlaceholder": "Nombre en banco (ej: García)",
     "infoPlaceholder": "Info (opcional)"
   },
+  "onboarding": {
+    "title": "Primeros pasos",
+    "skip": "Omitir",
+    "next": "Siguiente",
+    "start": "Crear mi primer cliente",
+    "step1": {
+      "title": "Crea tu primer cliente",
+      "text": "Todo empieza con un cliente: su nombre, contacto y los nombres con los que aparece en las transferencias bancarias."
+    },
+    "step2": {
+      "title": "Define su contrato",
+      "text": "El contrato fija la tarifa por hora y el horario semanal. Con él se generan las clases y se calcula lo esperado cada mes."
+    },
+    "step3": {
+      "title": "Agenda clases o importa tu extracto",
+      "text": "Crea clases en el calendario y, a fin de mes, importa el extracto CSV del banco para conciliar los pagos automáticamente."
+    }
+  },
   "toasts": {
     "classCreated": "Clase creada correctamente",
     "classCreateError": "Error al crear la clase",
@@ -745,6 +764,7 @@
     "paymentDeleteError": "Error al eliminar el pago",
     "statementImported": "Extracto importado correctamente",
     "reportExportError": "No se pudo generar el archivo",
+    "gcalRetryScheduled": "Reintento de sincronización programado",
     "statementDeleted": "Extracto eliminado ({{count}} pagos)",
     "statementDeleteError": "Error al eliminar el extracto",
     "clientCreated": "Cliente creado correctamente",

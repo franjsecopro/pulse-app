@@ -39,6 +39,12 @@ def shared_session(db: AsyncSession, monkeypatch) -> AsyncSession:
     return db
 
 
+@pytest.fixture
+def fast_retries(monkeypatch):
+    """Zero out the backoff delays so failure-path tests stay fast."""
+    monkeypatch.setattr(ccs, "RETRY_DELAYS", (0.0, 0.0))
+
+
 def _class(**overrides) -> Class:
     defaults = dict(
         user_id=USER_ID,
@@ -116,7 +122,9 @@ class TestSyncCreate:
 
         assert calls == []
 
-    async def test_google_api_failure_does_not_propagate(self, shared_session, monkeypatch):
+    async def test_google_api_failure_does_not_propagate(
+        self, shared_session, monkeypatch, fast_retries
+    ):
         [cls, _] = await _seed(shared_session, _class(), _google_auth())
 
         async def failing_create_event(**kwargs):
@@ -161,7 +169,9 @@ class TestSyncUpdate:
         await shared_session.refresh(cls)
         assert cls.google_calendar_id == "evt-new"
 
-    async def test_google_api_failure_does_not_propagate(self, shared_session, monkeypatch):
+    async def test_google_api_failure_does_not_propagate(
+        self, shared_session, monkeypatch, fast_retries
+    ):
         [cls, _] = await _seed(
             shared_session, _class(google_calendar_id="evt-old"), _google_auth()
         )
@@ -202,7 +212,9 @@ class TestSyncDelete:
 
         assert deleted == []
 
-    async def test_google_api_failure_does_not_propagate(self, shared_session, monkeypatch):
+    async def test_google_api_failure_does_not_propagate(
+        self, shared_session, monkeypatch, fast_retries
+    ):
         await _seed(shared_session, _google_auth())
 
         async def failing_delete_event(**kwargs):
@@ -211,3 +223,78 @@ class TestSyncDelete:
         monkeypatch.setattr(ccs.gc_service, "delete_event", failing_delete_event)
 
         await ccs.sync_delete("evt-123", USER_ID)  # must not raise
+
+
+# ─── sync status persistence + retries ───────────────────────────────────────
+
+class TestSyncStatusAndRetries:
+    async def test_success_marks_class_synced(self, shared_session, monkeypatch):
+        [cls, _] = await _seed(shared_session, _class(), _google_auth())
+
+        async def fake_create_event(**kwargs):
+            return "evt-123"
+
+        monkeypatch.setattr(ccs.gc_service, "create_event", fake_create_event)
+
+        await ccs.sync_create(cls.id, USER_ID)
+
+        await shared_session.refresh(cls)
+        assert cls.gcal_sync_status == "synced"
+        assert cls.gcal_synced_at is not None
+
+    async def test_exhausted_retries_mark_class_failed(
+        self, shared_session, monkeypatch, fast_retries
+    ):
+        [cls, _] = await _seed(shared_session, _class(), _google_auth())
+        calls = []
+
+        async def failing_create_event(**kwargs):
+            calls.append(1)
+            raise RuntimeError("Google API down")
+
+        monkeypatch.setattr(ccs.gc_service, "create_event", failing_create_event)
+
+        await ccs.sync_create(cls.id, USER_ID)
+
+        assert len(calls) == 3  # 1 attempt + 2 retries
+        await shared_session.refresh(cls)
+        assert cls.gcal_sync_status == "failed"
+        assert cls.google_calendar_id is None
+
+    async def test_transient_failure_recovers_on_retry(
+        self, shared_session, monkeypatch, fast_retries
+    ):
+        [cls, _] = await _seed(shared_session, _class(), _google_auth())
+        calls = []
+
+        async def flaky_create_event(**kwargs):
+            calls.append(1)
+            if len(calls) < 3:
+                raise RuntimeError("transient")
+            return "evt-recovered"
+
+        monkeypatch.setattr(ccs.gc_service, "create_event", flaky_create_event)
+
+        await ccs.sync_create(cls.id, USER_ID)
+
+        assert len(calls) == 3
+        await shared_session.refresh(cls)
+        assert cls.google_calendar_id == "evt-recovered"
+        assert cls.gcal_sync_status == "synced"
+
+    async def test_update_failure_marks_class_failed(
+        self, shared_session, monkeypatch, fast_retries
+    ):
+        [cls, _] = await _seed(
+            shared_session, _class(google_calendar_id="evt-old"), _google_auth()
+        )
+
+        async def failing_update_event(**kwargs):
+            raise RuntimeError("Google API down")
+
+        monkeypatch.setattr(ccs.gc_service, "update_event", failing_update_event)
+
+        await ccs.sync_update(cls.id, USER_ID, "evt-old")
+
+        await shared_session.refresh(cls)
+        assert cls.gcal_sync_status == "failed"

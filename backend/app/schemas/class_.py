@@ -50,6 +50,7 @@ class ClassResponse(BaseSchema):
     notes: Optional[str]
     created_at: datetime
     google_calendar_id: Optional[str] = None
+    gcal_sync_status: Optional[str] = None
     client_name: Optional[str] = None
     contract_description: Optional[str] = None
     effective_revenue: Optional[float] = None

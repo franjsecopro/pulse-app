@@ -489,7 +489,7 @@ El stack original contemplaba una app de escritorio con PyQt6 y móvil con Flutt
 ```bash
 # 1. Clonar repositorio
 git clone <tu-repo-privado>
-cd gestor-contabilidad
+cd pulse-app
 
 # 2. Setup Backend
 cd backend
@@ -499,18 +499,22 @@ pip install -r requirements.txt
 
 # 3. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con credenciales (Google, WhatsApp, BD, etc)
+# Editar .env con credenciales (DATABASE_URL, SECRET_KEY, Google OAuth, etc)
 
 # 4. Inicializar BD
 python -m alembic upgrade head
 
-# 5. Ejecutar servidor
-uvicorn main:app --reload
+# 5. Ejecutar servidor (puerto 8001)
+uvicorn main:app --reload --port 8001
 
 # 6. Setup Frontend (en otra terminal)
-cd ../desktop
-pip install -r requirements.txt
-python main.py
+cd ../frontend
+pnpm install
+pnpm dev   # Vite en http://localhost:5173, con proxy /api → backend
+
+# Tests
+cd backend && pytest            # backend
+cd frontend && pnpm vitest run  # frontend
 ```
 
 ---

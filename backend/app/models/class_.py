@@ -25,6 +25,11 @@ class Class(Base):
     status: Mapped[str] = mapped_column(String(30), nullable=False, default="normal")
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     google_calendar_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    # Result of the last Google Calendar sync attempt: synced | failed | NULL (never synced)
+    gcal_sync_status: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    gcal_synced_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
