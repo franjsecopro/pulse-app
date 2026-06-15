@@ -48,7 +48,8 @@
       "Bash(./venv/Scripts/python.exe -m pytest tests/routers/test_imports.py -p no:cacheprovider -q)",
       "Bash(./venv/Scripts/python.exe -m alembic upgrade head)",
       "Bash(./venv/Scripts/python.exe -c ' *)",
-      "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && tail -25 src/pages/Dashboard.tsx)"
+      "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && tail -25 src/pages/Dashboard.tsx)",
+      "mcp__plugin_engram_engram__mem_context"
     ]
   }
 }
