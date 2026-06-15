@@ -18,6 +18,7 @@ from app.routers import auth, clients, classes, payments, dashboard, google_cale
 from app.routers import alerts
 from app.routers import imports as imports_router
 from app.routers import business_profile
+from app.routers import invoices
 
 logging.basicConfig(level=logging.INFO)
 
@@ -85,6 +86,7 @@ app.include_router(notifications.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(alerts.router, prefix="/api")
 app.include_router(business_profile.router, prefix="/api")
+app.include_router(invoices.router, prefix="/api")
 
 
 @app.get("/api/health")

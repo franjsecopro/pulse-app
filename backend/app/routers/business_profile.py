@@ -24,8 +24,13 @@ async def get_business_profile(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Return the current user's fiscal profile (empty fields if not set yet)."""
-    return await _get_profile(db, current_user.id) or BusinessProfile()
+    """Return the current user's fiscal profile (defaults if not set yet)."""
+    return await _get_profile(db, current_user.id) or BusinessProfile(
+        rcs_dispense=False,
+        vat_exempt=True,
+        invoice_number_format="YYYY-MM-NN",
+        invoice_sequence_scope="monthly",
+    )
 
 
 @router.put("", response_model=BusinessProfileResponse)

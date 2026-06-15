@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     GOOGLE_TOKEN_ENCRYPTION_KEY: str = ""  # Fernet key: 32 bytes url-safe base64
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # Resend email — dejar vacíos si no se usa el envío de facturas por email
+    RESEND_API_KEY: str = ""
+    RESEND_FROM: str = ""  # remitente verificado, ej. "Facturas <facturas@tudominio.com>"
+
     @model_validator(mode="after")
     def _derive_cookie_secure(self):
         self.COOKIE_SECURE = self.APP_ENV == "production"

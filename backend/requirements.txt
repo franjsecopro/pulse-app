@@ -12,3 +12,8 @@ greenlet==3.1.1
 openpyxl==3.1.5
 slowapi==0.1.9
 cryptography==46.0.6
+httpx==0.28.1
+jinja2==3.1.6
+# Invoice PDF rendering. Needs native GTK libs — use WSL/Docker on Windows dev;
+# runs natively on Linux/prod. Imported lazily in invoice_pdf_service.
+weasyprint==69.0

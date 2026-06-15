@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body { font-family: "Garamond", "Times New Roman", serif; color: #2b2b2b; font-size: 12pt; }
+    .copy-tag { text-align: center; font-size: 18pt; letter-spacing: 2px; margin-bottom: 1.2cm; }
+    .invoice-no { font-size: 14pt; font-weight: bold; margin-bottom: 0.8cm; }
+    .parties { width: 100%; margin-bottom: 0.8cm; }
+    .parties td { vertical-align: top; width: 50%; }
+    .box-title { font-weight: bold; }
+    .muted { color: #555; font-size: 10pt; }
+    .meta { margin: 0.6cm 0; }
+    table.lines { width: 100%; border-collapse: collapse; margin-top: 0.4cm; }
+    table.lines th, table.lines td { border: 1px solid #c0c0c0; padding: 6px 10px; }
+    table.lines th { background: #ccffff; text-align: left; }
+    table.lines td.num, table.lines th.num { text-align: center; }
+    .total { text-align: right; font-weight: bold; margin-top: 0.4cm; }
+    .legal { margin-top: 0.6cm; }
+    .closing { margin-top: 0.8cm; }
+    .footer { margin-top: 1.6cm; text-align: center; font-size: 9pt; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="copy-tag">EXEMPLAIRE CLIENT</div>
+
+  <div class="invoice-no">Facture n° {{ invoice.number or "—" }}</div>
+
+  <table class="parties">
+    <tr>
+      <td>
+        <div class="box-title">{{ issuer.name or "" }}</div>
+        <div>{{ issuer.address or "" }}</div>
+        {% if issuer.phone %}<div>Tél. : {{ issuer.phone }}</div>{% endif %}
+        {% if issuer.email %}<div>{{ issuer.email }}</div>{% endif %}
+        {% if issuer.siret %}<div>SIRET : {{ issuer.siret }}</div>{% endif %}
+        {% if show_rcs %}
+        <div class="muted">Dispensé d'immatriculation au registre du commerce et des sociétés (RCS) et au répertoire des métiers</div>
+        {% endif %}
+      </td>
+      <td>
+        <div class="box-title">Nom et adresse du client</div>
+        <div>{{ invoice.client_name or "" }}</div>
+        <div>{{ invoice.client_address or "" }}</div>
+        {% if invoice.client_tax_id %}<div>{{ invoice.client_tax_id }}</div>{% endif %}
+      </td>
+    </tr>
+  </table>
+
+  <div class="meta">
+    {% if invoice.issue_date %}<div>Date d'émission : {{ invoice.issue_date.strftime("%d/%m/%Y") }}</div>{% endif %}
+  </div>
+
+  <table class="lines">
+    <thead>
+      <tr>
+        <th>Désignation</th>
+        <th class="num">Quantité</th>
+        <th class="num">Prix unitaire HT</th>
+        <th class="num">Prix total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in invoice.lines %}
+      <tr>
+        <td>{{ line.designation }}</td>
+        <td class="num">{{ "%g"|format(line.quantity) }}h</td>
+        <td class="num">{{ "%.2f"|format(line.unit_price_ht) }} €</td>
+        <td class="num">{{ "%.2f"|format(line.total_ht) }} €</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="total">Total HT : {{ "%.2f"|format(invoice.total_ht) }} €</div>
+
+  {% if show_vat %}
+  <div class="legal">TVA non applicable, art. 293 B du CGI</div>
+  {% endif %}
+
+  <div class="closing">
+    <div>En votre aimable règlement,</div>
+    <div>Cordialement,</div>
+  </div>
+
+  <div class="legal muted">
+    <div>Conditions de paiement : {{ payment_conditions }}</div>
+    {% if issuer.iban %}<div>IBAN : {{ issuer.iban }}{% if issuer.bic %} — BIC : {{ issuer.bic }}{% endif %}</div>{% endif %}
+  </div>
+
+  <div class="footer">
+    {{ issuer.name or "" }}{% if issuer.address %}, {{ issuer.address }}{% endif %}{% if issuer.siret %} — SIRET : {{ issuer.siret }}{% endif %}
+  </div>
+</body>
+</html>
