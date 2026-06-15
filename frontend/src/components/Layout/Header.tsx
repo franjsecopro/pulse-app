@@ -18,6 +18,7 @@ export function Header() {
     { path: '/classes', label: t('nav.classes'), icon: 'school' },
     { path: '/payments', label: t('nav.payments'), icon: 'payments' },
     { path: '/accounting', label: t('nav.accounting'), icon: 'account_balance' },
+    { path: '/invoices', label: t('nav.invoices'), icon: 'receipt_long' },
     { path: '/alerts', label: t('nav.alerts'), icon: 'notifications' },
     { path: '/notifications', label: t('nav.notifications'), icon: 'send' },
     { path: '/settings', label: t('nav.settings'), icon: 'settings' },

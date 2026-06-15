@@ -76,6 +76,16 @@ export interface BusinessProfile {
   businessName: string | null
   taxId: string | null
   fiscalAddress: string | null
+  siret: string | null
+  phone: string | null
+  email: string | null
+  iban: string | null
+  bic: string | null
+  rcsDispense: boolean
+  vatExempt: boolean
+  paymentConditions: string | null
+  invoiceNumberFormat: string
+  invoiceSequenceScope: string
 }
 
 export type ClassStatus = 'normal' | 'cancelledWithPayment' | 'cancelledWithoutPayment'
@@ -136,6 +146,37 @@ export interface AccountingSummaryEntry {
 export interface GoogleCalendarStatus {
   connected: boolean
   email?: string
+}
+
+export type InvoiceStatus = 'draft' | 'issued' | 'sent' | 'paid' | 'cancelled'
+
+export interface InvoiceLine {
+  id: number
+  designation: string
+  quantity: number
+  unitPriceHt: number
+  totalHt: number
+  sourceClassId: number | null
+}
+
+export interface Invoice {
+  id: number
+  number: string | null
+  status: InvoiceStatus
+  issueDate: string | null
+  periodStart: string | null
+  periodEnd: string | null
+  totalHt: number
+  currency: string
+  clientId: number
+  clientName: string | null
+  lines: InvoiceLine[]
+}
+
+export interface SendInvoiceResult {
+  shareUrl: string
+  whatsappUrl: string | null
+  email: { sent: boolean; reason?: string }
 }
 
 export interface Payment {
