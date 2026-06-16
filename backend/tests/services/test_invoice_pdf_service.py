@@ -85,6 +85,19 @@ class TestRenderInvoiceHtml:
         assert "jean@dupont.fr" in html
         assert "FR7612345" in html
 
+    def test_client_falls_back_to_live_client_for_a_draft(self):
+        from app.models.client import Client
+
+        draft = Invoice(
+            number=None, status="draft", total_ht=40.0, currency="EUR",
+            lines=[InvoiceLine(designation="Cours particuliers", quantity=1.0,
+                               unit_price_ht=40.0, total_ht=40.0)],
+        )
+        client = Client(user_id=1, name="Marie Lefèvre", address="12 rue des Lilas")
+        html = render_invoice_html(draft, profile=None, client=client)
+        assert "Marie Lefèvre" in html
+        assert "12 rue des Lilas" in html
+
     def test_issued_snapshot_takes_precedence_over_profile(self):
         # An issued invoice keeps its frozen name even if the profile changed.
         issued = _invoice()  # issuer_name = "Prof Particulier"

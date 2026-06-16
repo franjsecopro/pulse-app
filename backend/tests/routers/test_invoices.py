@@ -119,6 +119,32 @@ class TestListAndGet:
         assert response.status_code == 200
         assert response.json()["id"] == created["id"]
 
+    async def test_list_filters_by_client(self, db: AsyncSession, app_client: AsyncClient):
+        cls1, c1 = await _seed_class(db)
+        cls2, c2 = await _seed_class(db)  # a different client
+        await app_client.post(f"/api/invoices/from-class/{cls1.id}")
+        await app_client.post(f"/api/invoices/from-class/{cls2.id}")
+
+        response = await app_client.get(f"/api/invoices?clientId={c1.id}")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body) == 1
+        assert body[0]["clientId"] == c1.id
+
+    async def test_list_filters_by_status(self, db: AsyncSession, app_client: AsyncClient):
+        cls1, _ = await _seed_class(db)
+        cls2, _ = await _seed_class(db)
+        issued_id = (await app_client.post(f"/api/invoices/from-class/{cls1.id}")).json()["id"]
+        await app_client.post(f"/api/invoices/{issued_id}/issue")
+        await app_client.post(f"/api/invoices/from-class/{cls2.id}")  # stays draft
+
+        issued = (await app_client.get("/api/invoices?status=issued")).json()
+        drafts = (await app_client.get("/api/invoices?status=draft")).json()
+
+        assert len(issued) == 1 and issued[0]["status"] == "issued"
+        assert len(drafts) == 1 and drafts[0]["status"] == "draft"
+
 
 class TestIssue:
     async def test_issue_assigns_a_number_and_marks_issued(

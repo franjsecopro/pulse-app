@@ -808,6 +808,7 @@
     "subtitle": "Générez et envoyez des factures à vos clients",
     "generate": "Générer par période",
     "loading": "Chargement des factures...",
+    "notNumbered": "Non numérotée",
     "empty": {
       "title": "Aucune facture",
       "description": "Générez votre première facture depuis un cours ou une période"

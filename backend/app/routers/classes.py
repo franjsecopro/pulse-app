@@ -28,7 +28,7 @@ def _build_response(class_: object) -> ClassResponse:
 @router.get("", response_model=list[ClassResponse])
 async def list_classes(
     response: Response,
-    client_id: Optional[int] = Query(None),
+    client_id: Optional[int] = Query(None, alias="clientId"),
     month: Optional[int] = Query(None, ge=1, le=12),
     year: Optional[int] = Query(None),
     limit: int = Query(100, ge=1, le=500),
@@ -63,7 +63,7 @@ async def create_class(
 async def get_class_stats(
     month: int = Query(..., ge=1, le=12),
     year: int = Query(...),
-    client_id: Optional[int] = Query(None),
+    client_id: Optional[int] = Query(None, alias="clientId"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

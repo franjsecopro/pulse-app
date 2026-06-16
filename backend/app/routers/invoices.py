@@ -4,6 +4,8 @@ Drafts are built from a single class or from a client + month/period; issuing
 assigns a gapless number and freezes the snapshot. All access is scoped to the
 authenticated user.
 """
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Response, Query, Request
 from fastapi.responses import HTMLResponse
 
@@ -74,11 +76,18 @@ async def list_invoices(
     response: Response,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    client_id: Optional[int] = Query(None, alias="clientId"),
+    status: Optional[str] = Query(None),
+    month: Optional[int] = Query(None, ge=1, le=12),
+    year: Optional[int] = Query(None),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ):
-    """List the current user's invoices (newest first)."""
-    invoices, total = await InvoiceService(db).list_for_user(current_user.id, limit, offset)
+    """List the current user's invoices (newest first), optionally filtered."""
+    invoices, total = await InvoiceService(db).list_for_user(
+        current_user.id, limit, offset,
+        client_id=client_id, status=status, month=month, year=year,
+    )
     response.headers["X-Total-Count"] = str(total)
     return invoices
 

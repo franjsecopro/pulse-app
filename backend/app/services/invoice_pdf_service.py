@@ -14,6 +14,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.models.invoice import Invoice
 from app.models.business_profile import BusinessProfile
+from app.models.client import Client
 
 _TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
 _env = Environment(
@@ -26,7 +27,11 @@ DEFAULT_PAYMENT_CONDITIONS = (
 )
 
 
-def render_invoice_html(invoice: Invoice, profile: Optional[BusinessProfile] = None) -> str:
+def render_invoice_html(
+    invoice: Invoice,
+    profile: Optional[BusinessProfile] = None,
+    client: Optional[Client] = None,
+) -> str:
     """Render the French invoice template to an HTML string."""
     # Auto-entrepreneurs are VAT-exempt by default; only an explicit False hides
     # the mention.
@@ -52,10 +57,19 @@ def render_invoice_html(invoice: Invoice, profile: Optional[BusinessProfile] = N
         "bic": profile.bic if profile else None,
     }
 
+    # Client identity: prefer the frozen snapshot, fall back to the live client so a
+    # draft preview isn't empty.
+    recipient = {
+        "name": invoice.client_name or (client.name if client else None),
+        "address": invoice.client_address or (client.address if client else None),
+        "tax_id": invoice.client_tax_id or (client.tax_id if client else None),
+    }
+
     template = _env.get_template("invoice_fr.html")
     return template.render(
         invoice=invoice,
         issuer=issuer,
+        recipient=recipient,
         show_vat=show_vat,
         show_rcs=show_rcs,
         payment_conditions=payment_conditions,
@@ -74,14 +88,18 @@ def _weasyprint_html():
     return HTML
 
 
-def invoice_to_pdf(invoice: Invoice, profile: Optional[BusinessProfile] = None) -> bytes:
+def invoice_to_pdf(
+    invoice: Invoice,
+    profile: Optional[BusinessProfile] = None,
+    client: Optional[Client] = None,
+) -> bytes:
     """Render the invoice and return PDF bytes.
 
     WeasyPrint is imported lazily so importing this module never requires the
     native GTK libraries. If those libraries are missing (e.g. bare Windows), a
     clean ``PdfGenerationError`` is raised instead of a raw OSError.
     """
-    html = render_invoice_html(invoice, profile)
+    html = render_invoice_html(invoice, profile, client)
     try:
         html_engine = _weasyprint_html()
     except (ImportError, OSError) as exc:

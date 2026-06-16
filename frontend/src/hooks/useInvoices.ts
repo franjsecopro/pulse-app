@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useToast } from '../context/ToastContext'
 import { queryKeys } from '../lib/queryKeys'
 import { clientService } from '../services/client.service'
@@ -7,14 +7,48 @@ import { invoiceService } from '../services/invoice.service'
 
 const PAGE_LIMIT = 100
 
-export function useInvoices() {
+interface UseInvoicesFilters {
+  filterClient: number | ''
+  filterStatus: string
+  filterMonth: number | ''
+  filterYear: number
+}
+
+const DEFAULT_FILTERS: UseInvoicesFilters = {
+  filterClient: '',
+  filterStatus: '',
+  filterMonth: '',
+  filterYear: new Date().getFullYear(),
+}
+
+export function useInvoices(filters: UseInvoicesFilters = DEFAULT_FILTERS) {
   const { addToast } = useToast()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
 
+  const { filterClient, filterStatus, filterMonth, filterYear } = filters
+  const serviceFilters = {
+    clientId: filterClient || undefined,
+    status: filterStatus || undefined,
+    month: filterMonth || undefined,
+    // Year is an independent filter here (the page always shows the year selector).
+    year: filterYear || undefined,
+  }
+
+  // A filter change lands the user back on page 1.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on raw filters
+  useEffect(() => {
+    setPage(1)
+  }, [filterClient, filterStatus, filterMonth, filterYear])
+
   const listQuery = useQuery({
-    queryKey: queryKeys.invoices.list({ page }),
-    queryFn: () => invoiceService.getAll({ limit: PAGE_LIMIT, offset: (page - 1) * PAGE_LIMIT }),
+    queryKey: queryKeys.invoices.list({ ...serviceFilters, page }),
+    queryFn: () =>
+      invoiceService.getAll({
+        ...serviceFilters,
+        limit: PAGE_LIMIT,
+        offset: (page - 1) * PAGE_LIMIT,
+      }),
   })
 
   const clientsQuery = useQuery({

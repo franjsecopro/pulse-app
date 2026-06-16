@@ -33,6 +33,7 @@ async def get_pending(
 async def generate_daily(
     target_date: Optional[date] = Query(
         None,
+        alias="targetDate",
         description="Date to generate for (defaults to tomorrow).",
     ),
     db: AsyncSession = Depends(get_db),
@@ -71,10 +72,10 @@ async def get_log(
         description="Anchor day for the time window. The window starts at 00:00 UTC of this day and extends per 'mode'.",
     ),
     status: Optional[str] = Query(None, description="pending|sent|skipped"),
-    client_id: Optional[int] = Query(None, ge=1),
+    client_id: Optional[int] = Query(None, ge=1, alias="clientId"),
     channel: Optional[str] = Query(None, description="whatsapp|email"),
     page: int = Query(1, ge=1),
-    page_size: int = Query(50, ge=1, le=100),
+    page_size: int = Query(50, ge=1, le=100, alias="pageSize"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

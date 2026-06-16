@@ -2,8 +2,19 @@ import type { Invoice, SendInvoiceResult } from '../types'
 import { api } from './api'
 
 export const invoiceService = {
-  getAll: (params?: { limit?: number; offset?: number }) => {
+  getAll: (params?: {
+    clientId?: number
+    status?: string
+    month?: number
+    year?: number
+    limit?: number
+    offset?: number
+  }) => {
     const qs = new URLSearchParams()
+    if (params?.clientId) qs.set('clientId', String(params.clientId))
+    if (params?.status) qs.set('status', params.status)
+    if (params?.month) qs.set('month', String(params.month))
+    if (params?.year) qs.set('year', String(params.year))
     if (params?.limit != null) qs.set('limit', String(params.limit))
     if (params?.offset != null) qs.set('offset', String(params.offset))
     const suffix = qs.toString() ? `?${qs.toString()}` : ''

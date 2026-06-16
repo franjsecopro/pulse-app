@@ -39,7 +39,7 @@ async def get_client_balance(
 async def get_monthly_report(
     month: int = Query(..., ge=1, le=12),
     year: int = Query(..., ge=2000),
-    client_id: Optional[int] = Query(None),
+    client_id: Optional[int] = Query(None, alias="clientId"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

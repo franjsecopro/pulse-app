@@ -88,7 +88,7 @@ class TestListClasses:
             _class(client_id=20),
         )
 
-        response = await app_client.get("/api/classes", params={"client_id": 10})
+        response = await app_client.get("/api/classes", params={"clientId": 10})
 
         assert response.status_code == 200
         assert len(response.json()) == 1
@@ -402,7 +402,7 @@ class TestClassStats:
 
         response = await app_client.get(
             "/api/classes/stats",
-            params={"month": 4, "year": 2026, "client_id": 10},
+            params={"month": 4, "year": 2026, "clientId": 10},
         )
 
         assert response.status_code == 200

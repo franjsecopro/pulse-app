@@ -25,7 +25,7 @@
 <body>
   <div class="copy-tag">EXEMPLAIRE CLIENT</div>
 
-  <div class="invoice-no">Facture n° {{ invoice.number or "—" }}</div>
+  <div class="invoice-no">Facture n° {{ invoice.number or "(brouillon)" }}</div>
 
   <table class="parties">
     <tr>
@@ -41,9 +41,9 @@
       </td>
       <td>
         <div class="box-title">Nom et adresse du client</div>
-        <div>{{ invoice.client_name or "" }}</div>
-        <div>{{ invoice.client_address or "" }}</div>
-        {% if invoice.client_tax_id %}<div>{{ invoice.client_tax_id }}</div>{% endif %}
+        <div>{{ recipient.name or "" }}</div>
+        <div>{{ recipient.address or "" }}</div>
+        {% if recipient.tax_id %}<div>{{ recipient.tax_id }}</div>{% endif %}
       </td>
     </tr>
   </table>

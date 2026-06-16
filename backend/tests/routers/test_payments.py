@@ -92,7 +92,7 @@ class TestListPayments:
             _payment(client_id=None),
         )
 
-        response = await app_client.get("/api/payments", params={"client_id": client.id})
+        response = await app_client.get("/api/payments", params={"clientId": client.id})
 
         assert response.status_code == 200
         assert len(response.json()) == 1

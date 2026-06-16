@@ -13,6 +13,8 @@ interface FinanceFiltersProps {
   status?: string
   onStatusChange?: (status: string) => void
   allowAllMonths?: boolean
+  /** Show the year selector even when no month is chosen (for year-level filtering). */
+  alwaysShowYear?: boolean
   trailing?: ReactNode
 }
 
@@ -30,6 +32,7 @@ export function FinanceFilters({
   status,
   onStatusChange,
   allowAllMonths = true,
+  alwaysShowYear = false,
   trailing,
 }: FinanceFiltersProps) {
   const { t } = useTranslation()
@@ -53,7 +56,7 @@ export function FinanceFilters({
         ))}
       </select>
 
-      {month !== '' && (
+      {(month !== '' || alwaysShowYear) && (
         <select
           value={year}
           onChange={(e) => onYearChange(parseInt(e.target.value, 10))}

@@ -766,6 +766,7 @@
     "subtitle": "Genera y envía facturas a tus clientes",
     "generate": "Generar por período",
     "loading": "Cargando facturas...",
+    "notNumbered": "Sin numerar",
     "empty": {
       "title": "Sin facturas",
       "description": "Genera tu primera factura desde una clase o un período"

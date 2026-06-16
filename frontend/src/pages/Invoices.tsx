@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { GenerateInvoiceModal } from '../components/invoices/GenerateInvoiceModal'
 import { SendInvoiceModal } from '../components/invoices/SendInvoiceModal'
 import { Button } from '../components/ui/Button'
@@ -29,6 +30,12 @@ export function Invoices() {
   const { addToast } = useToast()
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
+
+  const [filterClient, setFilterClient] = useState<number | ''>('')
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterMonth, setFilterMonth] = useState<number | ''>('')
+  const [filterYear, setFilterYear] = useState(new Date().getFullYear())
+
   const {
     invoices,
     clients,
@@ -42,11 +49,14 @@ export function Invoices() {
     deleteInvoice,
     isCreating,
     isDeleting,
-  } = useInvoices()
+  } = useInvoices({ filterClient, filterStatus, filterMonth, filterYear })
 
   const [isGenerateOpen, setIsGenerateOpen] = useState(false)
   const [sendTarget, setSendTarget] = useState<Invoice | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null)
+
+  // Drafts have no frozen clientName yet — fall back to the live client list.
+  const clientNameById = new Map(clients.map((c) => [c.id, c.name]))
 
   async function confirmDelete() {
     if (!deleteTarget) return
@@ -94,6 +104,32 @@ export function Invoices() {
         </Button>
       </div>
 
+      <FinanceFilters
+        clients={clients}
+        month={filterMonth}
+        year={filterYear}
+        client={filterClient}
+        onMonthChange={setFilterMonth}
+        onYearChange={setFilterYear}
+        onClientChange={setFilterClient}
+        allowAllMonths
+        alwaysShowYear
+        trailing={
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
+          >
+            <option value=''>{t('filters.allStatuses')}</option>
+            <option value='draft'>{t('invoices.status.draft')}</option>
+            <option value='issued'>{t('invoices.status.issued')}</option>
+            <option value='sent'>{t('invoices.status.sent')}</option>
+            <option value='paid'>{t('invoices.status.paid')}</option>
+            <option value='cancelled'>{t('invoices.status.cancelled')}</option>
+          </select>
+        }
+      />
+
       {isLoading ? (
         <div className='flex items-center justify-center h-32'>
           <span className='material-symbols-outlined text-primary text-3xl animate-spin'>sync</span>
@@ -134,8 +170,16 @@ export function Invoices() {
             <tbody className='divide-y divide-slate-100'>
               {invoices.map((invoice) => (
                 <tr key={invoice.id} className='hover:bg-slate-50 transition-colors'>
-                  <td className='px-5 py-4 font-medium text-slate-900'>{invoice.number ?? '—'}</td>
-                  <td className='px-4 py-4 text-slate-700'>{invoice.clientName ?? '—'}</td>
+                  <td className='px-5 py-4 font-medium text-slate-900'>
+                    {invoice.number ?? (
+                      <span className='text-slate-400 italic font-normal'>
+                        {t('invoices.notNumbered')}
+                      </span>
+                    )}
+                  </td>
+                  <td className='px-4 py-4 text-slate-700'>
+                    {invoice.clientName ?? clientNameById.get(invoice.clientId) ?? '—'}
+                  </td>
                   <td className='px-4 py-4 text-slate-500 text-xs'>{formatPeriod(invoice)}</td>
                   <td className='px-4 py-4 text-right text-slate-700'>
                     €{invoice.totalHt.toFixed(2)}
@@ -155,11 +199,14 @@ export function Invoices() {
                         onClick={() => openPreview(invoice.id)}
                       />
                       {invoice.status === 'draft' && (
-                        <IconAction
-                          icon='receipt_long'
-                          title={t('invoices.actions.issue')}
+                        <Button
+                          type='button'
                           onClick={() => issueInvoice(invoice.id)}
-                        />
+                          title={t('invoices.actions.issue')}
+                          className='px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors'
+                        >
+                          {t('invoices.actions.issue')}
+                        </Button>
                       )}
                       <IconAction
                         icon='download'

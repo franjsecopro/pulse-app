@@ -9,7 +9,7 @@ import calendar
 from datetime import date
 from typing import Optional
 
-from sqlalchemy import select, func, delete as sa_delete
+from sqlalchemy import select, func, extract, delete as sa_delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -136,15 +136,34 @@ class InvoiceService:
         return invoice
 
     async def list_for_user(
-        self, user_id: int, limit: int = 100, offset: int = 0
+        self,
+        user_id: int,
+        limit: int = 100,
+        offset: int = 0,
+        client_id: Optional[int] = None,
+        status: Optional[str] = None,
+        month: Optional[int] = None,
+        year: Optional[int] = None,
     ) -> tuple[list[Invoice], int]:
-        """Return a page of the user's invoices (newest first) plus the total count."""
+        """Return a filtered page of the user's invoices (newest first) + total count.
+
+        Month/year filter on the billing period start, so drafts are included."""
+        filters = [Invoice.user_id == user_id]
+        if client_id is not None:
+            filters.append(Invoice.client_id == client_id)
+        if status:
+            filters.append(Invoice.status == status)
+        if year is not None:
+            filters.append(extract("year", Invoice.period_start) == year)
+        if month is not None:
+            filters.append(extract("month", Invoice.period_start) == month)
+
         total = await self.db.scalar(
-            select(func.count()).select_from(Invoice).where(Invoice.user_id == user_id)
+            select(func.count()).select_from(Invoice).where(*filters)
         )
         result = await self.db.execute(
             select(Invoice)
-            .where(Invoice.user_id == user_id)
+            .where(*filters)
             .order_by(Invoice.id.desc())
             .options(selectinload(Invoice.lines))
             .limit(limit)
@@ -185,14 +204,18 @@ class InvoiceService:
         invoice = await self.get_by_id(user_id, invoice_id)
         if invoice is None:
             return None
-        return render_invoice_html(invoice, await self._get_profile(user_id))
+        return render_invoice_html(
+            invoice, await self._get_profile(user_id), await self._get_client(invoice.client_id)
+        )
 
     async def get_invoice_pdf(self, user_id: int, invoice_id: int) -> Optional[bytes]:
         """Render the invoice to PDF bytes (None if it doesn't exist for this user)."""
         invoice = await self.get_by_id(user_id, invoice_id)
         if invoice is None:
             return None
-        return invoice_to_pdf(invoice, await self._get_profile(user_id))
+        return invoice_to_pdf(
+            invoice, await self._get_profile(user_id), await self._get_client(invoice.client_id)
+        )
 
     async def get_or_create_pdf_by_id(self, invoice_id: int) -> Optional[bytes]:
         """Return the invoice's PDF bytes, generating and caching them on first
@@ -216,7 +239,11 @@ class InvoiceService:
         if invoice is None:
             return None
 
-        pdf = invoice_to_pdf(invoice, await self._get_profile(invoice.user_id))
+        pdf = invoice_to_pdf(
+            invoice,
+            await self._get_profile(invoice.user_id),
+            await self._get_client(invoice.client_id),
+        )
         self.db.add(InvoicePdf(invoice_id=invoice_id, content=pdf))
         await self.db.commit()
         return pdf

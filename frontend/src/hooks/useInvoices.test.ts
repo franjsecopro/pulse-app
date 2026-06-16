@@ -47,7 +47,9 @@ describe('useInvoices', () => {
   it('fetches the first page with limit/offset', async () => {
     renderHookWithQuery(() => useInvoices())
 
-    await waitFor(() => expect(mockGetAll).toHaveBeenCalledWith({ limit: 100, offset: 0 }))
+    await waitFor(() =>
+      expect(mockGetAll).toHaveBeenCalledWith(expect.objectContaining({ limit: 100, offset: 0 })),
+    )
   })
 
   it('exposes invoices and totalCount from the response', async () => {
@@ -66,7 +68,9 @@ describe('useInvoices', () => {
 
     act(() => result.current.goToPage(2))
 
-    await waitFor(() => expect(mockGetAll).toHaveBeenCalledWith({ limit: 100, offset: 100 }))
+    await waitFor(() =>
+      expect(mockGetAll).toHaveBeenCalledWith(expect.objectContaining({ offset: 100 })),
+    )
   })
 
   it('issueInvoice delegates to the service', async () => {
