@@ -23,6 +23,8 @@ export const invoiceService = {
 
   getById: (id: number) => api.get<Invoice>(`/invoices/${id}`),
 
+  getByClass: (classId: number) => api.get<Invoice[]>(`/invoices/by-class/${classId}`),
+
   createFromClass: (classId: number) => api.post<Invoice>(`/invoices/from-class/${classId}`, {}),
 
   createFromPeriod: (data: {

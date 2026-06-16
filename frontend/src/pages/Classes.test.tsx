@@ -7,6 +7,10 @@ vi.mock('../hooks/useClasses', () => ({
   useClasses: vi.fn(),
 }))
 
+vi.mock('../context/ToastContext', () => ({
+  useToast: () => ({ addToast: vi.fn() }),
+}))
+
 vi.mock('../components/classes/CalendarView', () => ({
   CalendarView: () => React.createElement('div', { 'data-testid': 'mock-calendar-view' }),
 }))

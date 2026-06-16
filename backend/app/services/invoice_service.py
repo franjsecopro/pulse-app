@@ -37,7 +37,9 @@ class InvoiceService:
     async def create_draft_from_class(self, user_id: int, class_id: int) -> Invoice:
         """Build a draft invoice (one "Cours particuliers" line) from a class."""
         result = await self.db.execute(
-            select(Class).where(Class.id == class_id, Class.user_id == user_id)
+            select(Class)
+            .where(Class.id == class_id, Class.user_id == user_id)
+            .options(selectinload(Class.contract))
         )
         cls = result.scalar_one()
 
@@ -50,6 +52,7 @@ class InvoiceService:
             period_end=cls.class_date,
             total_ht=amount,
             currency="EUR",
+            contract_label=cls.contract.description if cls.contract else None,
             lines=[
                 InvoiceLine(
                     designation=LINE_DESIGNATION,
@@ -99,41 +102,83 @@ class InvoiceService:
                 Class.class_date >= period_start,
                 Class.class_date <= period_end,
             )
+            .options(selectinload(Class.contract))
             .order_by(Class.class_date)
         )
-        classes = result.scalars().all()
+        billable = [c for c in result.scalars().all() if not is_excluded_status(c.status)]
+        return await self._build_draft_invoice(
+            user_id, client_id, period_start, period_end, billable
+        )
 
-        lines: list[InvoiceLine] = []
-        total = 0.0
-        for cls in classes:
-            if is_excluded_status(cls.status):
-                continue
-            amount = effective_revenue(cls)
-            lines.append(
-                InvoiceLine(
-                    designation=LINE_DESIGNATION,
-                    quantity=cls.duration_hours,
-                    unit_price_ht=cls.hourly_rate,
-                    total_ht=amount,
-                    source_class_id=cls.id,
-                )
+    async def _build_draft_invoice(
+        self, user_id: int, client_id: int, period_start: date, period_end: date,
+        billable: list[Class],
+    ) -> Invoice:
+        """Persist a draft invoice from an already-filtered list of billable classes."""
+        lines = [
+            InvoiceLine(
+                designation=LINE_DESIGNATION,
+                quantity=cls.duration_hours,
+                unit_price_ht=cls.hourly_rate,
+                total_ht=effective_revenue(cls),
+                source_class_id=cls.id,
             )
-            total += amount
-
+            for cls in billable
+        ]
+        total = round(sum(effective_revenue(cls) for cls in billable), 2)
         invoice = Invoice(
             user_id=user_id,
             client_id=client_id,
             status="draft",
             period_start=period_start,
             period_end=period_end,
-            total_ht=round(total, 2),
+            total_ht=total,
             currency="EUR",
+            contract_label=self._single_contract_label(billable),
             lines=lines,
         )
         self.db.add(invoice)
         await self.db.flush()
         await self.db.commit()
         return invoice
+
+    async def auto_generate_daily_drafts(self, user_id: int, day: date) -> int:
+        """Create one draft per client for the day's billable classes that aren't
+        already invoiced. Idempotent (skips classes already on an invoice line).
+        Returns the number of drafts created."""
+        already_invoiced = (
+            select(InvoiceLine.source_class_id)
+            .join(Invoice, InvoiceLine.invoice_id == Invoice.id)
+            .where(Invoice.user_id == user_id, InvoiceLine.source_class_id.is_not(None))
+        )
+        result = await self.db.execute(
+            select(Class)
+            .where(
+                Class.user_id == user_id,
+                Class.class_date == day,
+                Class.id.not_in(already_invoiced),
+            )
+            .options(selectinload(Class.contract))
+            .order_by(Class.client_id)
+        )
+        billable = [c for c in result.scalars().all() if not is_excluded_status(c.status)]
+
+        by_client: dict[int, list[Class]] = {}
+        for cls in billable:
+            by_client.setdefault(cls.client_id, []).append(cls)
+
+        for client_id, cls_list in by_client.items():
+            await self._build_draft_invoice(user_id, client_id, day, day, cls_list)
+        return len(by_client)
+
+    @staticmethod
+    def _single_contract_label(classes: list[Class]) -> Optional[str]:
+        """The contract description when all classes share one contract, else None.
+        Display-only label for the invoices list — not shown on the PDF."""
+        contract_ids = {c.contract_id for c in classes}
+        if len(contract_ids) == 1 and classes[0].contract is not None:
+            return classes[0].contract.description
+        return None
 
     async def list_for_user(
         self,
@@ -170,6 +215,17 @@ class InvoiceService:
             .offset(offset)
         )
         return list(result.scalars().all()), int(total or 0)
+
+    async def list_by_class(self, user_id: int, class_id: int) -> list[Invoice]:
+        """Invoices that reference a given class via one of their lines (newest first)."""
+        result = await self.db.execute(
+            select(Invoice)
+            .join(InvoiceLine, InvoiceLine.invoice_id == Invoice.id)
+            .where(Invoice.user_id == user_id, InvoiceLine.source_class_id == class_id)
+            .options(selectinload(Invoice.lines))
+            .order_by(Invoice.id.desc())
+        )
+        return list(result.scalars().unique().all())
 
     async def get_by_id(self, user_id: int, invoice_id: int) -> Optional[Invoice]:
         result = await self.db.execute(

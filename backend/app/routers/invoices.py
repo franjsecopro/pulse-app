@@ -92,6 +92,16 @@ async def list_invoices(
     return invoices
 
 
+@router.get("/by-class/{class_id}", response_model=list[InvoiceResponse])
+async def invoices_by_class(
+    class_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Invoices that reference a given class (so a class can show its invoice)."""
+    return await InvoiceService(db).list_by_class(current_user.id, class_id)
+
+
 @router.get("/{invoice_id}", response_model=InvoiceResponse)
 async def get_invoice(
     invoice_id: int,

@@ -110,6 +110,29 @@ class TestListAndGet:
         assert len(response.json()) == 1
         assert response.headers["X-Total-Count"] == "1"
 
+    async def test_by_class_returns_invoices_referencing_the_class(
+        self, db: AsyncSession, app_client: AsyncClient
+    ):
+        cls, _ = await _seed_class(db)
+        created = (await app_client.post(f"/api/invoices/from-class/{cls.id}")).json()
+
+        response = await app_client.get(f"/api/invoices/by-class/{cls.id}")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body) == 1
+        assert body[0]["id"] == created["id"]
+
+    async def test_by_class_returns_empty_when_no_invoice(
+        self, db: AsyncSession, app_client: AsyncClient
+    ):
+        cls, _ = await _seed_class(db)
+
+        response = await app_client.get(f"/api/invoices/by-class/{cls.id}")
+
+        assert response.status_code == 200
+        assert response.json() == []
+
     async def test_get_by_id(self, db: AsyncSession, app_client: AsyncClient):
         cls, _ = await _seed_class(db)
         created = (await app_client.post(f"/api/invoices/from-class/{cls.id}")).json()

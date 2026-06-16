@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str = ""
     RESEND_FROM: str = ""  # remitente verificado, ej. "Facturas <facturas@tudominio.com>"
 
+    # Scheduled jobs (auto-generation). The external cron sends this token in the
+    # X-Job-Token header. Empty = jobs disabled (endpoint returns 503).
+    JOB_TOKEN: str = ""
+    # Timezone used to resolve "today" for the daily jobs (the tutor's locale).
+    BUSINESS_TIMEZONE: str = "Europe/Paris"
+
     @model_validator(mode="after")
     def _derive_cookie_secure(self):
         self.COOKIE_SECURE = self.APP_ENV == "production"

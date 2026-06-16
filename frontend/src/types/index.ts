@@ -170,6 +170,7 @@ export interface Invoice {
   currency: string
   clientId: number
   clientName: string | null
+  contractLabel: string | null
   lines: InvoiceLine[]
 }
 

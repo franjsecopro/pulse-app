@@ -352,6 +352,12 @@
     "subtitle": "Registre des cours dispensés.",
     "newClass": "Nouveau cours",
     "editClass": "Modifier le cours",
+    "generateInvoice": "Générer une facture",
+    "invoice": {
+      "linked": "Facture associée",
+      "none": "Aucune facture associée",
+      "view": "Voir"
+    },
     "registerFirst": "Enregistrer le premier cours",
     "deleteConfirm": "Voulez-vous vraiment supprimer ce cours ? Cette action est irréversible.",
     "newOnDay": "Nouveau cours ce jour",

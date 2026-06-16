@@ -17,3 +17,6 @@ jinja2==3.1.6
 # Invoice PDF rendering. Needs native GTK libs — use WSL/Docker on Windows dev;
 # runs natively on Linux/prod. Imported lazily in invoice_pdf_service.
 weasyprint==69.0
+# Timezone database for zoneinfo (Europe/Paris business day in scheduled jobs).
+# Required on Windows and minimal Linux images that lack a system tz database.
+tzdata==2026.1

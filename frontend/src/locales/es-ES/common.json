@@ -310,6 +310,12 @@
     "subtitle": "Registro de clases impartidas.",
     "newClass": "Nueva clase",
     "editClass": "Editar clase",
+    "generateInvoice": "Generar factura",
+    "invoice": {
+      "linked": "Factura asociada",
+      "none": "Sin factura asociada",
+      "view": "Ver"
+    },
     "registerFirst": "Registrar primera clase",
     "deleteConfirm": "¿Seguro que quieres eliminar esta clase? Esta acción no se puede deshacer.",
     "newOnDay": "Nueva clase este día",

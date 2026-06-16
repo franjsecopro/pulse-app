@@ -24,6 +24,7 @@ class InvoiceResponse(BaseSchema):
     currency: str
     client_id: int
     client_name: Optional[str] = None
+    contract_label: Optional[str] = None
     lines: list[InvoiceLineResponse] = []
 
 

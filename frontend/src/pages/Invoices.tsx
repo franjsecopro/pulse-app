@@ -178,7 +178,10 @@ export function Invoices() {
                     )}
                   </td>
                   <td className='px-4 py-4 text-slate-700'>
-                    {invoice.clientName ?? clientNameById.get(invoice.clientId) ?? '—'}
+                    <div>{invoice.clientName ?? clientNameById.get(invoice.clientId) ?? '—'}</div>
+                    {invoice.contractLabel && (
+                      <div className='text-xs text-slate-400'>{invoice.contractLabel}</div>
+                    )}
                   </td>
                   <td className='px-4 py-4 text-slate-500 text-xs'>{formatPeriod(invoice)}</td>
                   <td className='px-4 py-4 text-right text-slate-700'>

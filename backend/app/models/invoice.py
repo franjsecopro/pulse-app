@@ -32,6 +32,9 @@ class Invoice(Base):
     payment_dates: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     total_ht: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="EUR")
+    # Display-only: the contract description when the invoice covers a single
+    # contract (NULL when it spans several). Not shown on the PDF.
+    contract_label: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Frozen client snapshot (PII encrypted, mirroring the Client model).
     client_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
