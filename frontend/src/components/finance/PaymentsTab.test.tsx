@@ -1,32 +1,32 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Payments } from './Payments'
+import { PaymentsTab } from './PaymentsTab'
 
-vi.mock('../context/AuthContext', () => ({
+vi.mock('../../context/AuthContext', () => ({
   useAuth: vi.fn(),
 }))
 
-vi.mock('../hooks/usePayments', () => ({
+vi.mock('../../hooks/usePayments', () => ({
   usePayments: vi.fn(),
 }))
 
-vi.mock('../hooks/useAlerts', () => ({
+vi.mock('../../hooks/useAlerts', () => ({
   useAlerts: vi.fn(),
 }))
 
-vi.mock('../components/payments/PaymentForm', () => ({
+vi.mock('../payments/PaymentForm', () => ({
   PaymentForm: () => React.createElement('div', { 'data-testid': 'mock-payment-form' }),
 }))
 
-vi.mock('../components/payments/ImportStatementModal', () => ({
+vi.mock('../payments/ImportStatementModal', () => ({
   ImportStatementModal: () =>
     React.createElement('div', {
       'data-testid': 'mock-import-statement-modal',
     }),
 }))
 
-vi.mock('../components/payments/StatementHistoryView', () => ({
+vi.mock('../payments/StatementHistoryView', () => ({
   StatementHistoryView: (props: Record<string, unknown>) => {
     mockStatementHistoryViewProps = props
     return React.createElement('div', {
@@ -35,29 +35,25 @@ vi.mock('../components/payments/StatementHistoryView', () => ({
   },
 }))
 
-vi.mock('../components/finance/FinanceFilters', () => ({
-  FinanceFilters: () => React.createElement('div', { 'data-testid': 'mock-finance-filters' }),
-}))
-
-vi.mock('../components/ui/Pagination', () => ({
+vi.mock('../ui/Pagination', () => ({
   Pagination: () => React.createElement('div', { 'data-testid': 'mock-pagination' }),
 }))
 
-vi.mock('../components/ui/ConfirmationModal', () => ({
+vi.mock('../ui/ConfirmationModal', () => ({
   ConfirmationModal: ({ isOpen, message }: { isOpen: boolean; message: string }) => {
     if (!isOpen) return null
     return React.createElement('div', { 'data-testid': 'mock-confirm-dialog' }, message)
   },
 }))
 
-vi.mock('../i18n', () => ({
+vi.mock('../../i18n', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-import { useAuth } from '../context/AuthContext'
-import { useAlerts } from '../hooks/useAlerts'
-import { usePayments } from '../hooks/usePayments'
-import type { Payment } from '../types'
+import { useAuth } from '../../context/AuthContext'
+import { useAlerts } from '../../hooks/useAlerts'
+import { usePayments } from '../../hooks/usePayments'
+import type { Payment } from '../../types'
 
 const mockUseAuth = vi.mocked(useAuth)
 const mockUsePayments = vi.mocked(usePayments)
@@ -72,6 +68,7 @@ const mockGoToPage = vi.fn()
 const mockLoadStatementHistory = vi.fn()
 const mockHandleImported = vi.fn()
 const mockDeleteStatementImport = vi.fn()
+const mockOnPeriodChange = vi.fn()
 
 let mockStatementHistoryViewProps: Record<string, unknown> = {}
 
@@ -117,8 +114,10 @@ function makeHook(overrides: Partial<ReturnType<typeof usePayments>> = {}) {
   }
 }
 
-function renderPayments() {
-  return render(<Payments />)
+function renderPaymentsTab() {
+  return render(
+    <PaymentsTab month={6} year={2026} client='' status='' onPeriodChange={mockOnPeriodChange} />,
+  )
 }
 
 beforeEach(() => {
@@ -132,16 +131,10 @@ beforeEach(() => {
   mockUseAlerts.mockReturnValue({ alerts: [], isLoading: false, count: 0 } as never)
 })
 
-describe('Payments', () => {
-  describe('header', () => {
-    it('renders the page title and subtitle', () => {
-      renderPayments()
-      expect(screen.getByText('payments.title')).toBeTruthy()
-      expect(screen.getByText('payments.subtitle')).toBeTruthy()
-    })
-
+describe('PaymentsTab', () => {
+  describe('actions', () => {
     it('renders the import statement secondary button', () => {
-      renderPayments()
+      renderPaymentsTab()
       const importButton = screen.getByRole('button', {
         name: /payments\.importStatement/,
       })
@@ -149,7 +142,7 @@ describe('Payments', () => {
     })
 
     it('renders the new payment primary button', () => {
-      renderPayments()
+      renderPaymentsTab()
       const newPaymentButton = screen.getByRole('button', {
         name: /payments\.newPayment/,
       })
@@ -157,54 +150,55 @@ describe('Payments', () => {
     })
 
     it('opens the import modal when the import statement button is clicked', () => {
-      renderPayments()
+      renderPaymentsTab()
       fireEvent.click(screen.getByRole('button', { name: /payments\.importStatement/ }))
       expect(screen.getByTestId('mock-import-statement-modal')).toBeTruthy()
     })
 
     it('opens the create modal when the new payment button is clicked', () => {
-      renderPayments()
+      renderPaymentsTab()
       fireEvent.click(screen.getByRole('button', { name: /payments\.newPayment/ }))
       expect(screen.getByTestId('mock-payment-form')).toBeTruthy()
     })
   })
 
-  describe('tabs', () => {
+  describe('sub-tabs', () => {
     it('renders the payments and history tab buttons', () => {
-      renderPayments()
+      renderPaymentsTab()
       expect(screen.getByRole('button', { name: /payments\.tab\.payments/ })).toBeTruthy()
       expect(screen.getByRole('button', { name: /payments\.tab\.history/ })).toBeTruthy()
     })
 
     it('switches to history tab and shows StatementHistoryView', () => {
-      renderPayments()
+      renderPaymentsTab()
       fireEvent.click(screen.getByRole('button', { name: /payments\.tab\.history/ }))
       expect(screen.getByTestId('mock-statement-history-view')).toBeTruthy()
     })
 
-    it('starts on the payments tab by default', () => {
-      renderPayments()
-      expect(screen.getByTestId('mock-finance-filters')).toBeTruthy()
+    it('starts on the payments sub-tab by default', () => {
+      renderPaymentsTab()
+      // The payments sub-tab shows the empty state (no payments) by default.
+      expect(screen.getByText('payments.empty')).toBeTruthy()
     })
   })
 
-  describe('payments list (default tab)', () => {
+  describe('payments list (default sub-tab)', () => {
     it('shows a spinner while loading', () => {
       mockUsePayments.mockReturnValue(makeHook({ isLoading: true }) as never)
-      renderPayments()
+      renderPaymentsTab()
       const spinner = document.querySelector('.material-symbols-outlined.animate-spin')
       expect(spinner).toBeTruthy()
     })
 
     it('shows the empty state when there are no payments', () => {
       mockUsePayments.mockReturnValue(makeHook({ payments: [], totalCount: 0 }) as never)
-      renderPayments()
+      renderPaymentsTab()
       expect(screen.getByText('payments.empty')).toBeTruthy()
     })
 
     it('shows the registerFirst button in the empty state', () => {
       mockUsePayments.mockReturnValue(makeHook({ payments: [], totalCount: 0 }) as never)
-      renderPayments()
+      renderPaymentsTab()
       const registerFirstButton = screen.getByRole('button', {
         name: /payments\.registerFirst/,
       })
@@ -215,9 +209,17 @@ describe('Payments', () => {
       mockUsePayments.mockReturnValue(
         makeHook({ payments: [makePayment()], totalCount: 1 }) as never,
       )
-      renderPayments()
+      renderPaymentsTab()
       expect(screen.getByText('Juan García')).toBeTruthy()
       expect(screen.getByTestId('mock-pagination')).toBeTruthy()
+    })
+
+    it('shows the total amount badge when there are payments', () => {
+      mockUsePayments.mockReturnValue(
+        makeHook({ payments: [makePayment()], totalCount: 1, totalAmount: 100 }) as never,
+      )
+      renderPaymentsTab()
+      expect(screen.getByText('payments.totalAmount')).toBeTruthy()
     })
   })
 
@@ -229,14 +231,14 @@ describe('Payments', () => {
     })
 
     it('opens the edit modal when the row edit button is clicked', () => {
-      renderPayments()
+      renderPaymentsTab()
       const editIcon = screen.getByText('edit')
       fireEvent.click(editIcon.closest('button') as HTMLElement)
       expect(screen.getByTestId('mock-payment-form')).toBeTruthy()
     })
 
     it('calls requestDelete when the row delete button is clicked', () => {
-      renderPayments()
+      renderPaymentsTab()
       const deleteIcon = screen.getByText('delete')
       fireEvent.click(deleteIcon.closest('button') as HTMLElement)
       expect(mockRequestDelete).toHaveBeenCalledWith(1)
@@ -252,7 +254,7 @@ describe('Payments', () => {
           totalCount: 1,
         }) as never,
       )
-      renderPayments()
+      renderPaymentsTab()
       const confirmDialog = screen.getByTestId('mock-confirm-dialog')
       expect(confirmDialog).toBeTruthy()
       expect(confirmDialog.textContent).toContain('payments.deleteMessage')
@@ -265,7 +267,7 @@ describe('Payments', () => {
         user: { id: 1, email: 'admin@test.com', role: 'admin' },
         isLoading: false,
       } as never)
-      renderPayments()
+      renderPaymentsTab()
       fireEvent.click(screen.getByRole('button', { name: /payments\.tab\.history/ }))
       await waitFor(() => {
         expect(screen.getByTestId('mock-statement-history-view')).toBeTruthy()
@@ -278,7 +280,7 @@ describe('Payments', () => {
         user: { id: 2, email: 'user@test.com', role: 'user' },
         isLoading: false,
       } as never)
-      renderPayments()
+      renderPaymentsTab()
       fireEvent.click(screen.getByRole('button', { name: /payments\.tab\.history/ }))
       await waitFor(() => {
         expect(screen.getByTestId('mock-statement-history-view')).toBeTruthy()

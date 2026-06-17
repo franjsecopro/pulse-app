@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { FinanceFilters } from '../components/finance/FinanceFilters'
-import { GenerateInvoiceModal } from '../components/invoices/GenerateInvoiceModal'
-import { SendInvoiceModal } from '../components/invoices/SendInvoiceModal'
-import { Button } from '../components/ui/Button'
-import { ConfirmationModal } from '../components/ui/ConfirmationModal'
-import { useToast } from '../context/ToastContext'
-import { useInvoices } from '../hooks/useInvoices'
-import { useTranslation } from '../i18n'
-import { invoiceService } from '../services/invoice.service'
-import type { Invoice } from '../types'
+import { useToast } from '../../context/ToastContext'
+import { useInvoices } from '../../hooks/useInvoices'
+import { useTranslation } from '../../i18n'
+import { invoiceService } from '../../services/invoice.service'
+import type { Invoice } from '../../types'
+import { GenerateInvoiceModal } from '../invoices/GenerateInvoiceModal'
+import { SendInvoiceModal } from '../invoices/SendInvoiceModal'
+import { Button } from '../ui/Button'
+import { ConfirmationModal } from '../ui/ConfirmationModal'
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-600',
@@ -25,25 +24,22 @@ function formatPeriod(invoice: Invoice): string {
   return `${invoice.periodStart} → ${invoice.periodEnd}`
 }
 
-export function Invoices() {
+interface InvoicesTabProps {
+  /** Shared filters — controlled by the Finanzas container. */
+  month: number | ''
+  year: number
+  client: number | ''
+  status: string
+}
+
+export function InvoicesTab({ month, year, client, status }: InvoicesTabProps) {
   const { t } = useTranslation()
   const { addToast } = useToast()
 
-  // "Ir a factura" from a class deep-links here with ?client=&year=&focus= to
-  // pre-set the filters and highlight the exact row.
+  // "Ir a factura" from a class deep-links here with ?focus= to highlight the
+  // exact row (the client filter is pre-set by the Finanzas container via ?client=).
   const [searchParams] = useSearchParams()
   const focusId = Number(searchParams.get('focus')) || null
-
-  const [filterClient, setFilterClient] = useState<number | ''>(() => {
-    const clientParam = searchParams.get('client')
-    return clientParam ? Number(clientParam) : ''
-  })
-  const [filterStatus, setFilterStatus] = useState('')
-  const [filterMonth, setFilterMonth] = useState<number | ''>('')
-  const [filterYear, setFilterYear] = useState(() => {
-    const yearParam = searchParams.get('year')
-    return yearParam ? Number(yearParam) : new Date().getFullYear()
-  })
 
   const {
     invoices,
@@ -58,7 +54,12 @@ export function Invoices() {
     deleteInvoice,
     isCreating,
     isDeleting,
-  } = useInvoices({ filterClient, filterStatus, filterMonth, filterYear })
+  } = useInvoices({
+    filterClient: client,
+    filterStatus: status,
+    filterMonth: month,
+    filterYear: year,
+  })
 
   const [isGenerateOpen, setIsGenerateOpen] = useState(false)
   const [sendTarget, setSendTarget] = useState<Invoice | null>(null)
@@ -98,11 +99,7 @@ export function Invoices() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-        <div>
-          <h1 className='text-2xl font-black text-slate-900'>{t('invoices.title')}</h1>
-          <p className='text-slate-500 text-sm mt-1'>{t('invoices.subtitle')}</p>
-        </div>
+      <div className='flex items-center justify-end'>
         <Button
           type='button'
           onClick={() => setIsGenerateOpen(true)}
@@ -112,32 +109,6 @@ export function Invoices() {
           {t('invoices.generate')}
         </Button>
       </div>
-
-      <FinanceFilters
-        clients={clients}
-        month={filterMonth}
-        year={filterYear}
-        client={filterClient}
-        onMonthChange={setFilterMonth}
-        onYearChange={setFilterYear}
-        onClientChange={setFilterClient}
-        allowAllMonths
-        alwaysShowYear
-        trailing={
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className='border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
-          >
-            <option value=''>{t('filters.allStatuses')}</option>
-            <option value='draft'>{t('invoices.status.draft')}</option>
-            <option value='issued'>{t('invoices.status.issued')}</option>
-            <option value='sent'>{t('invoices.status.sent')}</option>
-            <option value='paid'>{t('invoices.status.paid')}</option>
-            <option value='cancelled'>{t('invoices.status.cancelled')}</option>
-          </select>
-        }
-      />
 
       {isLoading ? (
         <div className='flex items-center justify-center h-32'>

@@ -4,26 +4,30 @@ import type { Client } from '../../types'
 
 interface FinanceFiltersProps {
   clients: Client[]
-  month: number | ''
-  year: number
+  month?: number | ''
+  year?: number
   client: number | ''
-  onMonthChange: (month: number | '') => void
-  onYearChange: (year: number) => void
+  onMonthChange?: (month: number | '') => void
+  onYearChange?: (year: number) => void
   onClientChange: (client: number | '') => void
   status?: string
   onStatusChange?: (status: string) => void
+  /** Status dropdown options. Defaults to the payment statuses when omitted. */
+  statusOptions?: { value: string; label: string }[]
   allowAllMonths?: boolean
   /** Show the year selector even when no month is chosen (for year-level filtering). */
   alwaysShowYear?: boolean
+  /** Hide the month/year selectors — used when the period is controlled upstream (shared period). */
+  hidePeriod?: boolean
   trailing?: ReactNode
 }
 
-const SELECT_CLASS =
+export const FINANCE_SELECT_CLASS =
   'border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-600 bg-white focus:ring-primary focus:border-primary'
 
 export function FinanceFilters({
   clients,
-  month,
+  month = '',
   year,
   client,
   onMonthChange,
@@ -31,8 +35,10 @@ export function FinanceFilters({
   onClientChange,
   status,
   onStatusChange,
+  statusOptions,
   allowAllMonths = true,
   alwaysShowYear = false,
+  hidePeriod = false,
   trailing,
 }: FinanceFiltersProps) {
   const { t } = useTranslation()
@@ -40,27 +46,34 @@ export function FinanceFilters({
   const currentYear = new Date().getFullYear()
   const years = [currentYear, currentYear - 1, currentYear - 2]
   const showStatus = onStatusChange !== undefined
+  const resolvedStatusOptions = statusOptions ?? [
+    { value: 'confirmed', label: t('filters.statusConfirmed') },
+    { value: 'pending', label: t('filters.statusPending') },
+    { value: 'unmatched', label: t('filters.statusUnmatched') },
+  ]
 
   return (
     <div className='bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap items-center gap-3'>
-      <select
-        value={month}
-        onChange={(e) => onMonthChange(parseInt(e.target.value, 10) || '')}
-        className={SELECT_CLASS}
-      >
-        {allowAllMonths && <option value=''>{t('filters.allMonths')}</option>}
-        {months.map((name, index) => (
-          <option key={name} value={index + 1}>
-            {name}
-          </option>
-        ))}
-      </select>
+      {!hidePeriod && (
+        <select
+          value={month}
+          onChange={(e) => onMonthChange?.(parseInt(e.target.value, 10) || '')}
+          className={FINANCE_SELECT_CLASS}
+        >
+          {allowAllMonths && <option value=''>{t('filters.allMonths')}</option>}
+          {months.map((name, index) => (
+            <option key={name} value={index + 1}>
+              {name}
+            </option>
+          ))}
+        </select>
+      )}
 
-      {(month !== '' || alwaysShowYear) && (
+      {!hidePeriod && (month !== '' || alwaysShowYear) && (
         <select
           value={year}
-          onChange={(e) => onYearChange(parseInt(e.target.value, 10))}
-          className={SELECT_CLASS}
+          onChange={(e) => onYearChange?.(parseInt(e.target.value, 10))}
+          className={FINANCE_SELECT_CLASS}
         >
           {years.map((year) => (
             <option key={year} value={year}>
@@ -73,7 +86,7 @@ export function FinanceFilters({
       <select
         value={client}
         onChange={(e) => onClientChange(parseInt(e.target.value, 10) || '')}
-        className={SELECT_CLASS}
+        className={FINANCE_SELECT_CLASS}
       >
         <option value=''>{t('filters.allClients')}</option>
         {clients.map((client) => (
@@ -87,12 +100,14 @@ export function FinanceFilters({
         <select
           value={status}
           onChange={(e) => onStatusChange?.(e.target.value)}
-          className={SELECT_CLASS}
+          className={FINANCE_SELECT_CLASS}
         >
           <option value=''>{t('filters.allStatuses')}</option>
-          <option value='confirmed'>{t('filters.statusConfirmed')}</option>
-          <option value='pending'>{t('filters.statusPending')}</option>
-          <option value='unmatched'>{t('filters.statusUnmatched')}</option>
+          {resolvedStatusOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       )}
 

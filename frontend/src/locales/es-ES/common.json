@@ -70,6 +70,7 @@
     "dashboard": "Dashboard",
     "clients": "Clientes",
     "classes": "Clases",
+    "finanzas": "Finanzas",
     "payments": "Pagos",
     "accounting": "Contabilidad",
     "invoices": "Facturas",
@@ -554,6 +555,19 @@
     "empty": {
       "title": "Sin datos",
       "description": "No hay clases ni pagos registrados para {{month}} {{year}}."
+    },
+    "pickMonth": {
+      "title": "Seleccioná un mes",
+      "description": "La contabilidad se calcula por mes. Elegí un mes en el selector de arriba."
+    }
+  },
+  "finanzas": {
+    "title": "Finanzas",
+    "subtitle": "Pagos, contabilidad y facturas del período seleccionado.",
+    "tab": {
+      "pagos": "Pagos",
+      "contabilidad": "Contabilidad",
+      "facturas": "Facturas"
     }
   },
   "alerts": {

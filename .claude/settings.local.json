@@ -49,7 +49,21 @@
       "Bash(./venv/Scripts/python.exe -m alembic upgrade head)",
       "Bash(./venv/Scripts/python.exe -c ' *)",
       "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && tail -25 src/pages/Dashboard.tsx)",
-      "mcp__plugin_engram_engram__mem_context"
+      "mcp__plugin_engram_engram__mem_context",
+      "Bash(python -c \"import pypdf; r=pypdf.PdfReader\\(r'C:\\\\Users\\\\luthe\\\\Downloads\\\\finanzas-unificacion.pdf'\\); print\\('\\\\n'.join\\(p.extract_text\\(\\) for p in r.pages\\)\\)\")",
+      "Bash(Out-String)",
+      "Bash(python -c \"import pypdf; r=pypdf.PdfReader\\('/c/Users/luthe/Downloads/finanzas-unificacion.pdf'\\); print\\('\\\\n'.join\\(p.extract_text\\(\\) for p in r.pages\\)\\)\")",
+      "Bash(Get-ChildItem -Recurse \"C:\\\\Users\\\\luthe\\\\Desktop\\\\DEV\\\\pulse-app\\\\frontend\\\\src\" -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(python3 -c ' *)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\luthe\\\\.claude\\\\plans\")",
+      "Bash(Out-Null)",
+      "Bash(Write-Output \"dir ok\")",
+      "Bash(mkdir -p \"/mnt/c/Users/luthe/.claude/plans\" && echo \"ok\")",
+      "Bash(pnpm exec *)",
+      "Skill(run)",
+      "Skill(run:*)"
     ]
   }
 }

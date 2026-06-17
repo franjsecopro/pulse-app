@@ -104,7 +104,7 @@ export function ClassInvoiceLink({ classId }: { classId: number }) {
                 title={t('classes.invoice.goto')}
                 onClick={() =>
                   navigate(
-                    `/invoices?client=${invoice.clientId}` +
+                    `/finanzas?tab=facturas&client=${invoice.clientId}` +
                       `&year=${(invoice.periodStart ?? '').slice(0, 4)}&focus=${invoice.id}`,
                   )
                 }

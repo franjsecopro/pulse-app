@@ -1,40 +1,44 @@
 import { useEffect, useState } from 'react'
-import { AlertButton } from '../components/alerts/AlertButton'
-import { AlertsDrawer } from '../components/alerts/AlertsDrawer'
-import { FinanceFilters } from '../components/finance/FinanceFilters'
-import { PAYMENT_STATUS_CONFIG } from '../components/payments/constants'
-import { ImportStatementModal } from '../components/payments/ImportStatementModal'
-import { PaymentForm } from '../components/payments/PaymentForm'
-import { StatementHistoryView } from '../components/payments/StatementHistoryView'
-import { Button } from '../components/ui/Button'
-import { ConfirmationModal } from '../components/ui/ConfirmationModal'
-import { Modal } from '../components/ui/Modal'
-import { Pagination } from '../components/ui/Pagination'
-import { useAuth } from '../context/AuthContext'
-import { useAlerts } from '../hooks/useAlerts'
-import { usePayments } from '../hooks/usePayments'
-import { useTranslation } from '../i18n'
-import type { Payment } from '../types'
+import { useAuth } from '../../context/AuthContext'
+import { useAlerts } from '../../hooks/useAlerts'
+import { usePayments } from '../../hooks/usePayments'
+import { useTranslation } from '../../i18n'
+import type { Payment } from '../../types'
+import { AlertButton } from '../alerts/AlertButton'
+import { AlertsDrawer } from '../alerts/AlertsDrawer'
+import { PAYMENT_STATUS_CONFIG } from '../payments/constants'
+import { ImportStatementModal } from '../payments/ImportStatementModal'
+import { PaymentForm } from '../payments/PaymentForm'
+import { StatementHistoryView } from '../payments/StatementHistoryView'
+import { Button } from '../ui/Button'
+import { ConfirmationModal } from '../ui/ConfirmationModal'
+import { Modal } from '../ui/Modal'
+import { Pagination } from '../ui/Pagination'
 
-export function Payments() {
+interface PaymentsTabProps {
+  /** Shared filters — controlled by the Finanzas container. */
+  month: number | ''
+  year: number
+  client: number | ''
+  status: string
+  /** Bubble a detected statement period up to the shared selector after import. */
+  onPeriodChange: (month: number, year: number) => void
+}
+
+export function PaymentsTab({ month, year, client, status, onPeriodChange }: PaymentsTabProps) {
   const { t } = useTranslation()
-  const now = new Date()
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
 
   const [activeTab, setActiveTab] = useState<'payments' | 'history'>('payments')
   const [pendingStatementId, setPendingStatementId] = useState<number | null>(null)
-  const [filterMonth, setFilterMonth] = useState<number | ''>(now.getMonth() + 1)
-  const [filterYear, setFilterYear] = useState(now.getFullYear())
-  const [filterClient, setFilterClient] = useState<number | ''>('')
-  const [filterStatus, setFilterStatus] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
   const [isAlertsOpen, setIsAlertsOpen] = useState(false)
   const { alerts, isLoading: isAlertsLoading } = useAlerts({
-    month: typeof filterMonth === 'number' ? filterMonth : undefined,
-    year: filterYear,
+    month: typeof month === 'number' ? month : undefined,
+    year,
     types: ['statement_missing'],
   })
 
@@ -58,7 +62,12 @@ export function Payments() {
     cancelDelete,
     handleImported,
     deleteStatementImport,
-  } = usePayments({ filterMonth, filterYear, filterClient, filterStatus })
+  } = usePayments({
+    filterMonth: month,
+    filterYear: year,
+    filterClient: client,
+    filterStatus: status,
+  })
 
   useEffect(() => {
     if (activeTab === 'history') loadStatementHistory()
@@ -77,33 +86,27 @@ export function Payments() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-        <div>
-          <h1 className='text-2xl font-black text-slate-900'>{t('payments.title')}</h1>
-          <p className='text-slate-500 text-sm mt-1'>{t('payments.subtitle')}</p>
-        </div>
-        <div className='flex gap-2'>
-          <AlertButton alerts={alerts} onClick={() => setIsAlertsOpen(true)} />
-          <Button
-            type='button'
-            onClick={() => setShowImportModal(true)}
-            className='flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200'
-          >
-            <span className='material-symbols-outlined text-base'>upload_file</span>
-            {t('payments.importStatement')}
-          </Button>
-          <Button
-            type='button'
-            onClick={() => setShowCreateModal(true)}
-            className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
-          >
-            <span className='material-symbols-outlined'>add</span>
-            {t('payments.newPayment')}
-          </Button>
-        </div>
+      <div className='flex items-center justify-end gap-2'>
+        <AlertButton alerts={alerts} onClick={() => setIsAlertsOpen(true)} />
+        <Button
+          type='button'
+          onClick={() => setShowImportModal(true)}
+          className='flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-all border border-slate-200'
+        >
+          <span className='material-symbols-outlined text-base'>upload_file</span>
+          {t('payments.importStatement')}
+        </Button>
+        <Button
+          type='button'
+          onClick={() => setShowCreateModal(true)}
+          className='flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all'
+        >
+          <span className='material-symbols-outlined'>add</span>
+          {t('payments.newPayment')}
+        </Button>
       </div>
 
-      {/* Tabs */}
+      {/* Sub-tabs */}
       <div className='flex gap-1 bg-slate-100 rounded-xl p-1 w-fit'>
         {(['payments', 'history'] as const).map((tab) => (
           <Button
@@ -132,29 +135,14 @@ export function Payments() {
 
       {activeTab === 'payments' && (
         <>
-          {/* Filters */}
-          <FinanceFilters
-            clients={clients}
-            month={filterMonth}
-            year={filterYear}
-            client={filterClient}
-            onMonthChange={setFilterMonth}
-            onYearChange={setFilterYear}
-            onClientChange={setFilterClient}
-            status={filterStatus}
-            onStatusChange={setFilterStatus}
-            trailing={
-              payments.length > 0 ? (
-                <div className='bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary'>
-                  {t('payments.totalAmount', {
-                    amount: totalAmount.toFixed(2),
-                  })}
-                </div>
-              ) : undefined
-            }
-          />
+          {payments.length > 0 && (
+            <div className='flex justify-end'>
+              <div className='bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm font-bold text-primary'>
+                {t('payments.totalAmount', { amount: totalAmount.toFixed(2) })}
+              </div>
+            </div>
+          )}
 
-          {/* Table */}
           {isLoading ? (
             <div className='flex items-center justify-center h-32'>
               <span className='material-symbols-outlined text-primary text-3xl animate-spin'>
@@ -203,7 +191,7 @@ export function Payments() {
                   </thead>
                   <tbody className='divide-y divide-slate-100'>
                     {payments.map((payment) => {
-                      const status =
+                      const paymentStatus =
                         PAYMENT_STATUS_CONFIG[payment.status] ?? PAYMENT_STATUS_CONFIG.pending
                       return (
                         <tr key={payment.id} className='hover:bg-slate-50 transition-colors'>
@@ -226,12 +214,12 @@ export function Payments() {
                           </td>
                           <td className='px-6 py-4'>
                             <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status.className}`}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${paymentStatus.className}`}
                             >
                               <span className='material-symbols-outlined text-[12px]'>
-                                {status.icon}
+                                {paymentStatus.icon}
                               </span>
-                              {t(status.label)}
+                              {t(paymentStatus.label)}
                             </span>
                           </td>
                           <td className='px-6 py-4 text-right'>
@@ -328,9 +316,8 @@ export function Payments() {
         <ImportStatementModal
           clients={clients}
           onClose={() => setShowImportModal(false)}
-          onImported={(month, year) => {
-            if (month) setFilterMonth(month)
-            if (year) setFilterYear(year)
+          onImported={(importedMonth, importedYear) => {
+            if (importedMonth && importedYear) onPeriodChange(importedMonth, importedYear)
             handleImported()
           }}
         />

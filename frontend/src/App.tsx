@@ -5,16 +5,14 @@ import { AppLayout } from './components/Layout/AppLayout'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import { queryClient } from './lib/queryClient'
-import { Accounting } from './pages/Accounting'
 import { Admin } from './pages/Admin'
 import { Alerts } from './pages/Alerts'
 import { Classes } from './pages/Classes'
 import { Clients } from './pages/Clients'
 import { Dashboard } from './pages/Dashboard'
-import { Invoices } from './pages/Invoices'
+import { Finanzas } from './pages/Finanzas'
 import { Login } from './pages/Login'
 import { Notifications } from './pages/Notifications'
-import { Payments } from './pages/Payments'
 import { Settings } from './pages/Settings'
 
 function ProtectedRoute() {
@@ -42,9 +40,16 @@ export default function App() {
                   <Route path='/' element={<Dashboard />} />
                   <Route path='/clients' element={<Clients />} />
                   <Route path='/classes' element={<Classes />} />
-                  <Route path='/payments' element={<Payments />} />
-                  <Route path='/accounting' element={<Accounting />} />
-                  <Route path='/invoices' element={<Invoices />} />
+                  <Route path='/finanzas' element={<Finanzas />} />
+                  <Route path='/payments' element={<Navigate to='/finanzas?tab=pagos' replace />} />
+                  <Route
+                    path='/accounting'
+                    element={<Navigate to='/finanzas?tab=contabilidad' replace />}
+                  />
+                  <Route
+                    path='/invoices'
+                    element={<Navigate to='/finanzas?tab=facturas' replace />}
+                  />
                   <Route path='/notifications' element={<Notifications />} />
                   <Route element={<AdminRoute />}>
                     <Route path='/admin' element={<Admin />} />
