@@ -72,6 +72,7 @@
     "classes": "Clases",
     "payments": "Pagos",
     "accounting": "Contabilidad",
+    "invoices": "Facturas",
     "alerts": "Alertas",
     "notifications": "Notificaciones",
     "settings": "Ajustes",
@@ -146,6 +147,19 @@
       "taxId": "NIF / CIF",
       "taxIdPlaceholder": "B12345678",
       "address": "Dirección fiscal",
+      "siret": "SIRET",
+      "siretPlaceholder": "*** *** *** *****",
+      "phone": "Teléfono",
+      "email": "Email",
+      "iban": "IBAN",
+      "bic": "BIC",
+      "paymentConditions": "Condiciones de pago",
+      "numberFormat": "Formato de numeración",
+      "sequenceScope": "Reinicio de secuencia",
+      "scopeMonthly": "Mensual (reinicia cada mes)",
+      "scopeAnnual": "Anual (reinicia cada año)",
+      "vatExempt": "Exento de IVA (mención «TVA non applicable, art. 293 B du CGI»)",
+      "rcsDispense": "Mostrar «Dispensé d'immatriculation au RCS et au répertoire des métiers»",
       "save": "Guardar datos fiscales"
     },
     "toast": {
@@ -296,6 +310,12 @@
     "subtitle": "Registro de clases impartidas.",
     "newClass": "Nueva clase",
     "editClass": "Editar clase",
+    "generateInvoice": "Generar factura",
+    "invoice": {
+      "linked": "Factura asociada",
+      "none": "Sin factura asociada",
+      "view": "Ver"
+    },
     "registerFirst": "Registrar primera clase",
     "deleteConfirm": "¿Seguro que quieres eliminar esta clase? Esta acción no se puede deshacer.",
     "newOnDay": "Nueva clase este día",
@@ -747,6 +767,68 @@
       "text": "Crea clases en el calendario y, a fin de mes, importa el extracto CSV del banco para conciliar los pagos automáticamente."
     }
   },
+  "invoices": {
+    "title": "Facturas",
+    "subtitle": "Genera y envía facturas a tus clientes",
+    "generate": "Generar por período",
+    "loading": "Cargando facturas...",
+    "notNumbered": "Sin numerar",
+    "empty": {
+      "title": "Sin facturas",
+      "description": "Genera tu primera factura desde una clase o un período"
+    },
+    "table": {
+      "number": "Número",
+      "client": "Cliente",
+      "issueDate": "Emisión",
+      "period": "Período",
+      "total": "Total",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "status": {
+      "draft": "Borrador",
+      "issued": "Emitida",
+      "sent": "Enviada",
+      "paid": "Pagada",
+      "cancelled": "Anulada"
+    },
+    "actions": {
+      "preview": "Ver",
+      "issue": "Emitir",
+      "download": "Descargar PDF",
+      "send": "Enviar",
+      "delete": "Borrar"
+    },
+    "deleteConfirm": "¿Borrar la factura {{number}}? Esta acción no se puede deshacer.",
+    "generateModal": {
+      "title": "Generar factura por período",
+      "client": "Cliente",
+      "selectClient": "Seleccioná un cliente",
+      "month": "Mes",
+      "year": "Año",
+      "modeMonth": "Por mes",
+      "modeDay": "Por día",
+      "from": "Desde",
+      "to": "Hasta",
+      "rangeHint": "Para un solo mes, dejá «Hasta» igual que «Desde».",
+      "dayHint": "Para un solo día, dejá ambas fechas iguales.",
+      "cancel": "Cancelar",
+      "submit": "Generar"
+    },
+    "sendModal": {
+      "title": "Enviar factura",
+      "email": "Email del cliente",
+      "phone": "Teléfono (WhatsApp)",
+      "hint": "Dejá un campo vacío para omitir ese canal",
+      "cancel": "Cancelar",
+      "submit": "Enviar",
+      "shareLink": "Link de la factura",
+      "whatsappLink": "Abrir en WhatsApp",
+      "emailSent": "Email enviado",
+      "emailNotConfigured": "Email no configurado (falta Resend en el .env)"
+    }
+  },
   "toasts": {
     "classCreated": "Clase creada correctamente",
     "classCreateError": "Error al crear la clase",
@@ -764,6 +846,15 @@
     "paymentDeleteError": "Error al eliminar el pago",
     "statementImported": "Extracto importado correctamente",
     "reportExportError": "No se pudo generar el archivo",
+    "invoiceCreated": "Factura generada",
+    "invoiceCreateError": "Error al generar la factura",
+    "invoiceIssued": "Factura emitida",
+    "invoiceIssueError": "Error al emitir la factura",
+    "invoiceSent": "Factura enviada",
+    "invoiceSendError": "Error al enviar la factura",
+    "invoiceDeleted": "Factura borrada",
+    "invoiceDeleteError": "Error al borrar la factura",
+    "invoiceEmpty": "No se encontraron clases facturables en ese período",
     "gcalRetryScheduled": "Reintento de sincronización programado",
     "statementDeleted": "Extracto eliminado ({{count}} pagos)",
     "statementDeleteError": "Error al eliminar el extracto",

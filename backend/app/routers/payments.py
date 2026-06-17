@@ -20,7 +20,7 @@ def _build_response(payment: object) -> PaymentResponse:
 @router.get("", response_model=list[PaymentResponse])
 async def list_payments(
     response: Response,
-    client_id: Optional[int] = Query(None),
+    client_id: Optional[int] = Query(None, alias="clientId"),
     month: Optional[int] = Query(None, ge=1, le=12),
     year: Optional[int] = Query(None),
     status: Optional[str] = Query(None),

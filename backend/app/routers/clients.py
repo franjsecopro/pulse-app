@@ -24,8 +24,8 @@ router = APIRouter(prefix="/clients", tags=["clients"])
 @router.get("", response_model=list[ClientListResponse])
 async def list_clients(
     search: Optional[str] = Query(None),
-    is_active: Optional[bool] = Query(None),
-    deleted_filter: str = Query("exclude"),  # 'exclude', 'include', 'only'
+    is_active: Optional[bool] = Query(None, alias="isActive"),
+    deleted_filter: str = Query("exclude", alias="deletedFilter"),  # 'exclude', 'include', 'only'
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

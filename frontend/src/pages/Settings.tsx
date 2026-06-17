@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
+import { FiscalDataForm } from '../components/settings/FiscalDataForm'
 import { LanguageSelector } from '../components/settings/LanguageSelector'
 import { Button } from '../components/ui/Button'
 import { useTranslation } from '../i18n'
-import { businessProfileService } from '../services/business_profile.service'
 import { googleCalendarService } from '../services/google_calendar.service'
 import type { GoogleCalendarStatus } from '../types'
 
@@ -16,29 +16,6 @@ export function Settings() {
     type: 'success' | 'error'
     message: string
   } | null>(null)
-  const [fiscal, setFiscal] = useState({
-    businessName: '',
-    taxId: '',
-    fiscalAddress: '',
-  })
-  const [isSavingFiscal, setIsSavingFiscal] = useState(false)
-
-  const handleSaveFiscal = async () => {
-    setIsSavingFiscal(true)
-    try {
-      await businessProfileService.update({
-        businessName: fiscal.businessName || null,
-        taxId: fiscal.taxId || null,
-        fiscalAddress: fiscal.fiscalAddress || null,
-      })
-      setToast({ type: 'success', message: t('settings.toast.fiscalSaved') })
-    } catch {
-      setToast({ type: 'error', message: t('settings.toast.fiscalSaveError') })
-    } finally {
-      setIsSavingFiscal(false)
-    }
-  }
-
   const loadStatus = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -217,65 +194,8 @@ export function Settings() {
           </div>
         </div>
 
-        <div className='px-6 py-5 space-y-4'>
-          <div>
-            <label
-              htmlFor='business-name'
-              className='block text-sm font-semibold text-slate-700 mb-1'
-            >
-              {t('settings.fiscal.businessName')}
-            </label>
-            <input
-              id='business-name'
-              value={fiscal.businessName}
-              onChange={(e) => setFiscal((prev) => ({ ...prev, businessName: e.target.value }))}
-              className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
-            />
-          </div>
-          <div>
-            <label htmlFor='tax-id' className='block text-sm font-semibold text-slate-700 mb-1'>
-              {t('settings.fiscal.taxId')}
-            </label>
-            <input
-              id='tax-id'
-              placeholder={t('settings.fiscal.taxIdPlaceholder')}
-              value={fiscal.taxId}
-              onChange={(e) => setFiscal((prev) => ({ ...prev, taxId: e.target.value }))}
-              className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
-            />
-          </div>
-          <div>
-            <label
-              htmlFor='fiscal-address'
-              className='block text-sm font-semibold text-slate-700 mb-1'
-            >
-              {t('settings.fiscal.address')}
-            </label>
-            <input
-              id='fiscal-address'
-              value={fiscal.fiscalAddress}
-              onChange={(e) =>
-                setFiscal((prev) => ({
-                  ...prev,
-                  fiscalAddress: e.target.value,
-                }))
-              }
-              className='w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm'
-            />
-          </div>
-          <Button
-            type='button'
-            onClick={handleSaveFiscal}
-            loading={isSavingFiscal}
-            className='flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-md shadow-primary/20'
-          >
-            {isSavingFiscal ? (
-              <span className='material-symbols-outlined text-base animate-spin'>sync</span>
-            ) : (
-              <span className='material-symbols-outlined text-base'>save</span>
-            )}
-            {t('settings.fiscal.save')}
-          </Button>
+        <div className='px-6 py-5'>
+          <FiscalDataForm />
         </div>
       </div>
     </div>

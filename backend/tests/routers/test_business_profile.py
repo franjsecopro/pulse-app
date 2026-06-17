@@ -39,6 +39,40 @@ class TestBusinessProfile:
 
         assert response.json()["businessName"] == "Después"
 
+    async def test_put_persists_french_invoicing_fields(self, app_client: AsyncClient):
+        await app_client.put(
+            "/api/business-profile",
+            json={
+                "businessName": "Jean Dupont",
+                "siret": "12345678900012",
+                "phone": "+33612345678",
+                "email": "facturas@dupont.fr",
+                "iban": "FR7612345",
+                "bic": "ABCDEFGH",
+                "rcsDispense": True,
+                "vatExempt": False,
+                "paymentConditions": "Virement bancaire",
+                "invoiceNumberFormat": "YYYY-NNNN",
+                "invoiceSequenceScope": "annual",
+            },
+        )
+
+        body = (await app_client.get("/api/business-profile")).json()
+
+        assert body["siret"] == "12345678900012"
+        assert body["iban"] == "FR7612345"
+        assert body["rcsDispense"] is True
+        assert body["vatExempt"] is False
+        assert body["invoiceNumberFormat"] == "YYYY-NNNN"
+        assert body["invoiceSequenceScope"] == "annual"
+
+    async def test_get_returns_invoicing_defaults_when_not_set(self, app_client: AsyncClient):
+        body = (await app_client.get("/api/business-profile")).json()
+
+        assert body["vatExempt"] is True
+        assert body["rcsDispense"] is False
+        assert body["invoiceSequenceScope"] == "monthly"
+
 
 class TestClientTaxId:
     async def test_create_client_with_tax_id(self, db: AsyncSession, app_client: AsyncClient):

@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { useTranslation } from '../../i18n'
 import type { ClassSession, ClassStatus, Client, Contract } from '../../types'
 import { Button } from '../ui/Button'
+import { ClassInvoiceLink } from './ClassInvoiceLink'
 
 interface ClassFormProps {
   initial?: Partial<ClassSession>
@@ -9,10 +10,19 @@ interface ClassFormProps {
   onSave: (data: Partial<ClassSession>) => Promise<void>
   onCancel: () => void
   onDelete?: () => Promise<void>
+  onGenerateInvoice?: () => Promise<void>
 }
 
-export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: ClassFormProps) {
+export function ClassForm({
+  initial,
+  clients,
+  onSave,
+  onCancel,
+  onDelete,
+  onGenerateInvoice,
+}: ClassFormProps) {
   const { t } = useTranslation()
+  const [isGenerating, setIsGenerating] = useState(false)
   const [selectedClientId, setSelectedClientId] = useState<number | ''>(initial?.clientId ?? '')
   const [form, setForm] = useState({
     contractId: initial?.contractId ?? null,
@@ -92,6 +102,7 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
           {error}
         </div>
       )}
+      {initial?.id && <ClassInvoiceLink classId={initial.id} />}
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
         <div className='sm:col-span-2'>
           <label htmlFor='client' className='block text-sm font-semibold text-slate-700 mb-1'>
@@ -252,19 +263,37 @@ export function ClassForm({ initial, clients, onSave, onCancel, onDelete }: Clas
         </div>
       )}
       <div className='flex items-center justify-between gap-3 pt-2'>
-        {onDelete ? (
-          <Button
-            type='button'
-            onClick={onDelete}
-            loading={isSubmitting}
-            className='px-4 py-2 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60 flex items-center gap-1.5'
-          >
-            <span className='material-symbols-outlined text-base'>delete</span>
-            {t('classes.delete')}
-          </Button>
-        ) : (
-          <span />
-        )}
+        <div className='flex items-center gap-1'>
+          {onDelete && (
+            <Button
+              type='button'
+              onClick={onDelete}
+              loading={isSubmitting}
+              className='px-4 py-2 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60 flex items-center gap-1.5'
+            >
+              <span className='material-symbols-outlined text-base'>delete</span>
+              {t('classes.delete')}
+            </Button>
+          )}
+          {onGenerateInvoice && (
+            <Button
+              type='button'
+              onClick={async () => {
+                setIsGenerating(true)
+                try {
+                  await onGenerateInvoice()
+                } finally {
+                  setIsGenerating(false)
+                }
+              }}
+              loading={isGenerating}
+              className='px-4 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors disabled:opacity-60 flex items-center gap-1.5'
+            >
+              <span className='material-symbols-outlined text-base'>receipt_long</span>
+              {t('classes.generateInvoice')}
+            </Button>
+          )}
+        </div>
         <div className='flex gap-3'>
           <Button
             type='button'

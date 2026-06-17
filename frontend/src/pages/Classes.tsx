@@ -7,14 +7,17 @@ import { Button } from '../components/ui/Button'
 import { ConfirmationModal } from '../components/ui/ConfirmationModal'
 import { Modal } from '../components/ui/Modal'
 import { Pagination } from '../components/ui/Pagination'
+import { useToast } from '../context/ToastContext'
 import { useClasses } from '../hooks/useClasses'
 import i18n, { useTranslation } from '../i18n'
+import { invoiceService } from '../services/invoice.service'
 import type { ClassSession } from '../types'
 
 type ViewMode = 'list' | 'calendar'
 
 export function Classes() {
   const { t } = useTranslation()
+  const { addToast } = useToast()
   const months: string[] = t('common.months.full', {
     returnObjects: true,
   }) as unknown as string[]
@@ -70,6 +73,22 @@ export function Classes() {
     if (!editingClass) return
     await updateClass(editingClass.id, data)
     setEditingClass(null)
+  }
+
+  const handleGenerateInvoiceFromClass = async () => {
+    if (!editingClass) return
+    try {
+      await invoiceService.createFromClass(editingClass.id)
+      addToast('toasts.invoiceCreated', 'success')
+      setEditingClass(null)
+    } catch (err: unknown) {
+      addToast(
+        'toasts.invoiceCreateError',
+        'error',
+        undefined,
+        err instanceof Error ? err.message : undefined,
+      )
+    }
   }
 
   const handleNewClassFromCalendar = (date: string) => {
@@ -416,6 +435,7 @@ export function Classes() {
             onDelete={async () => {
               requestDelete(editingClass.id)
             }}
+            onGenerateInvoice={handleGenerateInvoiceFromClass}
           />
         )}
       </Modal>

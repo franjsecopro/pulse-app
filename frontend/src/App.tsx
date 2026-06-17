@@ -11,6 +11,7 @@ import { Alerts } from './pages/Alerts'
 import { Classes } from './pages/Classes'
 import { Clients } from './pages/Clients'
 import { Dashboard } from './pages/Dashboard'
+import { Invoices } from './pages/Invoices'
 import { Login } from './pages/Login'
 import { Notifications } from './pages/Notifications'
 import { Payments } from './pages/Payments'
@@ -43,6 +44,7 @@ export default function App() {
                   <Route path='/classes' element={<Classes />} />
                   <Route path='/payments' element={<Payments />} />
                   <Route path='/accounting' element={<Accounting />} />
+                  <Route path='/invoices' element={<Invoices />} />
                   <Route path='/notifications' element={<Notifications />} />
                   <Route element={<AdminRoute />}>
                     <Route path='/admin' element={<Admin />} />

@@ -66,7 +66,7 @@ class TestListClients:
     async def test_deleted_filter_only_returns_archived(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(db, _client("Active"), _client("Archived", archived=True))
 
-        response = await app_client.get("/api/clients", params={"deleted_filter": "only"})
+        response = await app_client.get("/api/clients", params={"deletedFilter": "only"})
 
         assert response.status_code == 200
         assert len(response.json()) == 1
@@ -75,7 +75,7 @@ class TestListClients:
     async def test_deleted_filter_include_returns_all(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(db, _client("Active"), _client("Archived", archived=True))
 
-        response = await app_client.get("/api/clients", params={"deleted_filter": "include"})
+        response = await app_client.get("/api/clients", params={"deletedFilter": "include"})
 
         assert response.status_code == 200
         assert len(response.json()) == 2
@@ -92,7 +92,7 @@ class TestListClients:
     async def test_is_active_filter(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(db, _client("Active", is_active=True), _client("Inactive", is_active=False))
 
-        response = await app_client.get("/api/clients", params={"is_active": "false"})
+        response = await app_client.get("/api/clients", params={"isActive": "false"})
 
         assert response.status_code == 200
         assert len(response.json()) == 1

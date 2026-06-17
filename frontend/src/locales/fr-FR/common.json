@@ -114,6 +114,7 @@
     "classes": "Cours",
     "payments": "Paiements",
     "accounting": "Comptabilité",
+    "invoices": "Factures",
     "alerts": "Alertes",
     "notifications": "Notifications",
     "settings": "Paramètres",
@@ -188,6 +189,19 @@
       "taxId": "NIF / CIF",
       "taxIdPlaceholder": "B12345678",
       "address": "Adresse fiscale",
+      "siret": "SIRET",
+      "siretPlaceholder": "*** *** *** *****",
+      "phone": "Téléphone",
+      "email": "Email",
+      "iban": "IBAN",
+      "bic": "BIC",
+      "paymentConditions": "Conditions de paiement",
+      "numberFormat": "Format de numérotation",
+      "sequenceScope": "Réinitialisation de séquence",
+      "scopeMonthly": "Mensuelle (réinitialise chaque mois)",
+      "scopeAnnual": "Annuelle (réinitialise chaque année)",
+      "vatExempt": "Exonéré de TVA (mention « TVA non applicable, art. 293 B du CGI »)",
+      "rcsDispense": "Afficher « Dispensé d'immatriculation au RCS et au répertoire des métiers »",
       "save": "Enregistrer les données fiscales"
     },
     "toast": {
@@ -338,6 +352,12 @@
     "subtitle": "Registre des cours dispensés.",
     "newClass": "Nouveau cours",
     "editClass": "Modifier le cours",
+    "generateInvoice": "Générer une facture",
+    "invoice": {
+      "linked": "Facture associée",
+      "none": "Aucune facture associée",
+      "view": "Voir"
+    },
     "registerFirst": "Enregistrer le premier cours",
     "deleteConfirm": "Voulez-vous vraiment supprimer ce cours ? Cette action est irréversible.",
     "newOnDay": "Nouveau cours ce jour",
@@ -789,6 +809,68 @@
       "text": "Créez des cours dans le calendrier et, en fin de mois, importez le relevé CSV de la banque pour rapprocher les paiements automatiquement."
     }
   },
+  "invoices": {
+    "title": "Factures",
+    "subtitle": "Générez et envoyez des factures à vos clients",
+    "generate": "Générer par période",
+    "loading": "Chargement des factures...",
+    "notNumbered": "Non numérotée",
+    "empty": {
+      "title": "Aucune facture",
+      "description": "Générez votre première facture depuis un cours ou une période"
+    },
+    "table": {
+      "number": "Numéro",
+      "client": "Client",
+      "issueDate": "Émission",
+      "period": "Période",
+      "total": "Total",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "issued": "Émise",
+      "sent": "Envoyée",
+      "paid": "Payée",
+      "cancelled": "Annulée"
+    },
+    "actions": {
+      "preview": "Voir",
+      "issue": "Émettre",
+      "download": "Télécharger le PDF",
+      "send": "Envoyer",
+      "delete": "Supprimer"
+    },
+    "deleteConfirm": "Supprimer la facture {{number}} ? Cette action est irréversible.",
+    "generateModal": {
+      "title": "Générer une facture par période",
+      "client": "Client",
+      "selectClient": "Sélectionnez un client",
+      "month": "Mois",
+      "year": "Année",
+      "modeMonth": "Par mois",
+      "modeDay": "Par jour",
+      "from": "Du",
+      "to": "Au",
+      "rangeHint": "Pour un seul mois, laissez « Au » identique à « Du ».",
+      "dayHint": "Pour un seul jour, mettez les deux dates identiques.",
+      "cancel": "Annuler",
+      "submit": "Générer"
+    },
+    "sendModal": {
+      "title": "Envoyer la facture",
+      "email": "Email du client",
+      "phone": "Téléphone (WhatsApp)",
+      "hint": "Laissez un champ vide pour ignorer ce canal",
+      "cancel": "Annuler",
+      "submit": "Envoyer",
+      "shareLink": "Lien de la facture",
+      "whatsappLink": "Ouvrir dans WhatsApp",
+      "emailSent": "Email envoyé",
+      "emailNotConfigured": "Email non configuré (Resend manquant dans le .env)"
+    }
+  },
   "toasts": {
     "classCreated": "Cours créé avec succès",
     "classCreateError": "Erreur lors de la création du cours",
@@ -818,6 +900,15 @@
     "clientHardDeleted": "Client définitivement supprimé",
     "clientHardDeleteError": "Erreur lors de la suppression du client",
     "reportExportError": "Impossible de générer le fichier",
+    "invoiceCreated": "Facture générée",
+    "invoiceCreateError": "Erreur lors de la génération de la facture",
+    "invoiceIssued": "Facture émise",
+    "invoiceIssueError": "Erreur lors de l'émission de la facture",
+    "invoiceSent": "Facture envoyée",
+    "invoiceSendError": "Erreur lors de l'envoi de la facture",
+    "invoiceDeleted": "Facture supprimée",
+    "invoiceDeleteError": "Erreur lors de la suppression de la facture",
+    "invoiceEmpty": "Aucun cours facturable trouvé sur cette période",
     "gcalRetryScheduled": "Nouvelle tentative de synchronisation programmée"
   }
 }
