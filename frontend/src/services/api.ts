@@ -1,3 +1,5 @@
+import { ENDPOINTS } from './endpoints'
+
 const BASE_URL = '/api'
 
 class ApiError extends Error {
@@ -13,7 +15,7 @@ class ApiError extends Error {
 async function refreshSession(): Promise<boolean> {
   // refresh_token is httpOnly — not readable via document.cookie.
   // Just attempt the call; the backend rejects it if the token is absent or expired.
-  const response = await fetch(`${BASE_URL}/auth/refresh`, {
+  const response = await fetch(`${BASE_URL}${ENDPOINTS.auth.refresh}`, {
     method: 'POST',
     credentials: 'include',
   })

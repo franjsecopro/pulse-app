@@ -10,11 +10,18 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createWrapper } from '../lib/test-utils'
+import { adminService } from '../services/admin.service'
 import { clientService } from '../services/client.service'
 import { useClients } from './useClients'
 
 vi.mock('../context/ToastContext', () => ({
   useToast: () => ({ addToast: vi.fn() }),
+}))
+
+vi.mock('../services/admin.service', () => ({
+  adminService: {
+    hardDeleteClient: vi.fn(),
+  },
 }))
 
 vi.mock('../services/client.service', () => ({
@@ -24,7 +31,6 @@ vi.mock('../services/client.service', () => ({
     update: vi.fn(),
     archive: vi.fn(),
     activate: vi.fn(),
-    hardDelete: vi.fn(),
   },
 }))
 

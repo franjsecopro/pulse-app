@@ -5,6 +5,7 @@ import {
   getInvoicesListQueryKeys,
 } from '../API/queryKeys/invoices/invoicesQueryKeys'
 import { useToast } from '../context/ToastContext'
+import { adminService } from '../services/admin.service'
 import { clientService } from '../services/client.service'
 import { invoiceService } from '../services/invoice.service'
 import { useMutationRequest, useQueryClient, useQueryRequest } from './reactQuery'
@@ -91,7 +92,7 @@ export function useInvoices(filters: UseInvoicesFilters = DEFAULT_FILTERS) {
   })
 
   const deleteMutation = useMutationRequest({
-    mutationFn: (id: number) => invoiceService.delete(id),
+    mutationFn: (id: number) => adminService.deleteInvoice(id),
     onSuccess: () => {
       addToast('toasts.invoiceDeleted', 'success')
       invalidateInvoices()

@@ -235,7 +235,7 @@ export function Dashboard() {
         <div className='px-6 py-4 border-b border-slate-200 flex items-center justify-between'>
           <h3 className='text-slate-900 font-bold'>{t('dashboard.recentPayments.title')}</h3>
           <Link
-            to='/finanzas?tab=pagos'
+            to='/finances?tab=payments'
             className='text-primary text-sm font-semibold hover:underline'
           >
             {t('dashboard.recentPayments.viewAll')}
@@ -321,7 +321,7 @@ export function Dashboard() {
             desc: t('dashboard.quickLinks.newClassDesc'),
           },
           {
-            to: '/finanzas?tab=pagos',
+            to: '/finances?tab=payments',
             icon: 'add_card',
             label: t('dashboard.quickLinks.newPayment'),
             desc: t('dashboard.quickLinks.newPaymentDesc'),

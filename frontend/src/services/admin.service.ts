@@ -1,5 +1,7 @@
 import type { AdminClient, User } from '../types'
 import { api } from './api'
+import { ENDPOINTS } from './endpoints'
+import { buildQuery } from './query'
 
 interface AdminUser {
   id: number
@@ -19,38 +21,52 @@ interface DemoStatus {
 }
 
 export const adminService = {
-  listUsers: () => api.get<AdminUser[]>('/admin/users'),
+  listUsers: () => api.get<AdminUser[]>(ENDPOINTS.admin.users),
 
   setUserRole: (userId: number, role: 'admin' | 'user') =>
-    api.put<AdminUser>(`/admin/users/${userId}/role?role=${role}`, {}),
+    api.put<AdminUser>(
+      `${ENDPOINTS.admin.userRole(userId)}${buildQuery({ role })}`,
+      {},
+    ),
 
-  deleteUser: (userId: number) => api.delete(`/admin/users/${userId}`),
+  deleteUser: (userId: number) => api.delete(ENDPOINTS.admin.userById(userId)),
 
   syncGCal: (userId: number) =>
-    api.post<{ scheduled: number }>(`/admin/users/${userId}/sync-gcal`, {}),
+    api.post<{ scheduled: number }>(ENDPOINTS.admin.userSyncGCal(userId), {}),
 
   listClients: (opts?: { archivedOnly?: boolean; demoOnly?: boolean }) => {
-    const params = new URLSearchParams()
-    if (opts?.archivedOnly) params.set('archived_only', 'true')
-    if (opts?.demoOnly) params.set('demo_only', 'true')
-    const qs = params.toString() ? `?${params}` : ''
-    return api.get<AdminClient[]>(`/admin/clients${qs}`)
+    const params: Record<string, string | undefined> = {}
+    if (opts?.archivedOnly) params.archived_only = 'true'
+    if (opts?.demoOnly) params.demo_only = 'true'
+    return api.get<AdminClient[]>(
+      `${ENDPOINTS.admin.clients}${buildQuery(params)}`,
+    )
   },
 
   moveClientFromDemo: (clientId: number) =>
-    api.post<{ moved: number; name: string }>(`/admin/clients/${clientId}/move-from-demo`, {}),
+    api.post<{ moved: number; name: string }>(
+      ENDPOINTS.admin.clientMoveFromDemo(clientId),
+      {},
+    ),
 
   hardDeleteClient: (clientId: number) =>
-    api.delete<{ deleted: number; name: string }>(`/admin/clients/${clientId}`),
+    api.delete<{ deleted: number; name: string }>(ENDPOINTS.admin.clientById(clientId)),
 
   moveClientToDemo: (clientId: number) =>
-    api.post<{ moved: number; name: string }>(`/admin/clients/${clientId}/move-to-demo`, {}),
+    api.post<{ moved: number; name: string }>(
+      ENDPOINTS.admin.clientMoveToDemo(clientId),
+      {},
+    ),
 
-  demoStatus: () => api.get<DemoStatus>('/admin/demo/status'),
+  /** Admin-only hard delete for invoices (dev/cleanup tool). */
+  deleteInvoice: (invoiceId: number) =>
+    api.delete(ENDPOINTS.invoices.byId(invoiceId)),
 
-  demoEnter: () => api.post<User>('/admin/demo/enter', {}),
+  demoStatus: () => api.get<DemoStatus>(ENDPOINTS.admin.demoStatus),
 
-  demoExit: () => api.post<User>('/admin/demo/exit', {}),
+  demoEnter: () => api.post<User>(ENDPOINTS.admin.demoEnter, {}),
 
-  demoReset: () => api.post<DemoResetResult>('/admin/demo/reset', {}),
+  demoExit: () => api.post<User>(ENDPOINTS.admin.demoExit, {}),
+
+  demoReset: () => api.post<DemoResetResult>(ENDPOINTS.admin.demoReset, {}),
 }

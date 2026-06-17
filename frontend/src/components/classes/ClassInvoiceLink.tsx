@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../../context/ToastContext'
 import { useTranslation } from '../../i18n'
+import { adminService } from '../../services/admin.service'
 import { invoiceService } from '../../services/invoice.service'
 import type { Invoice } from '../../types'
 import { Button } from '../ui/Button'
@@ -43,7 +44,7 @@ export function ClassInvoiceLink({ classId }: { classId: number }) {
     if (!pendingDiscard) return
     setIsDiscarding(true)
     try {
-      await invoiceService.delete(pendingDiscard.id)
+      await adminService.deleteInvoice(pendingDiscard.id)
       setInvoices((prev) => (prev ?? []).filter((inv) => inv.id !== pendingDiscard.id))
       addToast('toasts.invoiceDeleted', 'success')
     } catch (err) {
@@ -104,7 +105,7 @@ export function ClassInvoiceLink({ classId }: { classId: number }) {
                 title={t('classes.invoice.goto')}
                 onClick={() =>
                   navigate(
-                    `/finanzas?tab=facturas&client=${invoice.clientId}` +
+                    `/finances?tab=invoices&client=${invoice.clientId}` +
                       `&year=${(invoice.periodStart ?? '').slice(0, 4)}&focus=${invoice.id}`,
                   )
                 }

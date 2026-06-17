@@ -5,32 +5,40 @@ import type {
   NotificationSettings,
 } from '../types'
 import { api } from './api'
+import { ENDPOINTS } from './endpoints'
 import { buildQuery } from './query'
 
 export const notificationsService = {
   getPending(date?: string): Promise<AppNotification[]> {
-    return api.get<AppNotification[]>(`/notifications/pending${buildQuery({ date })}`)
+    return api.get<AppNotification[]>(
+      `${ENDPOINTS.notifications.pending}${buildQuery({ date })}`,
+    )
   },
 
   generate(targetDate?: string): Promise<AppNotification[]> {
-    return api.post<AppNotification[]>(`/notifications/generate${buildQuery({ targetDate })}`, {})
+    return api.post<AppNotification[]>(
+      `${ENDPOINTS.notifications.generate}${buildQuery({ targetDate })}`,
+      {},
+    )
   },
 
   markSent(id: number): Promise<{ id: number; status: string; sentAt: string }> {
-    return api.post(`/notifications/${id}/mark-sent`, {})
+    return api.post(ENDPOINTS.notifications.markSent(id), {})
   },
 
   getLog(filters: NotificationLogFilters): Promise<NotificationLogPage> {
     // Spread into an object literal so the named interface gains an implicit
     // index signature compatible with buildQuery's Record param.
-    return api.get<NotificationLogPage>(`/notifications/log${buildQuery({ ...filters })}`)
+    return api.get<NotificationLogPage>(
+      `${ENDPOINTS.notifications.log}${buildQuery({ ...filters })}`,
+    )
   },
 
   getSettings(): Promise<NotificationSettings> {
-    return api.get<NotificationSettings>('/notifications/settings')
+    return api.get<NotificationSettings>(ENDPOINTS.notifications.settings)
   },
 
   updateSettings(data: Partial<NotificationSettings>): Promise<NotificationSettings> {
-    return api.put<NotificationSettings>('/notifications/settings', data)
+    return api.put<NotificationSettings>(ENDPOINTS.notifications.settings, data)
   },
 }

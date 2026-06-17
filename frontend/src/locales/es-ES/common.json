@@ -70,7 +70,7 @@
     "dashboard": "Dashboard",
     "clients": "Clientes",
     "classes": "Clases",
-    "finanzas": "Finanzas",
+    "finances": "Finanzas",
     "payments": "Pagos",
     "accounting": "Contabilidad",
     "invoices": "Facturas",
@@ -561,13 +561,13 @@
       "description": "La contabilidad se calcula por mes. Elegí un mes en el selector de arriba."
     }
   },
-  "finanzas": {
+  "finances": {
     "title": "Finanzas",
     "subtitle": "Pagos, contabilidad y facturas del período seleccionado.",
     "tab": {
-      "pagos": "Pagos",
-      "contabilidad": "Contabilidad",
-      "facturas": "Facturas"
+      "payments": "Pagos",
+      "accounting": "Contabilidad",
+      "invoices": "Facturas"
     }
   },
   "alerts": {

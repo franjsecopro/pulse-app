@@ -49,7 +49,7 @@ async def get_monthly_report(
         summary = [entry for entry in summary if entry.client_id == client_id]
 
     xlsx_bytes = build_monthly_report_xlsx(summary, month, year)
-    filename = f"contabilidad_{MONTH_NAMES[month - 1].lower()}_{year}.xlsx"
+    filename = f"accounting_{MONTH_NAMES[month - 1].lower()}_{year}.xlsx"
 
     return Response(
         content=xlsx_bytes,

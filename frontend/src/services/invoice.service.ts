@@ -1,5 +1,7 @@
 import type { Invoice, SendInvoiceResult } from '../types'
 import { api } from './api'
+import { ENDPOINTS } from './endpoints'
+import { buildQuery } from './query'
 
 export const invoiceService = {
   getAll: (params?: {
@@ -9,23 +11,25 @@ export const invoiceService = {
     year?: number
     limit?: number
     offset?: number
-  }) => {
-    const qs = new URLSearchParams()
-    if (params?.clientId) qs.set('clientId', String(params.clientId))
-    if (params?.status) qs.set('status', params.status)
-    if (params?.month) qs.set('month', String(params.month))
-    if (params?.year) qs.set('year', String(params.year))
-    if (params?.limit != null) qs.set('limit', String(params.limit))
-    if (params?.offset != null) qs.set('offset', String(params.offset))
-    const suffix = qs.toString() ? `?${qs.toString()}` : ''
-    return api.getPageable<Invoice[]>(`/invoices${suffix}`)
-  },
+  }) =>
+    api.getPageable<Invoice[]>(
+      `${ENDPOINTS.invoices.base}${buildQuery({
+        clientId: params?.clientId,
+        status: params?.status,
+        month: params?.month,
+        year: params?.year,
+        limit: params?.limit,
+        offset: params?.offset,
+      })}`,
+    ),
 
-  getById: (id: number) => api.get<Invoice>(`/invoices/${id}`),
+  getById: (id: number) => api.get<Invoice>(ENDPOINTS.invoices.byId(id)),
 
-  getByClass: (classId: number) => api.get<Invoice[]>(`/invoices/by-class/${classId}`),
+  getByClass: (classId: number) =>
+    api.get<Invoice[]>(ENDPOINTS.invoices.byClass(classId)),
 
-  createFromClass: (classId: number) => api.post<Invoice>(`/invoices/from-class/${classId}`, {}),
+  createFromClass: (classId: number) =>
+    api.post<Invoice>(ENDPOINTS.invoices.fromClass(classId), {}),
 
   createFromPeriod: (data: {
     clientId: number
@@ -35,17 +39,14 @@ export const invoiceService = {
     endYear?: number
     periodStart?: string
     periodEnd?: string
-  }) => api.post<Invoice>('/invoices/from-period', data),
+  }) => api.post<Invoice>(ENDPOINTS.invoices.fromPeriod, data),
 
-  issue: (id: number) => api.post<Invoice>(`/invoices/${id}/issue`, {}),
+  issue: (id: number) => api.post<Invoice>(ENDPOINTS.invoices.issue(id), {}),
 
-  share: (id: number) => api.post<{ url: string }>(`/invoices/${id}/share`, {}),
+  share: (id: number) => api.post<{ url: string }>(ENDPOINTS.invoices.share(id), {}),
 
   send: (id: number, data: { email?: string; phone?: string }) =>
-    api.post<SendInvoiceResult>(`/invoices/${id}/send`, data),
+    api.post<SendInvoiceResult>(ENDPOINTS.invoices.send(id), data),
 
-  downloadPdf: (id: number) => api.getBlob(`/invoices/${id}/pdf`),
-
-  // Admin-only hard delete (dev/cleanup tool).
-  delete: (id: number) => api.delete(`/invoices/${id}`),
+  downloadPdf: (id: number) => api.getBlob(ENDPOINTS.invoices.pdf(id)),
 }

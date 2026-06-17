@@ -13,7 +13,7 @@ class TestMonthlyReport:
 
         assert response.status_code == 200
         assert response.headers["content-type"] == XLSX_MEDIA_TYPE
-        assert "contabilidad_abril_2026.xlsx" in response.headers["content-disposition"]
+        assert "accounting_abril_2026.xlsx" in response.headers["content-disposition"]
 
     async def test_body_is_a_valid_workbook(self, app_client: AsyncClient):
         response = await app_client.get("/api/accounting/report?month=4&year=2026")

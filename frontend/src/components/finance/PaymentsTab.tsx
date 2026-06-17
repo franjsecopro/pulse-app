@@ -16,7 +16,7 @@ import { Modal } from '../ui/Modal'
 import { Pagination } from '../ui/Pagination'
 
 interface PaymentsTabProps {
-  /** Shared filters — controlled by the Finanzas container. */
+  /** Shared filters — controlled by the Finances container. */
   month: number | ''
   year: number
   client: number | ''

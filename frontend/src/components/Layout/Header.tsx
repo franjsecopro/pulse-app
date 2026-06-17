@@ -16,7 +16,7 @@ export function Header() {
     { path: '/', label: t('nav.dashboard'), icon: 'home' },
     { path: '/clients', label: t('nav.clients'), icon: 'people' },
     { path: '/classes', label: t('nav.classes'), icon: 'school' },
-    { path: '/finanzas', label: t('nav.finanzas'), icon: 'account_balance_wallet' },
+    { path: '/finances', label: t('nav.finances'), icon: 'account_balance_wallet' },
     { path: '/alerts', label: t('nav.alerts'), icon: 'notifications' },
     { path: '/notifications', label: t('nav.notifications'), icon: 'send' },
     { path: '/settings', label: t('nav.settings'), icon: 'settings' },

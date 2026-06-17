@@ -1,16 +1,16 @@
 import { useTranslation } from '../../i18n'
 import { Button } from '../ui/Button'
 
-export type FinanceTab = 'pagos' | 'contabilidad' | 'facturas'
+export type FinanceTab = 'payments' | 'accounting' | 'invoices'
 
-export const FINANCE_TABS: FinanceTab[] = ['pagos', 'contabilidad', 'facturas']
+export const FINANCE_TABS: FinanceTab[] = ['payments', 'accounting', 'invoices']
 
 interface TabStripProps {
   activeTab: FinanceTab
   onTabChange: (tab: FinanceTab) => void
 }
 
-/** Segmented control to switch between the Finanzas modules. */
+/** Segmented control to switch between the Finances modules. */
 export function TabStrip({ activeTab, onTabChange }: TabStripProps) {
   const { t } = useTranslation()
 
@@ -27,7 +27,7 @@ export function TabStrip({ activeTab, onTabChange }: TabStripProps) {
               : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          {t(`finanzas.tab.${tab}`)}
+          {t(`finances.tab.${tab}`)}
         </Button>
       ))}
     </div>

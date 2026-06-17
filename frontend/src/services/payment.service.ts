@@ -1,5 +1,7 @@
 import type { Payment } from '../types'
 import { api } from './api'
+import { ENDPOINTS } from './endpoints'
+import { buildQuery } from './query'
 
 export const paymentService = {
   getAll: (params?: {
@@ -9,17 +11,17 @@ export const paymentService = {
     status?: string
     limit?: number
     offset?: number
-  }) => {
-    const query = new URLSearchParams()
-    if (params?.clientId) query.set('clientId', String(params.clientId))
-    if (params?.month) query.set('month', String(params.month))
-    if (params?.year) query.set('year', String(params.year))
-    if (params?.status) query.set('status', params.status)
-    if (params?.limit != null) query.set('limit', String(params.limit))
-    if (params?.offset != null) query.set('offset', String(params.offset))
-    const qs = query.toString()
-    return api.getPageable<Payment[]>(`/payments${qs ? `?${qs}` : ''}`)
-  },
+  }) =>
+    api.getPageable<Payment[]>(
+      `${ENDPOINTS.payments.base}${buildQuery({
+        clientId: params?.clientId,
+        month: params?.month,
+        year: params?.year,
+        status: params?.status,
+        limit: params?.limit,
+        offset: params?.offset,
+      })}`,
+    ),
 
   create: (data: {
     clientId?: number | null
@@ -29,9 +31,10 @@ export const paymentService = {
     source?: string
     status?: string
     notes?: string | null
-  }) => api.post<Payment>('/payments', data),
+  }) => api.post<Payment>(ENDPOINTS.payments.base, data),
 
-  update: (id: number, data: Partial<Payment>) => api.put<Payment>(`/payments/${id}`, data),
+  update: (id: number, data: Partial<Payment>) =>
+    api.put<Payment>(ENDPOINTS.payments.byId(id), data),
 
-  delete: (id: number) => api.delete(`/payments/${id}`),
+  delete: (id: number) => api.delete(ENDPOINTS.payments.byId(id)),
 }

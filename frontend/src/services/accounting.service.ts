@@ -1,9 +1,13 @@
 import type { AccountingSummaryEntry, StatementImportRecord } from '../types'
 import { api } from './api'
+import { ENDPOINTS } from './endpoints'
+import { buildQuery } from './query'
 
 export const accountingService = {
   getMonthlySummary: (month: number, year: number) =>
-    api.get<AccountingSummaryEntry[]>(`/accounting/summary?month=${month}&year=${year}`),
+    api.get<AccountingSummaryEntry[]>(
+      `${ENDPOINTS.accounting.summary}${buildQuery({ month, year })}`,
+    ),
 
   getClientBalance: (clientId: number) =>
     api.get<{
@@ -12,19 +16,19 @@ export const accountingService = {
       totalExpected: number
       totalPaid: number
       balance: number
-    }>(`/accounting/client/${clientId}`),
+    }>(ENDPOINTS.accounting.client(clientId)),
 
-  getStatementHistory: () => api.get<StatementImportRecord[]>('/imports/history'),
+  getStatementHistory: () => api.get<StatementImportRecord[]>(ENDPOINTS.imports.history),
 
   deleteStatementImport: (id: number) =>
-    api.delete<{ deleted: number; paymentsDeleted: number }>(`/imports/${id}`),
+    api.delete<{ deleted: number; paymentsDeleted: number }>(ENDPOINTS.imports.byId(id)),
 
-  getReport: (month: number, year: number, clientId?: number | '') => {
-    const params = new URLSearchParams({
-      month: String(month),
-      year: String(year),
-    })
-    if (clientId !== undefined && clientId !== '') params.set('clientId', String(clientId))
-    return api.getBlob(`/accounting/report?${params.toString()}`)
-  },
+  getReport: (month: number, year: number, clientId?: number | '') =>
+    api.getBlob(
+      `${ENDPOINTS.accounting.report}${buildQuery({
+        month,
+        year,
+        clientId: clientId || undefined,
+      })}`,
+    ),
 }

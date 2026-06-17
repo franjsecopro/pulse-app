@@ -3,6 +3,7 @@ import {
   getClientsListQueryKeys,
 } from '../API/queryKeys/clients/clientsQueryKeys'
 import { useToast } from '../context/ToastContext'
+import { adminService } from '../services/admin.service'
 import { clientService } from '../services/client.service'
 import type { Client, Contract, PaymentIdentifier } from '../types'
 import { useMutationRequest, useQueryClient, useQueryRequest } from './reactQuery'
@@ -83,7 +84,7 @@ export function useClients(search: string, filterActive: FilterActive) {
   })
 
   const hardDeleteMutation = useMutationRequest({
-    mutationFn: clientService.hardDelete,
+    mutationFn: adminService.hardDeleteClient,
     onSuccess: () => {
       addToast('toasts.clientHardDeleted', 'success')
       invalidateClients()

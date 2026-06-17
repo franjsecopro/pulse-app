@@ -112,7 +112,7 @@
     "dashboard": "Dashboard",
     "clients": "Clients",
     "classes": "Cours",
-    "finanzas": "Finances",
+    "finances": "Finances",
     "payments": "Paiements",
     "accounting": "Comptabilité",
     "invoices": "Factures",
@@ -603,13 +603,13 @@
       "description": "La comptabilité se calcule par mois. Choisissez un mois dans le sélecteur ci-dessus."
     }
   },
-  "finanzas": {
+  "finances": {
     "title": "Finances",
     "subtitle": "Paiements, comptabilité et factures de la période sélectionnée.",
     "tab": {
-      "pagos": "Paiements",
-      "contabilidad": "Comptabilité",
-      "facturas": "Factures"
+      "payments": "Paiements",
+      "accounting": "Comptabilité",
+      "invoices": "Factures"
     }
   },
   "alerts": {

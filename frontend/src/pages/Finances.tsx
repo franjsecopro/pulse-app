@@ -18,18 +18,18 @@ const PAYMENT_STATUS_VALUES = ['confirmed', 'pending', 'unmatched'] as const
 const INVOICE_STATUS_VALUES = ['draft', 'issued', 'sent', 'paid', 'cancelled'] as const
 
 /**
- * Unified Finanzas page. A single filter bar (period + client + status) sits
- * above a tab strip and drives the three modules at once: Pagos, Contabilidad
- * and Facturas. The status filter is hidden in Contabilidad (read-only report).
+ * Unified Finances page. A single filter bar (period + client + status) sits
+ * above a tab strip and drives the three modules at once: Payments, Accounting
+ * and Invoices. The status filter is hidden in Accounting (read-only report).
  */
-export function Finanzas() {
+export function Finances() {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
   const now = new Date()
 
   const tabParam = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState<FinanceTab>(
-    isFinanceTab(tabParam) ? tabParam : 'pagos',
+    isFinanceTab(tabParam) ? tabParam : 'payments',
   )
 
   // A deep-link to a specific invoice (?focus=) must not be hidden by the month
@@ -50,7 +50,7 @@ export function Finanzas() {
 
   const handleTabChange = (tab: FinanceTab) => {
     setActiveTab(tab)
-    // Pagos and Facturas use different status vocabularies, so a value carried
+    // Payments and Invoices use different status vocabularies, so a value carried
     // across tabs would be meaningless — reset it on every switch.
     setStatus('')
     setSearchParams(
@@ -68,9 +68,9 @@ export function Finanzas() {
     setYear(nextYear)
   }
 
-  const isAccounting = activeTab === 'contabilidad'
+  const isAccounting = activeTab === 'accounting'
   const statusOptions =
-    activeTab === 'facturas'
+    activeTab === 'invoices'
       ? INVOICE_STATUS_VALUES.map((value) => ({
           value,
           label: t(`invoices.status.${value}`),
@@ -83,8 +83,8 @@ export function Finanzas() {
   return (
     <div className='space-y-6'>
       <div>
-        <h1 className='text-2xl font-black text-slate-900'>{t('finanzas.title')}</h1>
-        <p className='text-slate-500 text-sm mt-1'>{t('finanzas.subtitle')}</p>
+        <h1 className='text-2xl font-black text-slate-900'>{t('finances.title')}</h1>
+        <p className='text-slate-500 text-sm mt-1'>{t('finances.subtitle')}</p>
       </div>
 
       <FinanceFilters
@@ -103,7 +103,7 @@ export function Finanzas() {
 
       <TabStrip activeTab={activeTab} onTabChange={handleTabChange} />
 
-      {activeTab === 'pagos' && (
+      {activeTab === 'payments' && (
         <PaymentsTab
           month={month}
           year={year}
@@ -112,8 +112,8 @@ export function Finanzas() {
           onPeriodChange={handlePeriodChange}
         />
       )}
-      {activeTab === 'contabilidad' && <AccountingTab month={month} year={year} client={client} />}
-      {activeTab === 'facturas' && (
+      {activeTab === 'accounting' && <AccountingTab month={month} year={year} client={client} />}
+      {activeTab === 'invoices' && (
         <InvoicesTab month={month} year={year} client={client} status={status} />
       )}
     </div>

@@ -1,5 +1,7 @@
 import type { ClassSession, ClassStats } from '../types'
 import { api } from './api'
+import { ENDPOINTS } from './endpoints'
+import { buildQuery } from './query'
 
 export const classService = {
   getAll: (params?: {
@@ -8,24 +10,25 @@ export const classService = {
     year?: number
     limit?: number
     offset?: number
-  }) => {
-    const query = new URLSearchParams()
-    if (params?.clientId) query.set('clientId', String(params.clientId))
-    if (params?.month) query.set('month', String(params.month))
-    if (params?.year) query.set('year', String(params.year))
-    if (params?.limit != null) query.set('limit', String(params.limit))
-    if (params?.offset != null) query.set('offset', String(params.offset))
-    const qs = query.toString()
-    return api.getPageable<ClassSession[]>(`/classes${qs ? `?${qs}` : ''}`)
-  },
+  }) =>
+    api.getPageable<ClassSession[]>(
+      `${ENDPOINTS.classes.base}${buildQuery({
+        clientId: params?.clientId,
+        month: params?.month,
+        year: params?.year,
+        limit: params?.limit,
+        offset: params?.offset,
+      })}`,
+    ),
 
-  getStats: (params: { month: number; year: number; clientId?: number | '' }) => {
-    const query = new URLSearchParams()
-    query.set('month', String(params.month))
-    query.set('year', String(params.year))
-    if (params.clientId) query.set('clientId', String(params.clientId))
-    return api.get<ClassStats>(`/classes/stats?${query.toString()}`)
-  },
+  getStats: (params: { month: number; year: number; clientId?: number | '' }) =>
+    api.get<ClassStats>(
+      `${ENDPOINTS.classes.stats}${buildQuery({
+        month: params.month,
+        year: params.year,
+        clientId: params.clientId || undefined,
+      })}`,
+    ),
 
   create: (data: {
     clientId: number
@@ -35,15 +38,16 @@ export const classService = {
     durationHours: number
     hourlyRate: number
     notes?: string | null
-  }) => api.post<ClassSession>('/classes', data),
+  }) => api.post<ClassSession>(ENDPOINTS.classes.base, data),
 
   update: (id: number, data: Partial<ClassSession>) =>
-    api.put<ClassSession>(`/classes/${id}`, data),
+    api.put<ClassSession>(ENDPOINTS.classes.byId(id), data),
 
-  delete: (id: number) => api.delete(`/classes/${id}`),
+  delete: (id: number) => api.delete(ENDPOINTS.classes.byId(id)),
 
-  syncGCal: () => api.post<{ scheduled: number }>('/classes/sync-gcal', {}),
+  syncGCal: () => api.post<{ scheduled: number }>(ENDPOINTS.classes.syncGCal, {}),
 
   /** Manually retry the Google Calendar sync for a single class (202 Accepted). */
-  syncCalendar: (id: number) => api.post<{ status: string }>(`/classes/${id}/sync-calendar`, {}),
+  syncCalendar: (id: number) =>
+    api.post<{ status: string }>(ENDPOINTS.classes.syncCalendar(id), {}),
 }

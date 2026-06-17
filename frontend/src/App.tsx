@@ -10,7 +10,7 @@ import { Alerts } from './pages/Alerts'
 import { Classes } from './pages/Classes'
 import { Clients } from './pages/Clients'
 import { Dashboard } from './pages/Dashboard'
-import { Finanzas } from './pages/Finanzas'
+import { Finances } from './pages/Finances'
 import { Login } from './pages/Login'
 import { Notifications } from './pages/Notifications'
 import { Settings } from './pages/Settings'
@@ -40,15 +40,15 @@ export default function App() {
                   <Route path='/' element={<Dashboard />} />
                   <Route path='/clients' element={<Clients />} />
                   <Route path='/classes' element={<Classes />} />
-                  <Route path='/finanzas' element={<Finanzas />} />
-                  <Route path='/payments' element={<Navigate to='/finanzas?tab=pagos' replace />} />
+                  <Route path='/finances' element={<Finances />} />
+                  <Route path='/payments' element={<Navigate to='/finances?tab=payments' replace />} />
                   <Route
                     path='/accounting'
-                    element={<Navigate to='/finanzas?tab=contabilidad' replace />}
+                    element={<Navigate to='/finances?tab=accounting' replace />}
                   />
                   <Route
                     path='/invoices'
-                    element={<Navigate to='/finanzas?tab=facturas' replace />}
+                    element={<Navigate to='/finances?tab=invoices' replace />}
                   />
                   <Route path='/notifications' element={<Notifications />} />
                   <Route element={<AdminRoute />}>

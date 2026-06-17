@@ -11,7 +11,7 @@ import { ClientRow } from './accounting/ClientRow'
 import { SummaryCard } from './accounting/SummaryCard'
 
 interface AccountingTabProps {
-  /** Shared filters — controlled by the Finanzas container. */
+  /** Shared filters — controlled by the Finances container. */
   month: number | ''
   year: number
   client: number | ''
@@ -62,7 +62,7 @@ export function AccountingTab({ month, year, client }: AccountingTabProps) {
       const url = URL.createObjectURL(blob)
       const anchor = document.createElement('a')
       anchor.href = url
-      anchor.download = `contabilidad_${monthsLower[activeMonth - 1]}_${year}.xlsx`
+      anchor.download = `accounting_${monthsLower[activeMonth - 1]}_${year}.xlsx`
       anchor.click()
       URL.revokeObjectURL(url)
     } catch (err: unknown) {
