@@ -66,7 +66,10 @@
       "Skill(run:*)",
       "Bash(pnpm build *)",
       "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && rm src/lib/reactQuery.ts && echo deleted)",
-      "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && rm src/hooks/useReactQuery.ts && echo deleted)"
+      "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && rm src/hooks/useReactQuery.ts && echo deleted)",
+      "Bash(xargs grep -l \"cron\\\\|schedule\\\\|invoice\\\\|job\")",
+      "Bash(xargs grep -l \"APScheduler\\\\|celery\\\\|schedule\\\\|APScheduler\\\\|croniter\")",
+      "Bash(xargs grep -l \"jobs\\\\|invoice\")"
     ]
   }
 }

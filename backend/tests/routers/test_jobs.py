@@ -100,3 +100,53 @@ class TestGenerateNotificationsJob:
 
         assert response.status_code == 200
         assert "notificationsGenerated" in response.json()
+
+
+class TestDailyJob:
+    async def test_requires_a_token(self, app_client: AsyncClient, monkeypatch):
+        monkeypatch.setattr(settings, "JOB_TOKEN", "secret")
+        response = await app_client.post("/api/jobs/daily")
+        assert response.status_code == 401
+
+    async def test_503_when_jobs_not_configured(self, app_client: AsyncClient, monkeypatch):
+        monkeypatch.setattr(settings, "JOB_TOKEN", "")
+        response = await app_client.post("/api/jobs/daily", headers={"X-Job-Token": "x"})
+        assert response.status_code == 503
+
+    async def test_runs_both_jobs(
+        self, db: AsyncSession, app_client: AsyncClient, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "JOB_TOKEN", "secret")
+        await _seed_user_with_class(db, date.today())
+
+        response = await app_client.post(
+            "/api/jobs/daily", headers={"X-Job-Token": "secret"}
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["usersProcessed"] >= 1
+        assert body["invoices"]["ok"] is True
+        assert body["notifications"]["ok"] is True
+
+    async def test_one_failure_does_not_block_the_other(
+        self, db: AsyncSession, app_client: AsyncClient, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "JOB_TOKEN", "secret")
+        await _seed(db, User(id=USER_ID, email="t@x.dev", role="user", password_hash="x", locale="es-ES"))
+
+        async def _boom(self, user_id, day):
+            raise RuntimeError("invoice generation exploded")
+
+        monkeypatch.setattr(
+            "app.services.invoice_service.InvoiceService.auto_generate_daily_drafts", _boom
+        )
+
+        response = await app_client.post(
+            "/api/jobs/daily", headers={"X-Job-Token": "secret"}
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["invoices"]["ok"] is False
+        assert body["notifications"]["ok"] is True
