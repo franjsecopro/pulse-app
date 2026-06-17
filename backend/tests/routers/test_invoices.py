@@ -370,41 +370,38 @@ class TestSend:
         assert response.json()["email"] == {"sent": False, "reason": "not_configured"}
 
 
-class TestAdminDelete:
-    async def test_admin_can_delete_an_invoice(self, db: AsyncSession, admin_client: AsyncClient):
+class TestDelete:
+    async def test_owner_can_delete_a_draft(self, db: AsyncSession, app_client: AsyncClient):
         from sqlalchemy import select
-        from app.models.invoice import Invoice
-        from app.models.invoice_line import InvoiceLine
-
-        (client,) = await _seed(db, Client(user_id=USER_ID, name="X"))
-        (invoice,) = await _seed(db, Invoice(
-            user_id=USER_ID, client_id=client.id, status="issued", number="2026-06-01",
-            total_ht=40.0, currency="EUR",
-            lines=[InvoiceLine(designation="Cours particuliers", quantity=1.0,
-                               unit_price_ht=40.0, total_ht=40.0)],
-        ))
-
-        response = await admin_client.delete(f"/api/invoices/{invoice.id}")
-
-        assert response.status_code == 200
-        remaining = await db.execute(select(Invoice).where(Invoice.id == invoice.id))
-        assert remaining.scalar_one_or_none() is None
-
-    async def test_regular_user_cannot_delete(self, db: AsyncSession, app_client: AsyncClient):
-        from main import app
-        from app.core.dependencies import get_real_user
-        from app.models.user import User
         from app.models.invoice import Invoice
 
         (client,) = await _seed(db, Client(user_id=USER_ID, name="X"))
         (invoice,) = await _seed(db, Invoice(
             user_id=USER_ID, client_id=client.id, status="draft", total_ht=0.0, currency="EUR",
         ))
-        app.dependency_overrides[get_real_user] = lambda: User(
-            id=1, email="u@x.dev", role="user", password_hash="x", locale="es-ES"
-        )
-        try:
-            response = await app_client.delete(f"/api/invoices/{invoice.id}")
-            assert response.status_code == 403
-        finally:
-            app.dependency_overrides.pop(get_real_user, None)
+
+        response = await app_client.delete(f"/api/invoices/{invoice.id}")
+
+        assert response.status_code == 200
+        remaining = await db.execute(select(Invoice).where(Invoice.id == invoice.id))
+        assert remaining.scalar_one_or_none() is None
+
+    async def test_cannot_delete_an_issued_invoice(self, db: AsyncSession, app_client: AsyncClient):
+        from sqlalchemy import select
+        from app.models.invoice import Invoice
+
+        (client,) = await _seed(db, Client(user_id=USER_ID, name="X"))
+        (invoice,) = await _seed(db, Invoice(
+            user_id=USER_ID, client_id=client.id, status="issued", number="2026-06-01",
+            total_ht=40.0, currency="EUR",
+        ))
+
+        response = await app_client.delete(f"/api/invoices/{invoice.id}")
+
+        assert response.status_code == 409
+        remaining = await db.execute(select(Invoice).where(Invoice.id == invoice.id))
+        assert remaining.scalar_one_or_none() is not None  # still there
+
+    async def test_404_for_unknown_invoice(self, app_client: AsyncClient):
+        response = await app_client.delete("/api/invoices/999999")
+        assert response.status_code == 404

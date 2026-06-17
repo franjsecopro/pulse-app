@@ -12,10 +12,14 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user, require_admin
+from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.invoice import InvoiceResponse, CreateFromPeriodRequest, SendInvoiceRequest
-from app.services.invoice_service import InvoiceService, InvoiceAlreadyIssuedError
+from app.services.invoice_service import (
+    InvoiceService,
+    InvoiceAlreadyIssuedError,
+    InvoiceNotDraftError,
+)
 from app.services.invoice_links import (
     create_invoice_file_token,
     verify_invoice_file_token,
@@ -240,11 +244,14 @@ async def get_invoice_file(
 async def delete_invoice(
     invoice_id: int,
     db: AsyncSession = Depends(get_db),
-    _admin: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
 ):
-    """Admin-only hard delete (dev/cleanup tool). Issued invoices should never be
-    deleted in production — this exists for development."""
-    deleted = await InvoiceService(db).delete(invoice_id)
+    """Delete a DRAFT invoice owned by the user. Issued invoices are immutable and
+    return 409 (correct them with a credit note / avoir)."""
+    try:
+        deleted = await InvoiceService(db).delete_draft(current_user.id, invoice_id)
+    except InvoiceNotDraftError:
+        raise HTTPException(status_code=409, detail="Only draft invoices can be deleted")
     if not deleted:
         raise HTTPException(status_code=404, detail="Invoice not found")
     return {"deleted": invoice_id}

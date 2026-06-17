@@ -314,7 +314,8 @@
     "invoice": {
       "linked": "Factura asociada",
       "none": "Sin factura asociada",
-      "view": "Ver"
+      "view": "Ver",
+      "goto": "Ir a factura"
     },
     "registerFirst": "Registrar primera clase",
     "deleteConfirm": "¿Seguro que quieres eliminar esta clase? Esta acción no se puede deshacer.",
@@ -798,9 +799,11 @@
       "issue": "Emitir",
       "download": "Descargar PDF",
       "send": "Enviar",
-      "delete": "Borrar"
+      "delete": "Borrar",
+      "discard": "Descartar borrador"
     },
     "deleteConfirm": "¿Borrar la factura {{number}}? Esta acción no se puede deshacer.",
+    "discardConfirm": "¿Descartar este borrador? No se puede deshacer (todavía no tiene número).",
     "generateModal": {
       "title": "Generar factura por período",
       "client": "Cliente",

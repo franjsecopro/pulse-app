@@ -356,7 +356,8 @@
     "invoice": {
       "linked": "Facture associée",
       "none": "Aucune facture associée",
-      "view": "Voir"
+      "view": "Voir",
+      "goto": "Aller à la facture"
     },
     "registerFirst": "Enregistrer le premier cours",
     "deleteConfirm": "Voulez-vous vraiment supprimer ce cours ? Cette action est irréversible.",
@@ -840,9 +841,11 @@
       "issue": "Émettre",
       "download": "Télécharger le PDF",
       "send": "Envoyer",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "discard": "Supprimer le brouillon"
     },
     "deleteConfirm": "Supprimer la facture {{number}} ? Cette action est irréversible.",
+    "discardConfirm": "Supprimer ce brouillon ? Action irréversible (il n'a pas encore de numéro).",
     "generateModal": {
       "title": "Générer une facture par période",
       "client": "Client",

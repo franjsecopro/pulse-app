@@ -1,10 +1,10 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { GenerateInvoiceModal } from '../components/invoices/GenerateInvoiceModal'
 import { SendInvoiceModal } from '../components/invoices/SendInvoiceModal'
 import { Button } from '../components/ui/Button'
 import { ConfirmationModal } from '../components/ui/ConfirmationModal'
-import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { useInvoices } from '../hooks/useInvoices'
 import { useTranslation } from '../i18n'
@@ -28,13 +28,22 @@ function formatPeriod(invoice: Invoice): string {
 export function Invoices() {
   const { t } = useTranslation()
   const { addToast } = useToast()
-  const { user } = useAuth()
-  const isAdmin = user?.role === 'admin'
 
-  const [filterClient, setFilterClient] = useState<number | ''>('')
+  // "Ir a factura" from a class deep-links here with ?client=&year=&focus= to
+  // pre-set the filters and highlight the exact row.
+  const [searchParams] = useSearchParams()
+  const focusId = Number(searchParams.get('focus')) || null
+
+  const [filterClient, setFilterClient] = useState<number | ''>(() => {
+    const clientParam = searchParams.get('client')
+    return clientParam ? Number(clientParam) : ''
+  })
   const [filterStatus, setFilterStatus] = useState('')
   const [filterMonth, setFilterMonth] = useState<number | ''>('')
-  const [filterYear, setFilterYear] = useState(new Date().getFullYear())
+  const [filterYear, setFilterYear] = useState(() => {
+    const yearParam = searchParams.get('year')
+    return yearParam ? Number(yearParam) : new Date().getFullYear()
+  })
 
   const {
     invoices,
@@ -169,7 +178,10 @@ export function Invoices() {
             </thead>
             <tbody className='divide-y divide-slate-100'>
               {invoices.map((invoice) => (
-                <tr key={invoice.id} className='hover:bg-slate-50 transition-colors'>
+                <tr
+                  key={invoice.id}
+                  className={`transition-colors ${focusId === invoice.id ? 'bg-primary/10' : 'hover:bg-slate-50'}`}
+                >
                   <td className='px-5 py-4 font-medium text-slate-900'>
                     {invoice.number ?? (
                       <span className='text-slate-400 italic font-normal'>
@@ -221,10 +233,10 @@ export function Invoices() {
                         title={t('invoices.actions.send')}
                         onClick={() => setSendTarget(invoice)}
                       />
-                      {isAdmin && (
+                      {invoice.status === 'draft' && (
                         <IconAction
                           icon='delete'
-                          title={t('invoices.actions.delete')}
+                          title={t('invoices.actions.discard')}
                           onClick={() => setDeleteTarget(invoice)}
                           danger
                         />
@@ -281,9 +293,7 @@ export function Invoices() {
       <ConfirmationModal
         isOpen={deleteTarget !== null}
         variant='danger'
-        message={t('invoices.deleteConfirm', {
-          number: deleteTarget?.number ?? deleteTarget?.id ?? '',
-        })}
+        message={t('invoices.discardConfirm')}
         isLoading={isDeleting}
         onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useToast } from '../../context/ToastContext'
 import { useTranslation } from '../../i18n'
 import { invoiceService } from '../../services/invoice.service'
 import type { Invoice } from '../../types'
 import { Button } from '../ui/Button'
+import { ConfirmationModal } from '../ui/ConfirmationModal'
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-600',
@@ -13,12 +16,17 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 /**
- * Shows whether a class already has invoice(s) associated and lets the user open
- * the invoice preview in a new tab — without leaving the class modal.
+ * Shows whether a class already has invoice(s) associated, lets the user open the
+ * invoice preview in a new tab, and discard it if it's still a draft — all without
+ * leaving the class modal.
  */
 export function ClassInvoiceLink({ classId }: { classId: number }) {
   const { t } = useTranslation()
+  const { addToast } = useToast()
+  const navigate = useNavigate()
   const [invoices, setInvoices] = useState<Invoice[] | null>(null)
+  const [pendingDiscard, setPendingDiscard] = useState<Invoice | null>(null)
+  const [isDiscarding, setIsDiscarding] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -30,6 +38,26 @@ export function ClassInvoiceLink({ classId }: { classId: number }) {
       active = false
     }
   }, [classId])
+
+  async function confirmDiscard() {
+    if (!pendingDiscard) return
+    setIsDiscarding(true)
+    try {
+      await invoiceService.delete(pendingDiscard.id)
+      setInvoices((prev) => (prev ?? []).filter((inv) => inv.id !== pendingDiscard.id))
+      addToast('toasts.invoiceDeleted', 'success')
+    } catch (err) {
+      addToast(
+        'toasts.invoiceDeleteError',
+        'error',
+        undefined,
+        err instanceof Error ? err.message : undefined,
+      )
+    } finally {
+      setIsDiscarding(false)
+      setPendingDiscard(null)
+    }
+  }
 
   if (invoices === null) return null // still loading — stay quiet
 
@@ -43,32 +71,70 @@ export function ClassInvoiceLink({ classId }: { classId: number }) {
   }
 
   return (
-    <div className='rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2'>
-      <p className='text-xs font-semibold text-slate-500 uppercase tracking-wide'>
-        {t('classes.invoice.linked')}
-      </p>
-      {invoices.map((invoice) => (
-        <div key={invoice.id} className='flex items-center justify-between gap-2'>
-          <div className='flex items-center gap-2 min-w-0'>
-            <span className='font-medium text-slate-800 text-sm truncate'>
-              {invoice.number ?? t('invoices.notNumbered')}
-            </span>
-            <span
-              className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? STATUS_STYLES.draft}`}
-            >
-              {t(`invoices.status.${invoice.status}`)}
-            </span>
+    <>
+      <div className='rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2'>
+        <p className='text-xs font-semibold text-slate-500 uppercase tracking-wide'>
+          {t('classes.invoice.linked')}
+        </p>
+        {invoices.map((invoice) => (
+          <div key={invoice.id} className='flex items-center justify-between gap-2'>
+            <div className='flex items-center gap-2 min-w-0'>
+              <span className='font-medium text-slate-800 text-sm truncate'>
+                {invoice.number ?? t('invoices.notNumbered')}
+              </span>
+              <span
+                className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[invoice.status] ?? STATUS_STYLES.draft}`}
+              >
+                {t(`invoices.status.${invoice.status}`)}
+              </span>
+            </div>
+            <div className='flex items-center gap-0.5 shrink-0'>
+              <Button
+                type='button'
+                title={t('classes.invoice.view')}
+                onClick={() =>
+                  window.open(`/api/invoices/${invoice.id}/preview`, '_blank', 'noopener')
+                }
+                className='p-1.5 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors'
+              >
+                <span className='material-symbols-outlined text-base'>visibility</span>
+              </Button>
+              <Button
+                type='button'
+                title={t('classes.invoice.goto')}
+                onClick={() =>
+                  navigate(
+                    `/invoices?client=${invoice.clientId}` +
+                      `&year=${(invoice.periodStart ?? '').slice(0, 4)}&focus=${invoice.id}`,
+                  )
+                }
+                className='p-1.5 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors'
+              >
+                <span className='material-symbols-outlined text-base'>open_in_new</span>
+              </Button>
+              {invoice.status === 'draft' && (
+                <Button
+                  type='button'
+                  title={t('invoices.actions.discard')}
+                  onClick={() => setPendingDiscard(invoice)}
+                  className='p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors'
+                >
+                  <span className='material-symbols-outlined text-base'>delete</span>
+                </Button>
+              )}
+            </div>
           </div>
-          <Button
-            type='button'
-            onClick={() => window.open(`/api/invoices/${invoice.id}/preview`, '_blank', 'noopener')}
-            className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-primary text-xs font-semibold hover:bg-primary/10 transition-colors shrink-0'
-          >
-            <span className='material-symbols-outlined text-sm'>visibility</span>
-            {t('classes.invoice.view')}
-          </Button>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      <ConfirmationModal
+        isOpen={pendingDiscard !== null}
+        variant='danger'
+        message={t('invoices.discardConfirm')}
+        isLoading={isDiscarding}
+        onConfirm={confirmDiscard}
+        onCancel={() => setPendingDiscard(null)}
+      />
+    </>
   )
 }

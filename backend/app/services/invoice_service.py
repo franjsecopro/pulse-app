@@ -30,6 +30,10 @@ class InvoiceAlreadyIssuedError(Exception):
     """Raised when attempting to issue an invoice that is already issued."""
 
 
+class InvoiceNotDraftError(Exception):
+    """Raised when attempting to delete an invoice that is not a draft."""
+
+
 class InvoiceService:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -235,21 +239,26 @@ class InvoiceService:
         )
         return result.scalar_one_or_none()
 
-    async def delete(self, invoice_id: int) -> bool:
-        """Hard-delete an invoice and its cached PDF. Admin/dev tool — there is no
-        user scoping. Returns False if the invoice doesn't exist.
+    async def delete_draft(self, user_id: int, invoice_id: int) -> bool:
+        """Delete a DRAFT invoice (and its cached PDF) owned by the user.
 
-        NOTE: deleting an *issued* invoice breaks the gapless legal sequence and
-        must never be exposed to non-admins in production (the router guards it
-        with require_admin). The sequence counter is intentionally NOT rolled
-        back — numbers are never reused.
+        Only drafts can be deleted — they carry no number, so removing one never
+        creates a gap in the legal sequence. Issued invoices are immutable
+        (corrections go through a credit note / avoir) and raise
+        InvoiceNotDraftError. Returns False if the invoice doesn't exist for the user.
         """
         result = await self.db.execute(
-            select(Invoice).where(Invoice.id == invoice_id).options(selectinload(Invoice.lines))
+            select(Invoice)
+            .where(Invoice.id == invoice_id, Invoice.user_id == user_id)
+            .options(selectinload(Invoice.lines))
         )
         invoice = result.scalar_one_or_none()
         if invoice is None:
             return False
+        if invoice.status != "draft":
+            raise InvoiceNotDraftError(
+                f"Invoice {invoice_id} is {invoice.status}; only drafts can be deleted"
+            )
         await self.db.execute(sa_delete(InvoicePdf).where(InvoicePdf.invoice_id == invoice_id))
         await self.db.delete(invoice)
         await self.db.commit()
