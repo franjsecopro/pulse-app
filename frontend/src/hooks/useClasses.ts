@@ -1,10 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import {
+  getClassesAllQueryKeys,
+  getClassesListQueryKeys,
+  getClassesStatsQueryKeys,
+} from '../API/queryKeys/classes/classesQueryKeys'
+import { getClientsDropdownQueryKeys } from '../API/queryKeys/clients/clientsQueryKeys'
 import { useToast } from '../context/ToastContext'
-import { queryKeys } from '../lib/queryKeys'
 import { classService } from '../services/class.service'
 import { clientService } from '../services/client.service'
 import type { ClassSession, ClassStats } from '../types'
+import { useMutationRequest, useQueryClient, useQueryRequest } from './reactQuery'
 
 const PAGE_LIMIT = 100
 
@@ -33,8 +38,8 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     setPage(1)
   }, [filterMonth, filterYear, filterClient])
 
-  const listQuery = useQuery({
-    queryKey: queryKeys.classes.list({ ...filters, page }),
+  const listQuery = useQueryRequest({
+    queryKey: getClassesListQueryKeys({ ...filters, page }),
     queryFn: () =>
       classService.getAll({
         ...filters,
@@ -43,19 +48,20 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
       }),
   })
 
-  const statsQuery = useQuery({
-    queryKey: queryKeys.classes.stats(filters),
+  const statsQuery = useQueryRequest({
+    queryKey: getClassesStatsQueryKeys(filters),
     queryFn: () => classService.getStats(filters),
   })
 
-  const clientsQuery = useQuery({
-    queryKey: queryKeys.clients.dropdown,
+  const clientsQuery = useQueryRequest({
+    queryKey: getClientsDropdownQueryKeys(),
     queryFn: () => clientService.getAll(),
   })
 
-  const invalidateClasses = () => queryClient.invalidateQueries({ queryKey: queryKeys.classes.all })
+  const invalidateClasses = () =>
+    queryClient.invalidateQueries({ queryKey: getClassesAllQueryKeys() })
 
-  const createMutation = useMutation({
+  const createMutation = useMutationRequest({
     mutationFn: (data: Partial<ClassSession>) =>
       classService.create(data as Parameters<typeof classService.create>[0]),
     onSuccess: () => {
@@ -65,7 +71,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     onError: (error) => addToast('toasts.classCreateError', 'error', undefined, error.message),
   })
 
-  const updateMutation = useMutation({
+  const updateMutation = useMutationRequest({
     mutationFn: ({ id, data }: { id: number; data: Partial<ClassSession> }) =>
       classService.update(id, data),
     onSuccess: () => {
@@ -75,7 +81,7 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     onError: (error) => addToast('toasts.classUpdateError', 'error', undefined, error.message),
   })
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutationRequest({
     mutationFn: (id: number) => classService.delete(id),
     onSuccess: () => addToast('toasts.classDeleted', 'success'),
     onError: (error) => addToast('toasts.classDeleteError', 'error', undefined, error.message),
@@ -86,13 +92,13 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     },
   })
 
-  const syncMutation = useMutation({
+  const syncMutation = useMutationRequest({
     mutationFn: () => classService.syncGCal(),
     onSuccess: (result) => addToast('toasts.gcalSynced', 'success', result.scheduled),
     onError: (error) => addToast('toasts.gcalSyncError', 'error', undefined, error.message),
   })
 
-  const retrySyncMutation = useMutation({
+  const retrySyncMutation = useMutationRequest({
     mutationFn: (id: number) => classService.syncCalendar(id),
     // The sync runs as a background task (202) — the badge updates on the next refetch.
     onSuccess: () => {

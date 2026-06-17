@@ -21,7 +21,9 @@ export const notificationsService = {
   },
 
   getLog(filters: NotificationLogFilters): Promise<NotificationLogPage> {
-    return api.get<NotificationLogPage>(`/notifications/log${buildQuery(filters)}`)
+    // Spread into an object literal so the named interface gains an implicit
+    // index signature compatible with buildQuery's Record param.
+    return api.get<NotificationLogPage>(`/notifications/log${buildQuery({ ...filters })}`)
   },
 
   getSettings(): Promise<NotificationSettings> {

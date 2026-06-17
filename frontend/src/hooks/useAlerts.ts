@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
-import { queryKeys } from '../lib/queryKeys'
+import { getAlertsListQueryKeys } from '../API/queryKeys/alerts/alertsQueryKeys'
 import { alertsService } from '../services/alerts.service'
 import type { AlertType } from '../types'
+import { useQueryRequest } from './reactQuery'
 
 interface UseAlertsParams {
   month?: number
@@ -11,8 +11,8 @@ interface UseAlertsParams {
 }
 
 export function useAlerts({ month, year, types, enabled = true }: UseAlertsParams) {
-  const query = useQuery({
-    queryKey: queryKeys.alerts.list({ month, year, types }),
+  const query = useQueryRequest({
+    queryKey: getAlertsListQueryKeys({ month, year, types }),
     queryFn: () => alertsService.getAlerts({ month, year, types }),
     enabled,
   })

@@ -74,6 +74,7 @@ function makeClass(overrides: Partial<ClassSession> = {}): ClassSession {
     status: 'normal',
     notes: null,
     googleCalendarId: null,
+    gcalSyncStatus: null,
     createdAt: '2026-06-01',
     clientName: 'Juan García',
     contractDescription: null,

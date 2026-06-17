@@ -1,13 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { getClientsDropdownQueryKeys } from '../API/queryKeys/clients/clientsQueryKeys'
 import { AccountingTab } from '../components/finance/AccountingTab'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { InvoicesTab } from '../components/finance/InvoicesTab'
 import { PaymentsTab } from '../components/finance/PaymentsTab'
 import { FINANCE_TABS, type FinanceTab, TabStrip } from '../components/finance/TabStrip'
+import { useQueryRequest } from '../hooks/reactQuery'
 import { useTranslation } from '../i18n'
-import { queryKeys } from '../lib/queryKeys'
 import { clientService } from '../services/client.service'
 
 function isFinanceTab(value: string | null): value is FinanceTab {
@@ -43,8 +43,8 @@ export function Finanzas() {
   const [client, setClient] = useState<number | ''>(clientParam)
   const [status, setStatus] = useState('')
 
-  const { data: clients = [] } = useQuery({
-    queryKey: queryKeys.clients.dropdown,
+  const { data: clients = [] } = useQueryRequest({
+    queryKey: getClientsDropdownQueryKeys(),
     queryFn: () => clientService.getAll(),
   })
 

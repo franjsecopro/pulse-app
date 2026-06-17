@@ -1,11 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
+import { getClientsDropdownQueryKeys } from '../API/queryKeys/clients/clientsQueryKeys'
+import {
+  getPaymentsAllQueryKeys,
+  getPaymentsListQueryKeys,
+  getPaymentsStatementHistoryQueryKeys,
+} from '../API/queryKeys/payments/paymentsQueryKeys'
 import { useToast } from '../context/ToastContext'
-import { queryKeys } from '../lib/queryKeys'
 import { accountingService } from '../services/accounting.service'
 import { clientService } from '../services/client.service'
 import { paymentService } from '../services/payment.service'
 import type { Payment } from '../types'
+import { useMutationRequest, useQueryClient, useQueryRequest } from './reactQuery'
 
 const PAGE_LIMIT = 100
 
@@ -41,8 +46,8 @@ export function usePayments({
     setPage(1)
   }, [filterMonth, filterYear, filterClient, filterStatus])
 
-  const listQuery = useQuery({
-    queryKey: queryKeys.payments.list({ ...filters, page }),
+  const listQuery = useQueryRequest({
+    queryKey: getPaymentsListQueryKeys({ ...filters, page }),
     queryFn: () =>
       paymentService.getAll({
         ...filters,
@@ -51,20 +56,20 @@ export function usePayments({
       }),
   })
 
-  const clientsQuery = useQuery({
-    queryKey: queryKeys.clients.dropdown,
+  const clientsQuery = useQueryRequest({
+    queryKey: getClientsDropdownQueryKeys(),
     queryFn: () => clientService.getAll(),
   })
 
   // Lazy query: only fetched when the user opens the history tab (loadStatementHistory).
-  const historyQuery = useQuery({
-    queryKey: queryKeys.payments.statementHistory,
+  const historyQuery = useQueryRequest({
+    queryKey: getPaymentsStatementHistoryQueryKeys(),
     queryFn: () => accountingService.getStatementHistory(),
     enabled: false,
   })
 
   const invalidatePayments = () =>
-    queryClient.invalidateQueries({ queryKey: queryKeys.payments.all })
+    queryClient.invalidateQueries({ queryKey: getPaymentsAllQueryKeys() })
 
   // Referentially stable — Payments.tsx puts this in a useEffect dependency array.
   const refetchHistory = historyQuery.refetch
@@ -72,7 +77,7 @@ export function usePayments({
     refetchHistory()
   }, [refetchHistory])
 
-  const createMutation = useMutation({
+  const createMutation = useMutationRequest({
     mutationFn: paymentService.create,
     onSuccess: () => {
       addToast('toasts.paymentCreated', 'success')
@@ -81,7 +86,7 @@ export function usePayments({
     onError: (error) => addToast('toasts.paymentCreateError', 'error', undefined, error.message),
   })
 
-  const updateMutation = useMutation({
+  const updateMutation = useMutationRequest({
     mutationFn: ({ id, data }: { id: number; data: Partial<Payment> }) =>
       paymentService.update(id, data),
     onSuccess: () => {
@@ -91,7 +96,7 @@ export function usePayments({
     onError: (error) => addToast('toasts.paymentUpdateError', 'error', undefined, error.message),
   })
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutationRequest({
     mutationFn: (id: number) => paymentService.delete(id),
     onSuccess: () => addToast('toasts.paymentDeleted', 'success'),
     onError: (error) => addToast('toasts.paymentDeleteError', 'error', undefined, error.message),
@@ -102,7 +107,7 @@ export function usePayments({
     },
   })
 
-  const deleteStatementMutation = useMutation({
+  const deleteStatementMutation = useMutationRequest({
     mutationFn: (id: number) => accountingService.deleteStatementImport(id),
     onSuccess: ({ paymentsDeleted }) => {
       addToast('toasts.statementDeleted', 'success', paymentsDeleted)
@@ -136,7 +141,7 @@ export function usePayments({
     setPage(1)
     invalidatePayments()
     // Drop cached history so the tab refetches fresh data next time it opens.
-    queryClient.removeQueries({ queryKey: queryKeys.payments.statementHistory })
+    queryClient.removeQueries({ queryKey: getPaymentsStatementHistoryQueryKeys() })
   }
 
   const payments = listQuery.data?.data ?? []

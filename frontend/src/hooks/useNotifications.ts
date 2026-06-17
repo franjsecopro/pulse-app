@@ -1,10 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
+import {
+  getNotificationsLogQueryKeys,
+  getNotificationsPendingQueryKeys,
+} from '../API/queryKeys/notifications/notificationsQueryKeys'
 import { useTranslation } from '../i18n'
-import { queryKeys } from '../lib/queryKeys'
 import { notificationsService } from '../services/notifications.service'
 import type { AppNotification, NotificationLogFilters } from '../types'
 import { addDaysISO, todayISO } from '../utils/formatters'
+import { useMutationRequest, useQueryClient, useQueryRequest } from './reactQuery'
 
 interface UsePendingNotificationsParams {
   /**
@@ -33,9 +36,9 @@ export function usePendingNotifications({
 
   const targetDate = addDaysISO(date, 1)
   const isToday = date === todayISO()
-  const pendingKey = queryKeys.notifications.pending(date)
+  const pendingKey = getNotificationsPendingQueryKeys(date)
 
-  const query = useQuery({
+  const query = useQueryRequest({
     queryKey: pendingKey,
     // First visit of the day has nothing pending yet — generate transparently.
     queryFn: async () => {
@@ -47,14 +50,14 @@ export function usePendingNotifications({
     },
   })
 
-  const generateMutation = useMutation({
+  const generateMutation = useMutationRequest({
     mutationFn: async () => {
       await notificationsService.generate(targetDate)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: pendingKey }),
   })
 
-  const sendMutation = useMutation({
+  const sendMutation = useMutationRequest({
     mutationFn: (notification: AppNotification) => notificationsService.markSent(notification.id),
     // Optimistic: the user already jumped to WhatsApp — show "sent" immediately,
     // roll back if the server rejects the markSent.
@@ -119,8 +122,8 @@ interface UseNotificationLogResult {
 export function useNotificationLog(filters: NotificationLogFilters): UseNotificationLogResult {
   // Inline `filters={{...}}` at call sites is fine: React Query hashes keys
   // deterministically, so an equal object is the same key.
-  const query = useQuery({
-    queryKey: queryKeys.notifications.log(filters),
+  const query = useQueryRequest({
+    queryKey: getNotificationsLogQueryKeys(filters),
     queryFn: () => notificationsService.getLog(filters),
   })
 

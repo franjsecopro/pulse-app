@@ -1,8 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  getClientsAllQueryKeys,
+  getClientsListQueryKeys,
+} from '../API/queryKeys/clients/clientsQueryKeys'
 import { useToast } from '../context/ToastContext'
-import { queryKeys } from '../lib/queryKeys'
 import { clientService } from '../services/client.service'
 import type { Client, Contract, PaymentIdentifier } from '../types'
+import { useMutationRequest, useQueryClient, useQueryRequest } from './reactQuery'
 
 type FilterActive = 'all' | 'active' | 'archived'
 
@@ -30,18 +33,19 @@ export function useClients(search: string, filterActive: FilterActive) {
   const queryClient = useQueryClient()
 
   const serviceArgs = toServiceArgs(search, filterActive)
-  const listKey = queryKeys.clients.list(serviceArgs)
+  const listKey = getClientsListQueryKeys(serviceArgs)
 
-  const query = useQuery({
+  const query = useQueryRequest({
     queryKey: listKey,
     queryFn: () => clientService.getAll(serviceArgs),
     // Sort runs over the cache on read — never mutate the cached array itself.
     select: (data) => [...data].sort((a, b) => Number(b.isActive) - Number(a.isActive)),
   })
 
-  const invalidateClients = () => queryClient.invalidateQueries({ queryKey: queryKeys.clients.all })
+  const invalidateClients = () =>
+    queryClient.invalidateQueries({ queryKey: getClientsAllQueryKeys() })
 
-  const createMutation = useMutation({
+  const createMutation = useMutationRequest({
     mutationFn: clientService.create,
     onSuccess: () => {
       addToast('toasts.clientCreated', 'success')
@@ -50,7 +54,7 @@ export function useClients(search: string, filterActive: FilterActive) {
     onError: (error) => addToast('toasts.clientCreateError', 'error', undefined, error.message),
   })
 
-  const updateMutation = useMutation({
+  const updateMutation = useMutationRequest({
     mutationFn: ({ id, data }: { id: number; data: Partial<Client> }) =>
       clientService.update(id, data),
     onSuccess: () => {
@@ -60,7 +64,7 @@ export function useClients(search: string, filterActive: FilterActive) {
     onError: (error) => addToast('toasts.clientUpdateError', 'error', undefined, error.message),
   })
 
-  const archiveMutation = useMutation({
+  const archiveMutation = useMutationRequest({
     mutationFn: clientService.archive,
     onSuccess: () => {
       addToast('toasts.clientArchived', 'success')
@@ -69,7 +73,7 @@ export function useClients(search: string, filterActive: FilterActive) {
     onError: (error) => addToast('toasts.clientArchiveError', 'error', undefined, error.message),
   })
 
-  const activateMutation = useMutation({
+  const activateMutation = useMutationRequest({
     mutationFn: clientService.activate,
     onSuccess: () => {
       addToast('toasts.clientActivated', 'success')
@@ -78,7 +82,7 @@ export function useClients(search: string, filterActive: FilterActive) {
     onError: (error) => addToast('toasts.clientActivateError', 'error', undefined, error.message),
   })
 
-  const hardDeleteMutation = useMutation({
+  const hardDeleteMutation = useMutationRequest({
     mutationFn: clientService.hardDelete,
     onSuccess: () => {
       addToast('toasts.clientHardDeleted', 'success')

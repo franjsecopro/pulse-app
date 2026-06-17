@@ -1,9 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { getClientsDropdownQueryKeys } from '../API/queryKeys/clients/clientsQueryKeys'
+import {
+  getInvoicesAllQueryKeys,
+  getInvoicesListQueryKeys,
+} from '../API/queryKeys/invoices/invoicesQueryKeys'
 import { useToast } from '../context/ToastContext'
-import { queryKeys } from '../lib/queryKeys'
 import { clientService } from '../services/client.service'
 import { invoiceService } from '../services/invoice.service'
+import { useMutationRequest, useQueryClient, useQueryRequest } from './reactQuery'
 
 const PAGE_LIMIT = 100
 
@@ -41,8 +45,8 @@ export function useInvoices(filters: UseInvoicesFilters = DEFAULT_FILTERS) {
     setPage(1)
   }, [filterClient, filterStatus, filterMonth, filterYear])
 
-  const listQuery = useQuery({
-    queryKey: queryKeys.invoices.list({ ...serviceFilters, page }),
+  const listQuery = useQueryRequest({
+    queryKey: getInvoicesListQueryKeys({ ...serviceFilters, page }),
     queryFn: () =>
       invoiceService.getAll({
         ...serviceFilters,
@@ -51,15 +55,15 @@ export function useInvoices(filters: UseInvoicesFilters = DEFAULT_FILTERS) {
       }),
   })
 
-  const clientsQuery = useQuery({
-    queryKey: queryKeys.clients.dropdown,
+  const clientsQuery = useQueryRequest({
+    queryKey: getClientsDropdownQueryKeys(),
     queryFn: () => clientService.getAll(),
   })
 
   const invalidateInvoices = () =>
-    queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all })
+    queryClient.invalidateQueries({ queryKey: getInvoicesAllQueryKeys() })
 
-  const createFromPeriodMutation = useMutation({
+  const createFromPeriodMutation = useMutationRequest({
     mutationFn: invoiceService.createFromPeriod,
     onSuccess: (invoice) => {
       // The period may have had no billable classes (e.g. all cancelled) — be explicit.
@@ -70,7 +74,7 @@ export function useInvoices(filters: UseInvoicesFilters = DEFAULT_FILTERS) {
     onError: (error) => addToast('toasts.invoiceCreateError', 'error', undefined, error.message),
   })
 
-  const issueMutation = useMutation({
+  const issueMutation = useMutationRequest({
     mutationFn: (id: number) => invoiceService.issue(id),
     onSuccess: () => {
       addToast('toasts.invoiceIssued', 'success')
@@ -79,14 +83,14 @@ export function useInvoices(filters: UseInvoicesFilters = DEFAULT_FILTERS) {
     onError: (error) => addToast('toasts.invoiceIssueError', 'error', undefined, error.message),
   })
 
-  const sendMutation = useMutation({
+  const sendMutation = useMutationRequest({
     mutationFn: ({ id, data }: { id: number; data: { email?: string; phone?: string } }) =>
       invoiceService.send(id, data),
     onSuccess: () => addToast('toasts.invoiceSent', 'success'),
     onError: (error) => addToast('toasts.invoiceSendError', 'error', undefined, error.message),
   })
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutationRequest({
     mutationFn: (id: number) => invoiceService.delete(id),
     onSuccess: () => {
       addToast('toasts.invoiceDeleted', 'success')

@@ -63,7 +63,10 @@
       "Bash(mkdir -p \"/mnt/c/Users/luthe/.claude/plans\" && echo \"ok\")",
       "Bash(pnpm exec *)",
       "Skill(run)",
-      "Skill(run:*)"
+      "Skill(run:*)",
+      "Bash(pnpm build *)",
+      "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && rm src/lib/reactQuery.ts && echo deleted)",
+      "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && rm src/hooks/useReactQuery.ts && echo deleted)"
     ]
   }
 }

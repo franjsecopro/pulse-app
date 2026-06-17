@@ -6,8 +6,8 @@ import { Finanzas } from './Finanzas'
 
 let financeFiltersProps: Record<string, unknown> = {}
 
-vi.mock('@tanstack/react-query', () => ({
-  useQuery: () => ({ data: [] }),
+vi.mock('../hooks/reactQuery', () => ({
+  useQueryRequest: () => ({ data: [] }),
 }))
 
 vi.mock('../components/finance/FinanceFilters', () => ({
