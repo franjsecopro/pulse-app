@@ -3,6 +3,7 @@ import { useTranslation } from '../../i18n'
 import type { ClassSession } from '../../types'
 import { formatTimeRange } from '../../utils/formatters'
 import { Button } from '../ui/Button'
+import { Tooltip } from '../ui/Tooltip'
 import {
   chipClassFor,
   STATUS_OVERLAY,
@@ -105,10 +106,12 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
     return (
       <div className='h-[110px] bg-slate-50/50 p-1.5 flex flex-col items-center justify-center text-center'>
         {planned > 0 && (
-          <span className='flex items-center gap-0.5 text-xs font-bold text-slate-600'>
-            <span className='material-symbols-outlined text-[12px] leading-none'>schedule</span>
-            {worked} / {planned}h
-          </span>
+          <Tooltip content={t('classes.totalHoursTitle')} position='left'>
+            <span className='flex items-center gap-0.5 text-xs font-bold text-slate-600 cursor-default'>
+              <span className='material-symbols-outlined text-[12px] leading-none'>schedule</span>
+              {worked} / {planned}h
+            </span>
+          </Tooltip>
         )}
       </div>
     )

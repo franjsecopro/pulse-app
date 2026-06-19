@@ -112,7 +112,8 @@
       "Bash(venv/Scripts/python.exe _diag_timeseries.py)",
       "Bash(venv/Scripts/python.exe _diag_net.py)",
       "Bash(rm -rf node_modules/.vite node_modules/.vite-temp)",
-      "Read(//c/c/Users/luthe/Desktop/DEV/pulse-app/frontend/src/components/ui/charts/**)"
+      "Read(//c/c/Users/luthe/Desktop/DEV/pulse-app/frontend/src/components/ui/charts/**)",
+      "Bash(cd /c/Users/luthe/Desktop/DEV/pulse-app/frontend && grep -n \"totalHoursTitle\\\\|totalHours\\\\b\\\\|weekTotal\\\\|workedHoursLabel\\\\|plannedHoursLabel\\\\|cancelledHoursExcluded\" src/locales/es-ES/common.json src/locales/fr-FR/common.json)"
     ]
   }
 }
