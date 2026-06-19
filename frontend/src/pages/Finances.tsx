@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getClientsDropdownQueryKeys } from '../API/queryKeys/clients/clientsQueryKeys'
 import { AccountingTab } from '../components/finance/AccountingTab'
+import { AnalyticsTab } from '../components/finance/AnalyticsTab'
 import { FinanceFilters } from '../components/finance/FinanceFilters'
 import { InvoicesTab } from '../components/finance/InvoicesTab'
 import { PaymentsTab } from '../components/finance/PaymentsTab'
@@ -68,7 +69,8 @@ export function Finances() {
     setYear(nextYear)
   }
 
-  const isAccounting = activeTab === 'accounting'
+  // Accounting and Analytics are read-only reports — no status filter applies.
+  const hideStatus = activeTab === 'accounting' || activeTab === 'analytics'
   const statusOptions =
     activeTab === 'invoices'
       ? INVOICE_STATUS_VALUES.map((value) => ({
@@ -97,7 +99,7 @@ export function Finances() {
         onClientChange={setClient}
         alwaysShowYear
         status={status}
-        onStatusChange={isAccounting ? undefined : setStatus}
+        onStatusChange={hideStatus ? undefined : setStatus}
         statusOptions={statusOptions}
       />
 
@@ -116,6 +118,7 @@ export function Finances() {
       {activeTab === 'invoices' && (
         <InvoicesTab month={month} year={year} client={client} status={status} />
       )}
+      {activeTab === 'analytics' && <AnalyticsTab month={month} year={year} />}
     </div>
   )
 }

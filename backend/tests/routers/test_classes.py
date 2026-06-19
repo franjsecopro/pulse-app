@@ -325,7 +325,12 @@ class TestClassStats:
         response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
 
         assert response.status_code == 200
-        assert response.json() == {"count": 0, "totalRevenue": 0.0}
+        assert response.json() == {
+            "count": 0,
+            "totalRevenue": 0.0,
+            "totalHours": 0.0,
+            "workedHours": 0.0,
+        }
 
     async def test_counts_all_classes_in_month(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(
@@ -393,6 +398,37 @@ class TestClassStats:
         assert response.status_code == 200
         assert response.json()["totalRevenue"] == 125.0
 
+    async def test_total_hours_sums_duration_for_normal_classes(
+        self, db: AsyncSession, app_client: AsyncClient
+    ):
+        await _seed(
+            db,
+            _class(class_date="2026-04-10", duration_hours=2.0, hourly_rate=20.0),
+            _class(class_date="2026-04-11", duration_hours=1.5, hourly_rate=30.0),
+        )
+
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        assert response.json()["totalHours"] == 3.5
+
+    async def test_total_hours_excludes_both_cancellation_statuses(
+        self, db: AsyncSession, app_client: AsyncClient
+    ):
+        await _seed(
+            db,
+            _class_with_status(class_date="2026-04-10", duration_hours=2.0, hourly_rate=50.0, status="normal"),
+            _class_with_status(class_date="2026-04-11", duration_hours=1.0, hourly_rate=75.0, status="cancelledWithPayment"),
+            _class_with_status(class_date="2026-04-12", duration_hours=1.0, hourly_rate=100.0, status="cancelledWithoutPayment"),
+        )
+
+        response = await app_client.get("/api/classes/stats", params={"month": 4, "year": 2026})
+
+        assert response.status_code == 200
+        # Only the delivered (normal) class counts toward worked hours; both
+        # cancellation statuses are excluded even though one still earns revenue.
+        assert response.json()["totalHours"] == 2.0
+
     async def test_filters_by_client_id(self, db: AsyncSession, app_client: AsyncClient):
         await _seed(
             db,
@@ -406,7 +442,13 @@ class TestClassStats:
         )
 
         assert response.status_code == 200
-        assert response.json() == {"count": 1, "totalRevenue": 20.0}
+        # The seeded class is dated 2026-04-10 (past), so it counts as worked.
+        assert response.json() == {
+            "count": 1,
+            "totalRevenue": 20.0,
+            "totalHours": 1.0,
+            "workedHours": 1.0,
+        }
 
     async def test_returns_422_when_month_missing(self, app_client: AsyncClient):
         response = await app_client.get("/api/classes/stats", params={"year": 2026})

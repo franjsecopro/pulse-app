@@ -41,7 +41,7 @@ const renderHookWithQuery: typeof renderHook = (cb) => renderHook(cb, { wrapper:
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetAllClasses.mockResolvedValue({ data: [], total: 0 })
-  mockGetStats.mockResolvedValue({ count: 0, totalRevenue: 0 })
+  mockGetStats.mockResolvedValue({ count: 0, totalRevenue: 0, totalHours: 0, workedHours: 0 })
   mockGetAllClients.mockResolvedValue([])
 })
 
@@ -82,11 +82,21 @@ describe('classStats', () => {
   it('starts as zero defaults', async () => {
     const { result } = renderHookWithQuery(() => useClasses(defaultFilters))
 
-    expect(result.current.classStats).toEqual({ count: 0, totalRevenue: 0 })
+    expect(result.current.classStats).toEqual({
+      count: 0,
+      totalRevenue: 0,
+      totalHours: 0,
+      workedHours: 0,
+    })
   })
 
   it('exposes the value returned by the backend', async () => {
-    mockGetStats.mockResolvedValue({ count: 12, totalRevenue: 540.5 })
+    mockGetStats.mockResolvedValue({
+      count: 12,
+      totalRevenue: 540.5,
+      totalHours: 24,
+      workedHours: 18,
+    })
 
     const { result } = renderHookWithQuery(() => useClasses(defaultFilters))
 
@@ -96,8 +106,18 @@ describe('classStats', () => {
   })
 
   it('is reloaded when filters change', async () => {
-    mockGetStats.mockResolvedValueOnce({ count: 1, totalRevenue: 10 })
-    mockGetStats.mockResolvedValueOnce({ count: 2, totalRevenue: 20 })
+    mockGetStats.mockResolvedValueOnce({
+      count: 1,
+      totalRevenue: 10,
+      totalHours: 2,
+      workedHours: 2,
+    })
+    mockGetStats.mockResolvedValueOnce({
+      count: 2,
+      totalRevenue: 20,
+      totalHours: 4,
+      workedHours: 3,
+    })
 
     const { rerender } = renderHook(({ filters }) => useClasses(filters), {
       wrapper: createWrapper(),

@@ -73,6 +73,29 @@ class TestBusinessProfile:
         assert body["rcsDispense"] is False
         assert body["invoiceSequenceScope"] == "monthly"
 
+    async def test_put_persists_analytics_config_fields(self, app_client: AsyncClient):
+        await app_client.put(
+            "/api/business-profile",
+            json={
+                "socialChargeRate": 22.0,
+                "incomeTaxRate": 2.2,
+                "monthlyIncomeGoal": 3000.0,
+            },
+        )
+
+        body = (await app_client.get("/api/business-profile")).json()
+
+        assert body["socialChargeRate"] == 22.0
+        assert body["incomeTaxRate"] == 2.2
+        assert body["monthlyIncomeGoal"] == 3000.0
+
+    async def test_get_returns_null_analytics_config_when_not_set(self, app_client: AsyncClient):
+        body = (await app_client.get("/api/business-profile")).json()
+
+        assert body["socialChargeRate"] is None
+        assert body["incomeTaxRate"] is None
+        assert body["monthlyIncomeGoal"] is None
+
 
 class TestClientTaxId:
     async def test_create_client_with_tax_id(self, db: AsyncSession, app_client: AsyncClient):

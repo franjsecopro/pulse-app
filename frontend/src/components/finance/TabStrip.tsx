@@ -1,9 +1,9 @@
 import { useTranslation } from '../../i18n'
 import { Button } from '../ui/Button'
 
-export type FinanceTab = 'payments' | 'accounting' | 'invoices'
+export type FinanceTab = 'payments' | 'accounting' | 'invoices' | 'analytics'
 
-export const FINANCE_TABS: FinanceTab[] = ['payments', 'accounting', 'invoices']
+export const FINANCE_TABS: FinanceTab[] = ['payments', 'accounting', 'invoices', 'analytics']
 
 interface TabStripProps {
   activeTab: FinanceTab

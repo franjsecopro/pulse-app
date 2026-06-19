@@ -60,3 +60,38 @@ export function chipClassFor(baseClass: string, status: ClassStatus): string {
 export function sumEffectiveRevenue(classes: ClassSession[]): number {
   return classes.reduce((sum, c) => sum + (c.effectiveRevenue ?? 0), 0)
 }
+
+/**
+ * Planned hours = hours scheduled. Only `normal` classes count; both cancellation
+ * statuses are excluded (mirrors the backend `EXCLUDED_FROM_WORKED_HOURS`). This
+ * counts future classes too — it is the day's scheduled load, regardless of date.
+ */
+export function sumPlannedHours(classes: ClassSession[]): number {
+  return classes
+    .filter((c) => c.status === 'normal')
+    .reduce((sum, c) => sum + (c.durationHours ?? 0), 0)
+}
+
+/** True when a class has already ended relative to `now`. */
+function hasClassEnded(c: ClassSession, now: Date): boolean {
+  if (c.classTime) {
+    const start = new Date(`${c.classDate}T${c.classTime}`)
+    const end = new Date(start.getTime() + (c.durationHours ?? 0) * 3_600_000)
+    return end.getTime() <= now.getTime()
+  }
+  // No time on the class: only count it as worked once the whole day has passed.
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+  return c.classDate < today
+}
+
+/**
+ * Worked hours = hours actually delivered: `normal` classes that have already
+ * ended (end time < `now`). Future and not-yet-finished classes are excluded —
+ * those are planned, not worked. Both cancellation statuses are excluded too.
+ */
+export function sumWorkedHours(classes: ClassSession[], now: Date = new Date()): number {
+  return classes
+    .filter((c) => c.status === 'normal' && hasClassEnded(c, now))
+    .reduce((sum, c) => sum + (c.durationHours ?? 0), 0)
+}

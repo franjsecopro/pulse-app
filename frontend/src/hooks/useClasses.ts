@@ -137,7 +137,9 @@ export function useClasses({ filterMonth, filterYear, filterClient }: UseClasses
     isLoading: listQuery.isLoading,
     isSyncing: syncMutation.isPending,
     pendingDeleteId,
-    classStats: statsQuery.data ?? ({ count: 0, totalRevenue: 0 } satisfies ClassStats),
+    classStats:
+      statsQuery.data ??
+      ({ count: 0, totalRevenue: 0, totalHours: 0, workedHours: 0 } satisfies ClassStats),
     page,
     pageCount,
     totalCount,

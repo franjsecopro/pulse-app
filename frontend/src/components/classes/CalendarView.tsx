@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import { Fragment, type ReactNode, useState } from 'react'
 import { useTranslation } from '../../i18n'
 import type { ClassSession } from '../../types'
 import { formatTimeRange } from '../../utils/formatters'
 import { Button } from '../ui/Button'
-import { chipClassFor, STATUS_OVERLAY, sumEffectiveRevenue } from './constants'
+import {
+  chipClassFor,
+  STATUS_OVERLAY,
+  sumEffectiveRevenue,
+  sumPlannedHours,
+  sumWorkedHours,
+} from './constants'
 
 const CLIENT_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
@@ -28,6 +34,14 @@ interface TooltipData {
   class: ClassSession
 }
 
+interface DayHoursTooltip {
+  x: number
+  y: number
+  workedHours: number
+  plannedHours: number
+  cancelledHours: number
+}
+
 interface Props {
   classes: ClassSession[]
   year: number
@@ -42,6 +56,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
   const [tooltip, setTooltip] = useState<TooltipData | null>(null)
+  const [dayTooltip, setDayTooltip] = useState<DayHoursTooltip | null>(null)
 
   const firstDay = new Date(year, month - 1, 1)
   const lastDay = new Date(year, month, 0)
@@ -81,9 +96,38 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
     returnObjects: true,
   }) as string[]
 
+  // Per-week summary cell (8th column). A week is the 7 cells ending at `endIndex`.
+  const renderWeekSummary = (endIndex: number) => {
+    const weekCells = cells.slice(endIndex - 6, endIndex + 1)
+    const weekClasses = weekCells.flatMap((c) => (c.day ? (byDate[dateStr(c.day)] ?? []) : []))
+    const planned = Number(sumPlannedHours(weekClasses).toFixed(2))
+    const worked = Number(sumWorkedHours(weekClasses, today).toFixed(2))
+    return (
+      <div className='h-[110px] bg-slate-50/50 p-1.5 flex flex-col items-center justify-center text-center'>
+        {planned > 0 && (
+          <span className='flex items-center gap-0.5 text-xs font-bold text-slate-600'>
+            <span className='material-symbols-outlined text-[12px] leading-none'>schedule</span>
+            {worked} / {planned}h
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  // Each row ends on the 7th cell (index % 7 === 6); append the week summary there.
+  const withWeekSummary = (index: number, key: string, content: ReactNode): ReactNode =>
+    index % 7 === 6 ? (
+      <Fragment key={key}>
+        {content}
+        {renderWeekSummary(index)}
+      </Fragment>
+    ) : (
+      content
+    )
+
   return (
     <div className='bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden'>
-      <div className='grid grid-cols-7 border-b border-slate-200 bg-slate-50'>
+      <div className='grid grid-cols-8 border-b border-slate-200 bg-slate-50'>
         {weekdays.map((d) => (
           <div
             key={d}
@@ -92,12 +136,19 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
             {d}
           </div>
         ))}
+        <div className='py-2 text-center text-xs font-bold text-slate-400 uppercase tracking-wider'>
+          {t('calendar.weekTotal')}
+        </div>
       </div>
 
-      <div className='grid grid-cols-7 divide-x divide-y divide-slate-100'>
-        {cells.map((cell) => {
+      <div className='grid grid-cols-8 divide-x divide-y divide-slate-100'>
+        {cells.map((cell, index) => {
           if (cell.day === null) {
-            return <div key={cell.key} className='h-[110px] bg-slate-50/40' />
+            return withWeekSummary(
+              index,
+              cell.key,
+              <div key={cell.key} className='h-[110px] bg-slate-50/40' />,
+            )
           }
           const day = cell.day
           const key = dateStr(day)
@@ -105,8 +156,18 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
           const visibleClasses = dayClasses.slice(0, MAX_VISIBLE)
           const hiddenCount = dayClasses.length - MAX_VISIBLE
           const total = sumEffectiveRevenue(dayClasses)
+          const plannedHours = Number(sumPlannedHours(dayClasses).toFixed(2))
+          const workedHours = Number(sumWorkedHours(dayClasses, today).toFixed(2))
+          const cancelledHours = Number(
+            dayClasses
+              .filter((c) => c.status !== 'normal')
+              .reduce((sum, c) => sum + (c.durationHours ?? 0), 0)
+              .toFixed(2),
+          )
 
-          return (
+          return withWeekSummary(
+            index,
+            key,
             <div
               key={key}
               className='h-[110px] p-1.5 flex flex-col gap-1 hover:bg-slate-50/60 transition-colors group relative'
@@ -124,8 +185,33 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
                 >
                   {day}
                 </Button>
-                {total > 0 && (
-                  <span className='text-[10px] font-bold text-primary'>€{total.toFixed(0)}</span>
+                {(plannedHours > 0 || total > 0) && (
+                  // biome-ignore lint/a11y/noStaticElementInteractions: hover-only breakdown; the same numbers are visible in the badge and the day detail is reachable via the keyboard-accessible day button
+                  <span
+                    data-testid={`day-hours-${key}`}
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      setDayTooltip({
+                        x: rect.left,
+                        y: rect.top,
+                        workedHours,
+                        plannedHours,
+                        cancelledHours,
+                      })
+                    }}
+                    onMouseLeave={() => setDayTooltip(null)}
+                    className='flex items-center gap-1.5 text-[10px] font-bold cursor-default'
+                  >
+                    {plannedHours > 0 && (
+                      <span className='flex items-center gap-0.5 text-slate-500'>
+                        <span className='material-symbols-outlined text-[11px] leading-none'>
+                          schedule
+                        </span>
+                        {plannedHours}h
+                      </span>
+                    )}
+                    {total > 0 && <span className='text-primary'>€{total.toFixed(0)}</span>}
+                  </span>
                 )}
               </div>
 
@@ -172,7 +258,7 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
               >
                 <span className='material-symbols-outlined text-sm'>add</span>
               </Button>
-            </div>
+            </div>,
           )
         })}
       </div>
@@ -222,6 +308,34 @@ export function CalendarView({ classes, year, month, onEdit, onNewClass, onDayDe
               €{(tooltip.class.effectiveRevenue ?? 0).toFixed(0)}
             </span>
           </div>
+        </div>
+      )}
+
+      {dayTooltip && (
+        <div
+          style={{
+            position: 'fixed',
+            left: dayTooltip.x,
+            top: dayTooltip.y - 8,
+            transform: 'translateY(-100%)',
+            zIndex: 9999,
+          }}
+          className='w-52 bg-slate-800 text-white text-[10px] rounded-lg p-2 shadow-xl pointer-events-none'
+        >
+          <p className='flex items-center gap-1 font-semibold text-slate-100'>
+            <span className='material-symbols-outlined text-[12px]'>schedule</span>
+            {t('calendar.workedHoursLabel', { hours: dayTooltip.workedHours })}
+          </p>
+          {dayTooltip.plannedHours > dayTooltip.workedHours && (
+            <p className='mt-0.5 text-slate-300'>
+              {t('calendar.plannedHoursLabel', { hours: dayTooltip.plannedHours })}
+            </p>
+          )}
+          {dayTooltip.cancelledHours > 0 && (
+            <p className='mt-1 pt-1 border-t border-slate-700 text-slate-400'>
+              {t('calendar.cancelledHoursExcluded', { hours: dayTooltip.cancelledHours })}
+            </p>
+          )}
         </div>
       )}
     </div>

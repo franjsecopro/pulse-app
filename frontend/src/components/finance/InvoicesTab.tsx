@@ -37,7 +37,7 @@ export function InvoicesTab({ month, year, client, status }: InvoicesTabProps) {
   const { addToast } = useToast()
 
   // "Ir a factura" from a class deep-links here with ?focus= to highlight the
-    // exact row (the client filter is pre-set by the Finances container via ?client=).
+  // exact row (the client filter is pre-set by the Finances container via ?client=).
   const [searchParams] = useSearchParams()
   const focusId = Number(searchParams.get('focus')) || null
 

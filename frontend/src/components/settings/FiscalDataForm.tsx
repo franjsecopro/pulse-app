@@ -19,6 +19,9 @@ const EMPTY_PROFILE: BusinessProfile = {
   paymentConditions: null,
   invoiceNumberFormat: 'YYYY-MM-NN',
   invoiceSequenceScope: 'monthly',
+  socialChargeRate: null,
+  incomeTaxRate: null,
+  monthlyIncomeGoal: null,
 }
 
 const INPUT_CLASS =
@@ -57,6 +60,40 @@ export function FiscalDataForm() {
           onChange={(e) => setField(key, (e.target.value || null) as BusinessProfile[typeof key])}
           className={INPUT_CLASS}
         />
+      </div>
+    )
+  }
+
+  function numberField(
+    key: 'socialChargeRate' | 'incomeTaxRate' | 'monthlyIncomeGoal',
+    label: string,
+    suffix: string,
+    placeholder?: string,
+  ) {
+    return (
+      <div>
+        <label
+          htmlFor={`fiscal-${key}`}
+          className='block text-sm font-semibold text-slate-700 mb-1'
+        >
+          {label}
+        </label>
+        <div className='relative'>
+          <input
+            id={`fiscal-${key}`}
+            type='number'
+            inputMode='decimal'
+            min={0}
+            step='any'
+            placeholder={placeholder}
+            value={profile[key] ?? ''}
+            onChange={(e) => setField(key, e.target.value === '' ? null : Number(e.target.value))}
+            className={INPUT_CLASS}
+          />
+          <span className='absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400'>
+            {suffix}
+          </span>
+        </div>
       </div>
     )
   }
@@ -144,6 +181,16 @@ export function FiscalDataForm() {
           />
           {t('settings.fiscal.rcsDispense')}
         </label>
+      </div>
+
+      <div className='pt-2 border-t border-slate-100'>
+        <h3 className='text-sm font-bold text-slate-800 mb-1'>{t('settings.analytics.title')}</h3>
+        <p className='text-xs text-slate-500 mb-3'>{t('settings.analytics.description')}</p>
+        <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+          {numberField('socialChargeRate', t('settings.analytics.socialChargeRate'), '%')}
+          {numberField('incomeTaxRate', t('settings.analytics.incomeTaxRate'), '%')}
+          {numberField('monthlyIncomeGoal', t('settings.analytics.monthlyIncomeGoal'), '€')}
+        </div>
       </div>
 
       <Button

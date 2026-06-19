@@ -7,7 +7,11 @@ from sqlalchemy.orm import joinedload
 from app.models.class_ import Class
 from app.models.contract import Contract
 from app.schemas.class_ import ClassCreateRequest, ClassUpdateRequest
-from app.services.class_revenue import EXCLUDED_FROM_REVENUE
+from app.services.class_revenue import (
+    EXCLUDED_FROM_REVENUE,
+    EXCLUDED_FROM_WORKED_HOURS,
+    class_has_ended,
+)
 
 
 class ClassRepository:
@@ -98,6 +102,23 @@ class ClassRepository:
         result = await self._db.execute(query)
         return list(result.scalars().all())
 
+    async def get_in_date_range(
+        self, user_id: int, start: date, end: date
+    ) -> list[Class]:
+        """Return the user's classes with class_date in [start, end] (inclusive)."""
+        query = (
+            select(Class)
+            .options(joinedload(Class.client), joinedload(Class.contract))
+            .where(
+                Class.user_id == user_id,
+                Class.class_date >= start,
+                Class.class_date <= end,
+            )
+            .order_by(Class.class_date.asc(), Class.class_time.asc())
+        )
+        result = await self._db.execute(query)
+        return list(result.scalars().all())
+
     async def get_monthly_totals(self, user_id: int, year: int, month: int) -> dict[int, float]:
         """Returns a mapping of client_id -> total billable amount for the given month.
         Excludes statuses in `EXCLUDED_FROM_REVENUE` (see app.services.class_revenue)."""
@@ -119,6 +140,7 @@ class ClassRepository:
         year: int,
         month: int,
         client_id: Optional[int] = None,
+        now: Optional[datetime] = None,
     ) -> dict[str, float | int]:
         count_result = await self._db.execute(
             select(func.count())
@@ -140,7 +162,47 @@ class ClassRepository:
         )
         total_revenue = round(float(revenue_result.scalar_one()), 2)
 
-        return {"count": count, "total_revenue": total_revenue}
+        hours_result = await self._db.execute(
+            select(func.coalesce(func.sum(Class.duration_hours), 0.0))
+            .where(
+                Class.user_id == user_id,
+                Class.status.notin_(EXCLUDED_FROM_WORKED_HOURS),
+                extract("month", Class.class_date) == month,
+                extract("year", Class.class_date) == year,
+                *([Class.client_id == client_id] if client_id else []),
+            )
+        )
+        total_hours = round(float(hours_result.scalar_one()), 2)
+
+        # Worked hours = the same worked-eligible (normal) classes that have
+        # already ended. Computed in Python so the end-time rule (date + time +
+        # duration, or whole-day for untimed classes) stays portable and matches
+        # the single source of truth in `class_revenue.class_has_ended`.
+        reference_now = now or datetime.now()
+        worked_result = await self._db.execute(
+            select(Class).where(
+                Class.user_id == user_id,
+                Class.status.notin_(EXCLUDED_FROM_WORKED_HOURS),
+                extract("month", Class.class_date) == month,
+                extract("year", Class.class_date) == year,
+                *([Class.client_id == client_id] if client_id else []),
+            )
+        )
+        worked_hours = round(
+            sum(
+                cls.duration_hours
+                for cls in worked_result.scalars().all()
+                if class_has_ended(cls, reference_now)
+            ),
+            2,
+        )
+
+        return {
+            "count": count,
+            "total_revenue": total_revenue,
+            "total_hours": total_hours,
+            "worked_hours": worked_hours,
+        }
 
     async def count_current_month(self, user_id: int) -> int:
         now = datetime.now(timezone.utc)

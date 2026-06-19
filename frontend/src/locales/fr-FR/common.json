@@ -205,6 +205,13 @@
       "rcsDispense": "Afficher « Dispensé d'immatriculation au RCS et au répertoire des métiers »",
       "save": "Enregistrer les données fiscales"
     },
+    "analytics": {
+      "title": "Configuration financière",
+      "description": "Utilisée pour estimer votre net et votre objectif. Le taux de cotisations dépend de votre activité et de l'année ; c'est vous qui le définissez.",
+      "socialChargeRate": "Cotisations sociales",
+      "incomeTaxRate": "Impôt (versement libératoire)",
+      "monthlyIncomeGoal": "Objectif de revenu mensuel"
+    },
     "toast": {
       "gcalConnected": "Google Calendar connecté avec succès.",
       "gcalConnectError": "Erreur lors de la connexion à Google Calendar. Réessayez.",
@@ -373,6 +380,8 @@
     "gcalNotSynced": "Non synchronisé avec Google Calendar",
     "gcalSyncFailed": "Échec de synchronisation Google Calendar — cliquez pour réessayer",
     "totalRevenue": "Total : {{amount}} €",
+    "totalHours": "{{worked}} / {{planned}} h",
+    "totalHoursTitle": "Heures travaillées / planifiées",
     "view": {
       "list": "Liste",
       "calendar": "Calendrier"
@@ -422,7 +431,11 @@
   },
   "calendar": {
     "moreClasses": "+{{count}} de plus",
-    "moreClasses_plural": "+{{count}} de plus"
+    "moreClasses_plural": "+{{count}} de plus",
+    "weekTotal": "Sem.",
+    "workedHoursLabel": "{{hours}} h travaillées",
+    "plannedHoursLabel": "{{hours}} h planifiées",
+    "cancelledHoursExcluded": "{{hours}} h annulées (non comptées)"
   },
   "dayView": {
     "untimed": "Sans heure assignée",
@@ -609,7 +622,58 @@
     "tab": {
       "payments": "Paiements",
       "accounting": "Comptabilité",
-      "invoices": "Factures"
+      "invoices": "Factures",
+      "analytics": "Analytique"
+    }
+  },
+  "analytics": {
+    "rangeHint": "Période : {{from}} → {{to}}",
+    "kpi": {
+      "collected": "Encaissé",
+      "collectionRate": "Taux d'encaissement",
+      "netEstimate": "Net estimé",
+      "netNotConfigured": "Configurez votre taux de cotisations",
+      "pending": "En attente"
+    },
+    "trend": {
+      "title": "Tendance des revenus",
+      "expected": "Prévu",
+      "collected": "Encaissé",
+      "net": "Net",
+      "empty": "Aucune donnée sur cette période."
+    },
+    "receivables": {
+      "title": "Qui vous doit",
+      "empty": "Personne ne vous doit. Tout est à jour."
+    },
+    "projection": {
+      "title": "Projection",
+      "revenue": "Revenu projeté",
+      "net": "Net projeté",
+      "netNotConfigured": "Configurez votre taux de cotisations",
+      "empty": "Aucun cours planifié sur cette période.",
+      "horizon": {
+        "this_month": "Ce mois-ci",
+        "this_year": "Cette année",
+        "rest_of_year": "Jusqu'à fin d'année",
+        "next_month": "Mois prochain",
+        "next_quarter": "Trimestre prochain",
+        "next_year": "Année prochaine"
+      }
+    },
+    "goal": {
+      "title": "Objectif mensuel",
+      "notConfigured": "Configurez votre objectif de revenu mensuel dans les Paramètres.",
+      "progress": "{{pct}}% de votre objectif"
+    },
+    "contribution": {
+      "title": "Apport par élève",
+      "empty": "Aucun cours sur cette période.",
+      "held_one": "{{count}} cours",
+      "held_other": "{{count}} cours",
+      "cancelled_one": "{{count}} annulé",
+      "cancelled_other": "{{count}} annulés",
+      "lost": "{{amount}} perdus"
     }
   },
   "alerts": {

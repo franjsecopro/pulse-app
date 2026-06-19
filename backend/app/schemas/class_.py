@@ -59,3 +59,5 @@ class ClassResponse(BaseSchema):
 class ClassStatsResponse(BaseSchema):
     count: int
     total_revenue: float
+    total_hours: float
+    worked_hours: float

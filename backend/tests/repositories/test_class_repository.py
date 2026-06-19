@@ -1,5 +1,5 @@
 """Tests for ClassRepository — filtering, user isolation, aggregations."""
-from datetime import date, time
+from datetime import date, datetime, time
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +19,7 @@ def _class(
     client_id: int = 10,
     contract_id: int = 1,
     class_date: str = "2026-04-10",
+    class_time: str | None = None,
     duration_hours: float = 1.0,
     hourly_rate: float = 20.0,
     status: str = "normal",
@@ -28,6 +29,7 @@ def _class(
         client_id=client_id,
         contract_id=contract_id,
         class_date=date.fromisoformat(class_date),
+        class_time=time.fromisoformat(class_time) if class_time else None,
         duration_hours=duration_hours,
         hourly_rate=hourly_rate,
         status=status,
@@ -304,3 +306,97 @@ class TestCountCurrentMonth:
         count = await repo.count_current_month(USER_A)
 
         assert count == 0
+
+
+# ─── get_stats — worked vs planned hours ─────────────────────────────────────
+
+class TestGetStatsWorkedHours:
+    _NOW = datetime(2026, 4, 18, 12, 0, 0)
+
+    async def test_worked_counts_only_ended_classes_planned_counts_all(self, db: AsyncSession):
+        await _seed(
+            db,
+            _class(class_date="2026-04-10", class_time="10:00:00", duration_hours=2.0),  # ended
+            _class(class_date="2026-04-25", class_time="10:00:00", duration_hours=1.0),  # future
+        )
+        repo = ClassRepository(db)
+
+        stats = await repo.get_stats(USER_A, year=2026, month=4, now=self._NOW)
+
+        assert stats["worked_hours"] == 2.0
+        assert stats["total_hours"] == 3.0
+
+    async def test_worked_excludes_cancellations(self, db: AsyncSession):
+        await _seed(
+            db,
+            _class(class_date="2026-04-10", class_time="10:00:00", duration_hours=2.0, status="normal"),
+            _class(class_date="2026-04-10", class_time="10:00:00", duration_hours=1.0, status="cancelledWithPayment"),
+            _class(class_date="2026-04-10", class_time="10:00:00", duration_hours=1.0, status="cancelledWithoutPayment"),
+        )
+        repo = ClassRepository(db)
+
+        stats = await repo.get_stats(USER_A, year=2026, month=4, now=self._NOW)
+
+        assert stats["worked_hours"] == 2.0
+
+    async def test_worked_zero_when_all_future(self, db: AsyncSession):
+        await _seed(
+            db,
+            _class(class_date="2026-04-25", class_time="10:00:00", duration_hours=2.0),
+        )
+        repo = ClassRepository(db)
+
+        stats = await repo.get_stats(USER_A, year=2026, month=4, now=self._NOW)
+
+        assert stats["worked_hours"] == 0.0
+        assert stats["total_hours"] == 2.0
+
+
+# ─── get_in_date_range ───────────────────────────────────────────────────────
+
+class TestGetInDateRange:
+    async def test_returns_classes_within_inclusive_range(self, db: AsyncSession):
+        await _seed(
+            db,
+            _class(class_date="2026-04-01"),
+            _class(class_date="2026-04-15"),
+            _class(class_date="2026-04-30"),
+        )
+        repo = ClassRepository(db)
+
+        results = await repo.get_in_date_range(
+            USER_A, date(2026, 4, 1), date(2026, 4, 30)
+        )
+
+        assert len(results) == 3
+
+    async def test_excludes_classes_outside_range(self, db: AsyncSession):
+        await _seed(
+            db,
+            _class(class_date="2026-03-31"),
+            _class(class_date="2026-04-15"),
+            _class(class_date="2026-05-01"),
+        )
+        repo = ClassRepository(db)
+
+        results = await repo.get_in_date_range(
+            USER_A, date(2026, 4, 1), date(2026, 4, 30)
+        )
+
+        assert len(results) == 1
+        assert results[0].class_date == date(2026, 4, 15)
+
+    async def test_isolates_by_user(self, db: AsyncSession):
+        await _seed(
+            db,
+            _class(user_id=USER_A, class_date="2026-04-10"),
+            _class(user_id=USER_B, class_date="2026-04-10"),
+        )
+        repo = ClassRepository(db)
+
+        results = await repo.get_in_date_range(
+            USER_A, date(2026, 4, 1), date(2026, 4, 30)
+        )
+
+        assert len(results) == 1
+        assert results[0].user_id == USER_A

@@ -163,6 +163,13 @@
       "rcsDispense": "Mostrar «Dispensé d'immatriculation au RCS et au répertoire des métiers»",
       "save": "Guardar datos fiscales"
     },
+    "analytics": {
+      "title": "Configuración de finanzas",
+      "description": "Se usan para estimar tu neto y tu meta. El % de cargas depende de tu actividad y año; lo definís vos.",
+      "socialChargeRate": "Cargas sociales",
+      "incomeTaxRate": "Impuesto (versement libératoire)",
+      "monthlyIncomeGoal": "Meta de ingreso mensual"
+    },
     "toast": {
       "gcalConnected": "Google Calendar conectado correctamente.",
       "gcalConnectError": "Error al conectar con Google Calendar. Inténtalo de nuevo.",
@@ -331,6 +338,8 @@
     "gcalNotSynced": "No sincronizado con Google Calendar",
     "gcalSyncFailed": "Falló la sincronización con Google Calendar — clic para reintentar",
     "totalRevenue": "Total: €{{amount}}",
+    "totalHours": "{{worked}} / {{planned}} h",
+    "totalHoursTitle": "Horas trabajadas / planificadas",
     "view": {
       "list": "Lista",
       "calendar": "Calendario"
@@ -380,7 +389,11 @@
   },
   "calendar": {
     "moreClasses": "+{{count}} más",
-    "moreClasses_plural": "+{{count}} más"
+    "moreClasses_plural": "+{{count}} más",
+    "weekTotal": "Sem.",
+    "workedHoursLabel": "{{hours}} h trabajadas",
+    "plannedHoursLabel": "{{hours}} h planificadas",
+    "cancelledHoursExcluded": "{{hours}} h canceladas (no se cuentan)"
   },
   "dayView": {
     "untimed": "Sin hora asignada",
@@ -567,7 +580,58 @@
     "tab": {
       "payments": "Pagos",
       "accounting": "Contabilidad",
-      "invoices": "Facturas"
+      "invoices": "Facturas",
+      "analytics": "Analítica"
+    }
+  },
+  "analytics": {
+    "rangeHint": "Período: {{from}} → {{to}}",
+    "kpi": {
+      "collected": "Cobrado",
+      "collectionRate": "Tasa de cobranza",
+      "netEstimate": "Neto estimado",
+      "netNotConfigured": "Configurá tu % de cargas",
+      "pending": "Pendiente"
+    },
+    "trend": {
+      "title": "Tendencia de ingresos",
+      "expected": "Esperado",
+      "collected": "Cobrado",
+      "net": "Neto",
+      "empty": "Sin datos en este período."
+    },
+    "receivables": {
+      "title": "Quién te debe",
+      "empty": "Nadie te debe. Todo al día."
+    },
+    "projection": {
+      "title": "Proyección",
+      "revenue": "Ingreso proyectado",
+      "net": "Neto proyectado",
+      "netNotConfigured": "Configurá tu % de cargas",
+      "empty": "No hay clases agendadas en este período.",
+      "horizon": {
+        "this_month": "Este mes",
+        "this_year": "Este año",
+        "rest_of_year": "Hasta fin de año",
+        "next_month": "Próximo mes",
+        "next_quarter": "Próximo trimestre",
+        "next_year": "Próximo año"
+      }
+    },
+    "goal": {
+      "title": "Meta mensual",
+      "notConfigured": "Configurá tu meta de ingreso mensual en Ajustes.",
+      "progress": "{{pct}}% de tu meta"
+    },
+    "contribution": {
+      "title": "Aporte por alumno",
+      "empty": "Sin clases en este período.",
+      "held_one": "{{count}} clase",
+      "held_other": "{{count}} clases",
+      "cancelled_one": "{{count}} cancelada",
+      "cancelled_other": "{{count}} canceladas",
+      "lost": "{{amount}} perdidos"
     }
   },
   "alerts": {

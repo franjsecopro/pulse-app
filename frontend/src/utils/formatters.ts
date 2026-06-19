@@ -57,6 +57,19 @@ export function formatCurrency(amount: number, currency = '€'): string {
 }
 
 /**
+ * Compact currency for chart axes/labels: thousands as "k", no decimals for
+ * round values. Keeps tick labels narrow so they don't clip. E.g. 4100 → "€4.1k".
+ */
+export function formatCompactCurrency(amount: number, currency = '€'): string {
+  const abs = Math.abs(amount)
+  if (abs >= 1000) {
+    const thousands = amount / 1000
+    return `${currency}${thousands.toFixed(thousands % 1 === 0 ? 0 : 1)}k`
+  }
+  return `${currency}${Math.round(amount)}`
+}
+
+/**
  * Calculates duration in decimal hours between two "HH:MM" time strings.
  * @param start - Start time string (e.g. "09:00")
  * @param end - End time string (e.g. "10:30")

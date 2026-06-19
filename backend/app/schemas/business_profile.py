@@ -19,6 +19,10 @@ class BusinessProfileUpdate(BaseSchema):
     payment_conditions: Optional[str] = None
     invoice_number_format: str = "YYYY-MM-NN"
     invoice_sequence_scope: str = "monthly"
+    # Analytics config (percentages of collected revenue; goal in currency).
+    social_charge_rate: Optional[float] = None
+    income_tax_rate: Optional[float] = None
+    monthly_income_goal: Optional[float] = None
 
 
 class BusinessProfileResponse(BaseSchema):
@@ -35,3 +39,7 @@ class BusinessProfileResponse(BaseSchema):
     payment_conditions: Optional[str] = None
     invoice_number_format: str = "YYYY-MM-NN"
     invoice_sequence_scope: str = "monthly"
+    # Analytics config (percentages of collected revenue; goal in currency).
+    social_charge_rate: Optional[float] = None
+    income_tax_rate: Optional[float] = None
+    monthly_income_goal: Optional[float] = None

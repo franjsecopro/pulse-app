@@ -28,8 +28,7 @@ export const ENDPOINTS = {
     futureClasses: (clientId: number, contractId: number) =>
       `/clients/${clientId}/contracts/${contractId}/future-classes`,
     payers: (clientId: number) => `/clients/${clientId}/payers`,
-    payerById: (clientId: number, payerId: number) =>
-      `/clients/${clientId}/payers/${payerId}`,
+    payerById: (clientId: number, payerId: number) => `/clients/${clientId}/payers/${payerId}`,
   },
 
   classes: {
@@ -111,5 +110,13 @@ export const ENDPOINTS = {
     demoEnter: '/admin/demo/enter',
     demoExit: '/admin/demo/exit',
     demoReset: '/admin/demo/reset',
+  },
+
+  analytics: {
+    revenueSeries: '/analytics/revenue-timeseries',
+    overview: '/analytics/overview',
+    receivables: '/analytics/receivables',
+    projection: '/analytics/projection',
+    clientContribution: '/analytics/client-contribution',
   },
 } as const

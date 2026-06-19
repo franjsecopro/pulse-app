@@ -90,7 +90,7 @@ function makeHook(overrides: Partial<ReturnType<typeof useClasses>> = {}) {
     isLoading: false,
     isSyncing: false,
     pendingDeleteId: null,
-    classStats: { count: 0, totalRevenue: 0 },
+    classStats: { count: 0, totalRevenue: 0, totalHours: 0, workedHours: 0 },
     page: 1,
     pageCount: 1,
     totalCount: 0,
@@ -208,11 +208,35 @@ describe('Classes', () => {
         makeHook({
           classes: [makeClass()],
           totalCount: 1,
-          classStats: { count: 25, totalRevenue: 1234.56 },
+          classStats: { count: 25, totalRevenue: 1234.56, totalHours: 40, workedHours: 30 },
         }) as never,
       )
       render(<Classes />)
       expect(screen.getByText('classes.totalRevenue')).toBeTruthy()
+    })
+
+    it('shows the total worked hours from classStats when there are classes', () => {
+      mockUseClasses.mockReturnValue(
+        makeHook({
+          classes: [makeClass()],
+          totalCount: 1,
+          classStats: { count: 25, totalRevenue: 1234.56, totalHours: 40, workedHours: 30 },
+        }) as never,
+      )
+      render(<Classes />)
+      expect(screen.getByText('classes.totalHours')).toBeTruthy()
+    })
+
+    it('renders a worked/planned tooltip label on the hours badge', () => {
+      mockUseClasses.mockReturnValue(
+        makeHook({
+          classes: [makeClass()],
+          totalCount: 1,
+          classStats: { count: 25, totalRevenue: 1234.56, totalHours: 40, workedHours: 30 },
+        }) as never,
+      )
+      render(<Classes />)
+      expect(screen.getByText('classes.totalHoursTitle')).toBeTruthy()
     })
 
     it('hides the total revenue chip when classStats.count is 0', () => {

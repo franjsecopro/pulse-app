@@ -20,6 +20,7 @@ from app.routers import imports as imports_router
 from app.routers import business_profile
 from app.routers import invoices
 from app.routers import jobs
+from app.routers import analytics
 
 logging.basicConfig(level=logging.INFO)
 
@@ -89,6 +90,7 @@ app.include_router(alerts.router, prefix="/api")
 app.include_router(business_profile.router, prefix="/api")
 app.include_router(invoices.router, prefix="/api")
 app.include_router(jobs.router, prefix="/api")
+app.include_router(analytics.router, prefix="/api")
 
 
 @app.get("/api/health")

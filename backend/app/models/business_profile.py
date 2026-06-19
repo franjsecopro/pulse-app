@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional
-from sqlalchemy import String, Integer, Boolean, ForeignKey, DateTime, Text
+from sqlalchemy import String, Integer, Boolean, ForeignKey, DateTime, Text, Float
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.crypto import EncryptedString
@@ -35,6 +35,11 @@ class BusinessProfile(Base):
     invoice_sequence_scope: Mapped[str] = mapped_column(
         String(10), nullable=False, default="monthly"
     )
+    # Analytics config (NULL = not configured → net/goal cards show an empty state).
+    # Rates are stored as percentages of collected revenue (e.g. 22.0 = 22%).
+    social_charge_rate: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    income_tax_rate: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    monthly_income_goal: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

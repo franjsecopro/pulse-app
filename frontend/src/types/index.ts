@@ -86,6 +86,10 @@ export interface BusinessProfile {
   paymentConditions: string | null
   invoiceNumberFormat: string
   invoiceSequenceScope: string
+  // Analytics config: rates are percentages of collected revenue; goal in currency.
+  socialChargeRate: number | null
+  incomeTaxRate: number | null
+  monthlyIncomeGoal: number | null
 }
 
 export type ClassStatus = 'normal' | 'cancelledWithPayment' | 'cancelledWithoutPayment'
@@ -258,6 +262,8 @@ export interface UpcomingClass {
 export interface ClassStats {
   count: number
   totalRevenue: number
+  totalHours: number
+  workedHours: number
 }
 
 export interface UpcomingClasses {
@@ -276,4 +282,51 @@ export interface Alert {
   amount: number
   month: number
   year: number
+}
+
+export interface RevenueTimeseriesPoint {
+  period: string // "YYYY-MM"
+  expected: number
+  paid: number
+  pending: number
+  net: number | null
+}
+
+export interface AnalyticsOverview {
+  periodFrom: string
+  periodTo: string
+  expected: number
+  paid: number
+  pending: number
+  net: number | null
+  collectionRate: number | null
+  expectedChangePct: number | null
+  paidChangePct: number | null
+}
+
+export interface ReceivableItem {
+  clientId: number
+  clientName: string
+  expected: number
+  paid: number
+  balance: number // negative = they owe
+}
+
+export interface ProjectionResponse {
+  horizon: string
+  periodStart: string // "YYYY-MM-DD"
+  periodEnd: string // "YYYY-MM-DD"
+  projectedRevenue: number
+  projectedNet: number | null
+}
+
+export interface ClientContributionItem {
+  clientId: number
+  clientName: string
+  billed: number
+  sharePct: number | null
+  heldCount: number
+  cancelledPaidCount: number
+  cancelledUnpaidCount: number
+  lostRevenue: number
 }
