@@ -54,19 +54,24 @@ export function HistoryTab() {
 
   return (
     <div className='space-y-4'>
-      <DateRangeMode
-        mode={mode}
-        date={date}
-        onDateChange={onDateChange}
-        onModeChange={onModeChange}
-      />
-      <NotificationFilters
-        values={filters}
-        onChange={onFiltersChange}
-        showStatus
-        showClient
-        showChannel
-      />
+      <fieldset className='flex flex-wrap items-end gap-3 border-0 p-0 m-0'>
+        <legend className='sr-only'>{t('notifications.filters.legend')}</legend>
+        <DateRangeMode
+          mode={mode}
+          date={date}
+          onDateChange={onDateChange}
+          onModeChange={onModeChange}
+          inline
+        />
+        <NotificationFilters
+          values={filters}
+          onChange={onFiltersChange}
+          showStatus
+          showClient
+          showChannel
+          inline
+        />
+      </fieldset>
 
       {isLoading ? (
         <div className='flex items-center justify-center py-16 text-slate-400'>

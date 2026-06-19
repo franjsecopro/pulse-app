@@ -59,6 +59,12 @@ interface DateRangeModeProps {
    * the pending tab to communicate that only the day mode is available.
    */
   modeLocked?: boolean
+  /**
+   * When true, the component renders its fields as bare siblings (a Fragment)
+   * instead of wrapping them in its own row, so a parent can lay them out in a
+   * single shared filter row. The range context text is pushed to its own line.
+   */
+  inline?: boolean
 }
 
 export function DateRangeMode({
@@ -67,6 +73,7 @@ export function DateRangeMode({
   onDateChange,
   onModeChange,
   modeLocked = false,
+  inline = false,
 }: DateRangeModeProps) {
   const { t } = useTranslation()
 
@@ -82,63 +89,81 @@ export function DateRangeMode({
 
   const showModeControl = onModeChange !== undefined || modeLocked
 
+  const modeControl = showModeControl && (
+    <div className='flex flex-col gap-1'>
+      <span className='text-xs font-medium text-slate-500'>{t('notifications.mode.label')}</span>
+      <div
+        className={`flex gap-1 bg-slate-100 p-1 rounded-lg ${modeLocked ? 'opacity-60' : ''}`}
+        role='radiogroup'
+        aria-label={t('notifications.mode.label')}
+        aria-disabled={modeLocked}
+      >
+        {(['day', 'week', 'month'] as const).map((m) => {
+          const isSelected = mode === m
+          return (
+            <label
+              key={m}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                isSelected
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              } ${modeLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              <input
+                type='radio'
+                name='date-range-mode'
+                value={m}
+                checked={isSelected}
+                disabled={modeLocked}
+                onChange={() => onModeChange?.(m)}
+                className='sr-only'
+              />
+              {t(`notifications.mode.${m}`)}
+            </label>
+          )
+        })}
+      </div>
+    </div>
+  )
+
+  const dateField = (
+    <div className='flex flex-col gap-1'>
+      <label htmlFor='date-range-date' className='text-xs font-medium text-slate-500'>
+        {t('notifications.dateLabel')}
+      </label>
+      <input
+        id='date-range-date'
+        type='date'
+        value={date}
+        onChange={(e) => onDateChange(e.target.value)}
+        className='border border-slate-200 rounded-lg px-3 py-2.5 text-sm min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1'
+      />
+    </div>
+  )
+
+  // In inline mode the context spans the full row so it drops to its own line
+  // below the shared filter row instead of sitting between the controls.
+  const contextParagraph = (
+    <p className={`text-sm text-slate-500${inline ? ' w-full order-last' : ''}`}>{contextText}</p>
+  )
+
+  if (inline) {
+    return (
+      <>
+        {modeControl}
+        {dateField}
+        {contextParagraph}
+      </>
+    )
+  }
+
   return (
     <div className='space-y-3'>
       <div className='flex flex-wrap items-end gap-3'>
-        {showModeControl && (
-          <div className='flex flex-col gap-1'>
-            <span className='text-xs font-medium text-slate-500'>
-              {t('notifications.mode.label')}
-            </span>
-            <div
-              className={`flex gap-1 bg-slate-100 p-1 rounded-lg ${modeLocked ? 'opacity-60' : ''}`}
-              role='radiogroup'
-              aria-label={t('notifications.mode.label')}
-              aria-disabled={modeLocked}
-            >
-              {(['day', 'week', 'month'] as const).map((m) => {
-                const isSelected = mode === m
-                return (
-                  <label
-                    key={m}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                      isSelected
-                        ? 'bg-white text-indigo-600 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-800'
-                    } ${modeLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    <input
-                      type='radio'
-                      name='date-range-mode'
-                      value={m}
-                      checked={isSelected}
-                      disabled={modeLocked}
-                      onChange={() => onModeChange?.(m)}
-                      className='sr-only'
-                    />
-                    {t(`notifications.mode.${m}`)}
-                  </label>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        <div className='flex flex-col gap-1'>
-          <label htmlFor='date-range-date' className='text-xs font-medium text-slate-500'>
-            {t('notifications.dateLabel')}
-          </label>
-          <input
-            id='date-range-date'
-            type='date'
-            value={date}
-            onChange={(e) => onDateChange(e.target.value)}
-            className='border border-slate-200 rounded-lg px-3 py-2.5 text-sm min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1'
-          />
-        </div>
+        {modeControl}
+        {dateField}
       </div>
-
-      <p className='text-sm text-slate-500'>{contextText}</p>
+      {contextParagraph}
     </div>
   )
 }

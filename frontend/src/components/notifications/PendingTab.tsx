@@ -57,21 +57,25 @@ export function PendingTab() {
         </div>
       )}
 
-      <DateRangeMode
-        mode='day'
-        date={notificationDay}
-        onDateChange={setNotificationDay}
-        modeLocked
-      />
-
-      <NotificationFilters
-        values={filters}
-        onChange={setFilters}
-        showStatus
-        showClient
-        showChannel
-        statusLocked
-      />
+      <fieldset className='flex flex-wrap items-end gap-3 border-0 p-0 m-0'>
+        <legend className='sr-only'>{t('notifications.filters.legend')}</legend>
+        <DateRangeMode
+          mode='day'
+          date={notificationDay}
+          onDateChange={setNotificationDay}
+          modeLocked
+          inline
+        />
+        <NotificationFilters
+          values={filters}
+          onChange={setFilters}
+          showStatus
+          showClient
+          showChannel
+          statusLocked
+          inline
+        />
+      </fieldset>
 
       <div className='flex justify-end'>
         <Button

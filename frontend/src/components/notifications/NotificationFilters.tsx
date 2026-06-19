@@ -27,6 +27,12 @@ interface NotificationFiltersProps {
    * notifications can appear there.
    */
   statusLocked?: boolean
+  /**
+   * When true, the fields are rendered as bare siblings (a Fragment) instead of
+   * being wrapped in their own fieldset row, so a parent can place them in a
+   * single shared filter row alongside other filters.
+   */
+  inline?: boolean
 }
 
 export function NotificationFilters({
@@ -36,6 +42,7 @@ export function NotificationFilters({
   showClient = true,
   showChannel = true,
   statusLocked = false,
+  inline = false,
 }: NotificationFiltersProps) {
   const { t } = useTranslation()
   const { clients } = useClients('', 'all')
@@ -50,10 +57,8 @@ export function NotificationFilters({
     onChange({ ...values, channel })
   }
 
-  return (
-    <fieldset className='flex flex-wrap items-end gap-3 border-0 p-0 m-0'>
-      <legend className='sr-only'>{t('notifications.filters.legend')}</legend>
-
+  const fields = (
+    <>
       {showStatus && (
         <div className='flex flex-col gap-1'>
           <label htmlFor='notif-filter-status' className='text-xs font-medium text-slate-500'>
@@ -114,6 +119,17 @@ export function NotificationFilters({
           </select>
         </div>
       )}
+    </>
+  )
+
+  if (inline) {
+    return fields
+  }
+
+  return (
+    <fieldset className='flex flex-wrap items-end gap-3 border-0 p-0 m-0'>
+      <legend className='sr-only'>{t('notifications.filters.legend')}</legend>
+      {fields}
     </fieldset>
   )
 }
